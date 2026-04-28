@@ -1,0 +1,28 @@
+# Build
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AGENTS.md (instruction file - optional to ignore)
+AGENTS.md
