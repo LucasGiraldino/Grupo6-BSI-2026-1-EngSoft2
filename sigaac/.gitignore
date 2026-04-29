@@ -1,28 +1,31 @@
-# Build
+# Environment variables
+.env
+
+# Maven
 target/
-*.class
-*.jar
-*.war
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven Wrapper
+!.mvn/
+!.mvn/wrapper/
+!.mvn/wrapper/maven-wrapper.properties
+mvnw
+mvnw.cmd
 
 # IDE
 .idea/
 *.iml
 .vscode/
+.settings/
 .project
 .classpath
-.settings/
-
-# Maven
-.mvn/
-mvnw
-mvnw.cmd
-
-# Logs
-*.log
 
 # OS
 .DS_Store
 Thumbs.db
 
-# AGENTS.md (instruction file - optional to ignore)
-AGENTS.md
+# Logs
+*.log
+logs/
