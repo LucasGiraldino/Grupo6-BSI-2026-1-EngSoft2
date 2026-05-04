@@ -20,7 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let cnpjTimeout;
 
     cnpjInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 14);
+        let v = this.value.replace(/\D/g, '').slice(0, 14);
+        v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+        v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+        v = v.replace(/(\d{4})(\d)/, '$1-$2');
+        this.value = v;
         clearTimeout(cnpjTimeout);
     });
 
@@ -32,7 +37,20 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(resp => resp.json())
             .then(data => {
                 if (data.message) {
-                    console.warn('CNPJ não encontrado:', data.message);
+                    if (razaoInput) razaoInput.value = '';
+                    if (fantasiaInput) fantasiaInput.value = '';
+                    
+                    // Show toast
+                    const toast = document.createElement('div');
+                    toast.textContent = 'CNPJ não encontrado';
+                    toast.className = 'fixed bottom-5 right-5 bg-red-500 text-white px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium z-[100] transition-opacity duration-300';
+                    document.body.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 3000);
+                    
                     return;
                 }
 
