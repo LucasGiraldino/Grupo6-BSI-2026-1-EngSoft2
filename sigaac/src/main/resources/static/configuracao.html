@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIGAAC - Sistema Integrado de Gestão e Apoio à Associação do Câncer. Configurações.">
+    <title>SIGAAC - Configuração</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(12px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.4s ease forwards',
+                        'fade-in-up-delay-1': 'fadeInUp 0.4s ease forwards 0.05s',
+                        'fade-in-up-delay-2': 'fadeInUp 0.4s ease forwards 0.1s',
+                        'fade-in-up-delay-3': 'fadeInUp 0.4s ease forwards 0.15s',
+                        'fade-in-up-delay-4': 'fadeInUp 0.4s ease forwards 0.2s',
+                        'fade-in': 'fadeIn 0.5s ease forwards 0.25s',
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-100 text-gray-900 min-h-screen flex overflow-x-hidden antialiased">
+    <div class="flex min-h-screen w-full">
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="hidden fixed inset-0 bg-black/50 z-[99] opacity-0 transition-opacity duration-250" id="sidebar-overlay"></div>
+
+        <!-- ========== SIDEBAR ========== -->
+        <aside class="w-[220px] min-h-screen bg-[#1a1a1a] flex flex-col fixed top-0 left-0 z-[100] transition-transform duration-250" id="sidebar">
+            <div class="px-5 pt-6 pb-5">
+                <div class="text-[1.35rem] font-extrabold text-white tracking-[0.5px]">SIGAAC</div>
+                <div class="text-[0.7rem] text-gray-400 mt-[2px] font-normal">Sistema Integrado de Gestão</div>
+            </div>
+
+            <nav class="flex-1 px-3 py-2 flex flex-col">
+                <ul class="flex flex-col gap-[2px]">
+                    <li>
+                        <a href="/dashboard.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-dashboard">
+                            <span class="w-5 h-5 flex items-center justify-content flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                                </svg>
+                            </span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pacientes.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-pacientes">
+                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </span>
+                            Pacientes
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/profissionais.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-profissionais">
+                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </span>
+                            Profissionais
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/consultas.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-consultas">
+                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                            </span>
+                            Consultas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/prontuarios.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-prontuarios">
+                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                            </span>
+                            Prontuários
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/alimentos.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-alimentos">
+                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                                    <line x1="6" y1="1" x2="6" y2="4"/>
+                                    <line x1="10" y1="1" x2="10" y2="4"/>
+                                    <line x1="14" y1="1" x2="14" y2="4"/>
+                                </svg>
+                            </span>
+                            Alimentos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/exames.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-exames">
+                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                            </span>
+                            Exames
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="p-3 border-t border-white/8 mt-auto">
+                <a href="/configuracao" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg cursor-pointer transition-all duration-150 relative bg-[#d4a017] text-white font-semibold hover:bg-[#c4920f]" id="nav-configuracoes">
+                    <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                    </span>
+                    Configurações
+                </a>
+            </div>
+        </aside>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <main class="flex-1 ml-[220px] flex flex-col min-h-screen">
+
+            <!-- Header -->
+            <header class="bg-white px-7 py-4 flex items-center justify-between border-b border-gray-200 sticky top-0 z-50">
+                <div class="flex items-center gap-4">
+                    <button class="hidden w-9 h-9 items-center justify-center rounded-lg hover:bg-black/5 transition-colors text-gray-900 md:flex" id="menu-toggle" aria-label="Abrir menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <div class="flex flex-col">
+                        <h1 class="text-[1.15rem] font-bold text-gray-900">Configurações</h1>
+                        <p class="text-[0.8rem] text-gray-500 mt-[1px]">Gerencie as preferências e parâmetros do sistema</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="relative w-[38px] h-[38px] flex items-center justify-center rounded-full hover:bg-black/5 transition-colors text-gray-500 hover:text-gray-900" id="btn-notifications" aria-label="Notificações">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                    </button>
+                    <div class="flex items-center gap-2.5 cursor-pointer px-1.5 py-1 rounded-lg hover:bg-black/3 transition-colors" id="user-menu">
+                        <div class="text-right hidden md:block">
+                            <div class="text-[0.85rem] font-semibold text-gray-900">Admin User</div>
+                            <div class="text-[0.72rem] text-gray-500">Administrador</div>
+                        </div>
+                        <div class="w-[38px] h-[38px] rounded-full bg-[#1a1a1a] text-white flex items-center justify-center text-[0.8rem] font-bold tracking-[0.5px]">AU</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Configuration Content -->
+            <section class="p-6 pr-7 pb-10 flex flex-col gap-6 max-w-[1000px] mx-auto w-full">
+
+                <form id="form-parametrizacao" class="grid grid-cols-1 gap-6">
+
+                    <!-- Dados da ONG -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in-up-delay-1" id="config-ong">
+                        <div class="px-[22px] pt-5 pb-4 border-b border-gray-200 flex justify-between items-center">
+                            <div>
+                                <h2 class="text-[1.1rem] font-bold text-gray-900">Dados da ONG</h2>
+                                <p class="text-[0.85rem] text-gray-500 mt-1">Informações cadastrais da associação</p>
+                            </div>
+                            <button type="submit" class="bg-[#1a1a1a] text-white px-4 py-2 rounded-lg text-[0.85rem] font-semibold hover:bg-black transition-colors">Salvar Alterações</button>
+                        </div>
+                        <div class="p-[22px] flex flex-col gap-5">
+                            <div class="grid grid-cols-2 gap-5 md:grid-cols-1">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Razão Social <span class="text-red-500">*</span></label>
+                                    <input type="text" name="razaoSocial" maxlength="150" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Ex: Associação de Apoio ao Câncer">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Nome Fantasia</label>
+                                    <input type="text" name="nomeFantasia" maxlength="150"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Ex: SIGAAC">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">CNPJ <span class="text-red-500">*</span></label>
+                                    <input type="text" name="cnpj" maxlength="14" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Apenas números (14 dígitos)">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Telefone</label>
+                                    <input type="text" name="telefone" maxlength="20"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="(00) 0000-0000">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">E-mail</label>
+                                    <input type="email" name="email" maxlength="150"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="contato@ong.org">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Site</label>
+                                    <input type="text" name="site" maxlength="150"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="https://www.exemplo.org">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Data de Fundação</label>
+                                    <input type="date" name="dataFundacao"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">URL da Logo</label>
+                                    <input type="text" name="logoUrl" maxlength="255"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="https://exemplo.org/logo.png">
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-[0.85rem] font-semibold text-gray-700">Observações</label>
+                                <textarea name="observacoes" rows="3"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all resize-none"
+                                    placeholder="Informações adicionais sobre a ONG"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Endereço -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in-up-delay-2" id="config-endereco">
+                        <div class="px-[22px] pt-5 pb-4 border-b border-gray-200">
+                            <h2 class="text-[1.1rem] font-bold text-gray-900">Endereço</h2>
+                            <p class="text-[0.85rem] text-gray-500 mt-1">Localização da associação</p>
+                        </div>
+                        <div class="p-[22px] flex flex-col gap-5">
+                            <div class="grid grid-cols-3 gap-5 md:grid-cols-1">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">CEP <span class="text-red-500">*</span></label>
+                                    <input type="text" name="endereco.cep" maxlength="8" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Apenas números (8 dígitos)">
+                                </div>
+                                <div class="flex flex-col gap-1.5 col-span-2">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Rua <span class="text-red-500">*</span></label>
+                                    <input type="text" name="endereco.rua" maxlength="150" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Nome da rua">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-5 md:grid-cols-1">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Número <span class="text-red-500">*</span></label>
+                                    <input type="text" name="endereco.numero" maxlength="10" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Nº">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Bairro <span class="text-red-500">*</span></label>
+                                    <input type="text" name="endereco.bairro" maxlength="100" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Bairro">
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Cidade <span class="text-red-500">*</span></label>
+                                    <input type="text" name="endereco.cidade" maxlength="100" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all"
+                                        placeholder="Cidade">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-5 md:grid-cols-1">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">Estado <span class="text-red-500">*</span></label>
+                                    <select name="endereco.estado" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all bg-white">
+                                        <option value="">Selecione...</option>
+                                        <option value="AC">Acre</option>
+                                        <option value="AL">Alagoas</option>
+                                        <option value="AP">Amapá</option>
+                                        <option value="AM">Amazonas</option>
+                                        <option value="BA">Bahia</option>
+                                        <option value="CE">Ceará</option>
+                                        <option value="DF">Distrito Federal</option>
+                                        <option value="ES">Espírito Santo</option>
+                                        <option value="GO">Goiás</option>
+                                        <option value="MA">Maranhão</option>
+                                        <option value="MT">Mato Grosso</option>
+                                        <option value="MS">Mato Grosso do Sul</option>
+                                        <option value="MG">Minas Gerais</option>
+                                        <option value="PA">Pará</option>
+                                        <option value="PB">Paraíba</option>
+                                        <option value="PR">Paraná</option>
+                                        <option value="PE">Pernambuco</option>
+                                        <option value="PI">Piauí</option>
+                                        <option value="RJ">Rio de Janeiro</option>
+                                        <option value="RN">Rio Grande do Norte</option>
+                                        <option value="RS">Rio Grande do Sul</option>
+                                        <option value="RO">Rondônia</option>
+                                        <option value="RR">Roraima</option>
+                                        <option value="SC">Santa Catarina</option>
+                                        <option value="SP">São Paulo</option>
+                                        <option value="SE">Sergipe</option>
+                                        <option value="TO">Tocantins</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.85rem] font-semibold text-gray-700">País</label>
+                                    <input type="text" name="endereco.pais" maxlength="50" value="Brasil"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all">
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-[0.85rem] font-semibold text-gray-700">Descrição do Endereço</label>
+                                <textarea name="endereco.descricao" rows="2"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-[#d4a017] focus:border-transparent transition-all resize-none"
+                                    placeholder="Complemento, referência, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/cnpj-lookup.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
