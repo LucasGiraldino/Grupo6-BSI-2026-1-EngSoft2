@@ -2,6 +2,7 @@ package com.sigaac.controllers;
 
 import com.sigaac.model.Alimento;
 import com.sigaac.repository.AlimentoRepository;
+import com.sigaac.service.AlimentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,9 @@ public class AlimentoController {
 
     @Autowired
     AlimentoRepository alimentoRepository;
+
+    @Autowired
+    AlimentoService alimentoService;
 
     @GetMapping
     public ResponseEntity<List<Alimento>> listar() {
@@ -30,7 +34,7 @@ public class AlimentoController {
 
     @PostMapping
     public ResponseEntity<Alimento> criar(@RequestBody Alimento body) {
-        Alimento alimento = alimentoRepository.save(body);
+        Alimento alimento = alimentoService.criar(body);
         return ResponseEntity.status(201).body(alimento);
     }
 
