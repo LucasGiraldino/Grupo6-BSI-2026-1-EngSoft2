@@ -26,7 +26,7 @@ async function carregarAlimentos() {
             <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 font-medium text-gray-900">${a.nome}</td>
                 <td class="px-6 py-4 text-gray-600">${a.categoria?.nome ?? '-'}</td>
-                <td class="px-6 py-4 text-gray-600">${a.unidadeMedida}</td>
+                <td class="px-6 py-4 text-gray-600">${a.unidadeMedida?.valor ?? a.unidadeMedida ?? '-'}</td>
                 <td class="px-6 py-4 text-gray-600">${a.dataVencimento ? new Date(a.dataVencimento).toLocaleDateString('pt-BR') : '-'}</td>
                  <td class="px-6 py-4">
                     <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -65,7 +65,7 @@ function abrirModalEdicao(alimento) {
     document.getElementById('campo-id').value = alimento.id;
     document.getElementById('campo-nome').value = alimento.nome;
     document.getElementById('campo-descricao').value = alimento.descricao ?? '';
-    document.getElementById('campo-unidade').value = alimento.unidadeMedida;
+        document.getElementById('campo-unidade').value = alimento.unidadeMedida?.valor ?? alimento.unidadeMedida ?? '';
     document.getElementById('campo-vencimento').value = alimento.dataVencimento ?? '';
     document.getElementById('campo-categoria').value = alimento.categoria?.id ?? '';
     document.getElementById('erro-form').classList.add('hidden');
@@ -82,7 +82,7 @@ async function salvar(e) {
     const body = {
         nome: document.getElementById('campo-nome').value,
         descricao: document.getElementById('campo-descricao').value,
-        unidadeMedida: document.getElementById('campo-unidade').value,
+        unidadeMedida: document.getElementById('campo-unidade').value.toUpperCase(),
         dataVencimento: document.getElementById('campo-vencimento').value || null,
         categoria: { id: parseInt(document.getElementById('campo-categoria').value) }
     };

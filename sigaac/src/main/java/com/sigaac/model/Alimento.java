@@ -27,8 +27,9 @@ public class Alimento {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(name = "unidade_medida", length = 20, nullable = false)
-    private String unidadeMedida;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "unidade_medida", nullable = false)
+    private UnidadeMedida unidadeMedida;
 
     @Column(name = "data_vencimento")
     private LocalDate dataVencimento;
@@ -38,7 +39,7 @@ public class Alimento {
 
     public Alimento() {}
 
-    public Alimento(Integer id, CategoriaAlimento categoria, String nome, String descricao, String unidadeMedida, LocalDate dataVencimento, LocalDateTime deletedAt) {
+    public Alimento(Integer id, CategoriaAlimento categoria, String nome, String descricao, UnidadeMedida unidadeMedida, LocalDate dataVencimento, LocalDateTime deletedAt) {
         this.id = id;
         this.categoria = categoria;
         this.nome = nome;
@@ -60,8 +61,8 @@ public class Alimento {
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
 
-    public String getUnidadeMedida() { return unidadeMedida; }
-    public void setUnidadeMedida(String unidadeMedida) { this.unidadeMedida = unidadeMedida; }
+    public UnidadeMedida getUnidadeMedida() { return unidadeMedida; }
+    public void setUnidadeMedida(UnidadeMedida unidadeMedida) { this.unidadeMedida = unidadeMedida; }
 
     public LocalDate getDataVencimento() { return dataVencimento; }
     public void setDataVencimento(LocalDate dataVencimento) { this.dataVencimento = dataVencimento; }
