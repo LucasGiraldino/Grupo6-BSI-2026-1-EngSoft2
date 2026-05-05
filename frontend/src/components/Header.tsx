@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+// No import needed for NavLink - using simple button
 import { Bell, Menu } from 'lucide-react'
 
 interface HeaderProps {

@@ -13,12 +13,9 @@ interface Alimento {
 
 export default function Alimentos() {
   const [alimentos, setAlimentos] = useState<Alimento[]>([])
-  const [modalOpen, setModalOpen] = useState(false)
-  const [categorias, setCategorias] = useState<any[]>([])
 
   useEffect(() => {
     carregarAlimentos()
-    carregarCategorias()
   }, [])
 
   const carregarAlimentos = async () => {
@@ -26,14 +23,6 @@ export default function Alimentos() {
       const res = await fetch('/api/alimentos')
       const data = await res.json()
       setAlimentos(data)
-    } catch {}
-  }
-
-  const carregarCategorias = async () => {
-    try {
-      const res = await fetch('/api/alimentos/categorias')
-      const data = await res.json()
-      setCategorias(data)
     } catch {}
   }
 
@@ -46,7 +35,6 @@ export default function Alimentos() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-900">Lista de Alimentos</h3>
             <button
-              onClick={() => setModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90"
             >
               <lucide.Plus className="w-4 h-4" />
