@@ -1,50 +1,39 @@
-package com.sigaac.model;
+package com.sigaac.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "parametrizacao_ong")
-public class ParametrizacaoOng {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_parametrizacao")
-    private Integer id;
-
-    @Column(name = "razao_social", length = 150, nullable = false)
+public class ParametrizacaoOngRequestDTO {
+    @NotBlank(message = "Razão social é obrigatória")
+    @Size(max = 150)
     private String razaoSocial;
 
-    @Column(name = "nome_fantasia", length = 150)
+    @Size(max = 150)
     private String nomeFantasia;
 
-    @Column(name = "cnpj", length = 14, nullable = false, unique = true)
+    @NotBlank(message = "CNPJ é obrigatório")
+    @Size(max = 14, min = 14)
     private String cnpj;
 
-    @Column(name = "telefone", length = 20)
+    @Size(max = 20)
     private String telefone;
 
-    @Column(name = "email", length = 150)
+    @Size(max = 150)
     private String email;
 
-    @Column(name = "site", length = 150)
+    @Size(max = 150)
     private String site;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_endereco")
-    private Endereco endereco;
+    private EnderecoDTO endereco;
 
-    @Column(name = "logo_url", length = 255)
+    @Size(max = 255)
     private String logoUrl;
 
-    @Column(name = "data_fundacao")
     private LocalDate dataFundacao;
 
-    @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
     public String getRazaoSocial() { return razaoSocial; }
     public void setRazaoSocial(String razaoSocial) { this.razaoSocial = razaoSocial; }
     public String getNomeFantasia() { return nomeFantasia; }
@@ -57,8 +46,8 @@ public class ParametrizacaoOng {
     public void setEmail(String email) { this.email = email; }
     public String getSite() { return site; }
     public void setSite(String site) { this.site = site; }
-    public Endereco getEndereco() { return endereco; }
-    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
+    public EnderecoDTO getEndereco() { return endereco; }
+    public void setEndereco(EnderecoDTO endereco) { this.endereco = endereco; }
     public String getLogoUrl() { return logoUrl; }
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
     public LocalDate getDataFundacao() { return dataFundacao; }

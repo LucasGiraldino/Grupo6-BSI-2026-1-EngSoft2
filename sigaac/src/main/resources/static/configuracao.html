@@ -157,6 +157,16 @@
                     </span>
                     Configurações
                 </a>
+                <button onclick="logout()" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-red-400 hover:bg-white/6 w-full mt-1">
+                    <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </span>
+                    Sair
+                </button>
             </div>
         </aside>
 
@@ -366,5 +376,99 @@
 
     <script src="/js/cnpj-lookup.js"></script>
     <script src="/js/app.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('userEmail');
+            window.location.href = '/';
+        }
+
+        // Check authentication and admin role
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            window.location.href = '/';
+        } else {
+            fetch(`/api/parametrizacao/configuracao-sistema?email=${encodeURIComponent(userEmail)}`)
+                .then(res => res.json())
+                .then(config => {
+                    if (!config.usuarioEhAdministrador) {
+                        window.location.href = '/pacientes.html';
+                    }
+                    // Load parametrizacao data if exists
+                    if (config.parametrizacao) {
+                        loadForm(config.parametrizacao);
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function loadForm(data) {
+            const form = document.getElementById('form-parametrizacao');
+            const fields = ['razaoSocial', 'nomeFantasia', 'cnpj', 'telefone', 'email', 'site', 'logoUrl', 'dataFundacao', 'observacoes'];
+            fields.forEach(field => {
+                const input = form.querySelector(`[name="${field}"]`);
+                if (input && data[field]) input.value = data[field];
+            });
+            if (data.endereco) {
+                const addrFields = ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado', 'pais', 'descricao'];
+                addrFields.forEach(field => {
+                    const input = form.querySelector(`[name="endereco.${field}"]`);
+                    if (input && data.endereco[field]) input.value = data.endereco[field];
+                });
+            }
+        }
+
+        // Save parametrizacao
+        document.getElementById('form-parametrizacao').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const payload = {
+                razaoSocial: form.querySelector('[name="razaoSocial"]')?.value || '',
+                nomeFantasia: form.querySelector('[name="nomeFantasia"]')?.value || '',
+                cnpj: form.querySelector('[name="cnpj"]')?.value || '',
+                telefone: form.querySelector('[name="telefone"]')?.value || '',
+                email: form.querySelector('[name="email"]')?.value || '',
+                site: form.querySelector('[name="site"]')?.value || '',
+                logoUrl: form.querySelector('[name="logoUrl"]')?.value || '',
+                dataFundacao: form.querySelector('[name="dataFundacao"]')?.value || null,
+                observacoes: form.querySelector('[name="observacoes"]')?.value || '',
+                endereco: {
+                    cep: form.querySelector('[name="endereco.cep"]')?.value || '',
+                    logradouro: form.querySelector('[name="endereco.logradouro"]')?.value || form.querySelector('[name="endereco.rua"]')?.value || '',
+                    numero: form.querySelector('[name="endereco.numero"]')?.value || '',
+                    complemento: form.querySelector('[name="endereco.complemento"]')?.value || '',
+                    bairro: form.querySelector('[name="endereco.bairro"]')?.value || '',
+                    cidade: form.querySelector('[name="endereco.cidade"]')?.value || '',
+                    estado: form.querySelector('[name="endereco.estado"]')?.value || '',
+                    pais: form.querySelector('[name="endereco.pais"]')?.value || 'Brasil',
+                    descricao: form.querySelector('[name="endereco.descricao"]')?.value || ''
+                }
+            };
+
+            try {
+                // Check if parametrizacao exists
+                const existing = await fetch('/api/parametrizacao/primeira');
+                if (existing.ok) {
+                    const existingData = await existing.json();
+                    const response = await fetch(`/api/parametrizacao/${existingData.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) alert('Configurações salvas com sucesso!');
+                    else alert('Erro ao salvar configurações.');
+                } else {
+                    const response = await fetch('/api/parametrizacao', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) alert('Configurações salvas com sucesso!');
+                    else alert('Erro ao salvar configurações.');
+                }
+            } catch (error) {
+                alert('Erro ao conectar com o servidor.');
+            }
+        });
+    </script>
 </body>
 </html>
