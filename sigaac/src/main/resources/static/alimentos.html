@@ -1,0 +1,204 @@
+    <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGAAC - Alimentos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }</script>
+    <style>[data-lucide] { display: inline-block; }</style>
+</head>
+<body class="font-sans bg-white text-gray-900 min-h-screen flex overflow-x-hidden">
+<div class="flex h-screen overflow-hidden w-full">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+        <div class="px-6 py-6 border-b border-gray-200">
+            <div class="text-xl font-semibold text-gray-900">SIGAAC</div>
+            <div class="text-sm text-gray-500 mt-1">Sistema Integrado de Gestão</div>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="/dashboard.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="home" class="w-5 h-5"></i>Dashboard</a>
+            <a href="/pacientes.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="users" class="w-5 h-5"></i>Pacientes</a>
+            <a href="/profissionais.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="user-cog" class="w-5 h-5"></i>Profissionais</a>
+            <a href="/consultas.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="calendar" class="w-5 h-5"></i>Consultas</a>
+            <a href="/prontuarios.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="file-text" class="w-5 h-5"></i>Prontuários</a>
+            <a href="/alimentos.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-[#030213] text-white font-medium transition-colors"><i data-lucide="package" class="w-5 h-5"></i>Alimentos</a>
+            <a href="/exames.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="test-tube" class="w-5 h-5"></i>Exames</a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/configuracao.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="settings" class="w-5 h-5"></i>Configurações</a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors"><i data-lucide="menu" class="w-5 h-5"></i></button>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">Alimentos</h2>
+                    <p class="text-sm text-gray-500">Associação do Câncer - Gestão Integrada</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">Admin User</p>
+                        <p class="text-xs text-gray-500">Administrador</p>
+                    </div>
+                    <div class="w-10 h-10 bg-[#030213] rounded-full flex items-center justify-center text-white text-sm font-bold">AU</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 bg-white">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Lista de Alimentos</h3>
+                <button onclick="abrirModal()" class="flex items-center gap-2 px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Novo Alimento
+                </button>
+            </div>
+
+            <!-- Tabela -->
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 bg-gray-50">
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoria</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Unidade</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vencimento</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-alimentos">
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                                <i data-lucide="loader" class="w-6 h-6 mx-auto mb-2 animate-spin"></i>
+                                Carregando...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h3 id="modal-titulo" class="text-lg font-semibold text-gray-900">Novo Alimento</h3>
+            <button onclick="fecharModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <form id="form-alimento" onsubmit="salvar(event)" class="px-6 py-5 space-y-4">
+            <input type="hidden" id="campo-id">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                <input id="campo-nome" type="text" required placeholder="Arroz"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                <div class="flex gap-2">
+                    <select id="campo-categoria" required
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]">
+                        <option value="">Selecione uma categoria</option>
+                    </select>
+                    <button type="button" onclick="abrirModalCategorias()" title="Gerenciar categorias"
+                        class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-600">
+                        <i data-lucide="settings-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                <textarea id="campo-descricao" rows="2" placeholder="Descrição do alimento"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Unidade de Medida</label>
+                    <input id="campo-unidade" type="text" required placeholder="kg, L, un"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
+                    <input id="campo-vencimento" type="date"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]">
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <input id="campo-ativo" type="checkbox" checked class="w-4 h-4 rounded border-gray-300">
+                <label for="campo-ativo" class="text-sm font-medium text-gray-700">Ativo</label>
+            </div>
+            <div id="erro-form" class="hidden text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg"></div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="fecharModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL CATEGORIAS -->
+<div id="modal-categorias" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Categorias</h3>
+            <button onclick="fecharModalCategorias()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="px-6 py-4 space-y-4">
+            <!-- Nova categoria -->
+            <form onsubmit="criarCategoria(event)" class="flex gap-2">
+                <input id="nova-categoria-nome" type="text" required placeholder="Nome da categoria"
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]">
+                <button type="submit" class="px-3 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+            </form>
+            <!-- Lista de categorias -->
+            <ul id="lista-categorias" class="space-y-1 max-h-60 overflow-y-auto"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO DELETE -->
+<div id="modal-delete" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Excluir alimento</h3>
+                <p class="text-sm text-gray-500">Esta ação não pode ser desfeita.</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="fecharModalDelete()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
+            <button onclick="confirmarDelete()" class="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">Excluir</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/alimentos.js"></script>
+</body>
+</html>
