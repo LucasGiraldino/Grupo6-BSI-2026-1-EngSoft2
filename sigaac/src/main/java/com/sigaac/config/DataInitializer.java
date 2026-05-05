@@ -31,7 +31,6 @@ public class DataInitializer {
                 admin.setSenhaHash(passwordEncoder.encode("admin123"));
                 admin.setPerfil("ADMINISTRADOR");
                 admin.setDataCadastro(LocalDate.now());
-                admin.setAtivo(true);
 
                 User user = new User();
                 user.setNome("Usuário Comum");
@@ -40,7 +39,6 @@ public class DataInitializer {
                 user.setSenhaHash(passwordEncoder.encode("user123"));
                 user.setPerfil("USUARIO");
                 user.setDataCadastro(LocalDate.now());
-                user.setAtivo(true);
 
                 userRepository.save(admin);
                 userRepository.save(user);

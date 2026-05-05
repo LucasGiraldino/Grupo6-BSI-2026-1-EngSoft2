@@ -28,9 +28,9 @@ async function carregarAlimentos() {
                 <td class="px-6 py-4 text-gray-600">${a.categoria?.nome ?? '-'}</td>
                 <td class="px-6 py-4 text-gray-600">${a.unidadeMedida}</td>
                 <td class="px-6 py-4 text-gray-600">${a.dataVencimento ? new Date(a.dataVencimento).toLocaleDateString('pt-BR') : '-'}</td>
-                <td class="px-6 py-4">
-                    <span class="px-2 py-1 rounded-full text-xs font-medium ${a.ativo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">
-                        ${a.ativo ? 'Ativo' : 'Inativo'}
+                 <td class="px-6 py-4">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        Ativo
                     </span>
                 </td>
                 <td class="px-6 py-4 text-right">
@@ -67,7 +67,6 @@ function abrirModalEdicao(alimento) {
     document.getElementById('campo-descricao').value = alimento.descricao ?? '';
     document.getElementById('campo-unidade').value = alimento.unidadeMedida;
     document.getElementById('campo-vencimento').value = alimento.dataVencimento ?? '';
-    document.getElementById('campo-ativo').checked = alimento.ativo;
     document.getElementById('campo-categoria').value = alimento.categoria?.id ?? '';
     document.getElementById('erro-form').classList.add('hidden');
     document.getElementById('modal').classList.remove('hidden');
@@ -85,7 +84,6 @@ async function salvar(e) {
         descricao: document.getElementById('campo-descricao').value,
         unidadeMedida: document.getElementById('campo-unidade').value,
         dataVencimento: document.getElementById('campo-vencimento').value || null,
-        ativo: document.getElementById('campo-ativo').checked,
         categoria: { id: parseInt(document.getElementById('campo-categoria').value) }
     };
 

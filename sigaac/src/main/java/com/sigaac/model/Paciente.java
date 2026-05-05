@@ -3,6 +3,9 @@ package com.sigaac.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "pacientes")
@@ -10,6 +13,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Where(clause = "deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE pacientes SET deleted_at = NOW() WHERE id_paciente = ?")
 public class Paciente {
 
     @Id
@@ -48,7 +53,6 @@ public class Paciente {
     @Column(name = "data_cadastro", nullable = false)
     private LocalDate dataCadastro;
 
-    @Column(name = "ativo", nullable = false)
-    @Builder.Default
-    private Boolean ativo = true;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

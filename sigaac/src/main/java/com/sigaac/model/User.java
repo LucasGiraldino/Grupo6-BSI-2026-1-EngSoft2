@@ -1,10 +1,16 @@
 package com.sigaac.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@Where(clause = "deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id_usuario = ?")
 public class User {
 
     @Id
@@ -30,8 +36,8 @@ public class User {
     @Column(name = "data_cadastro", nullable = false)
     private LocalDate dataCadastro;
 
-    @Column(name = "ativo", nullable = false)
-    private Boolean ativo = true;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -47,6 +53,6 @@ public class User {
     public void setPerfil(String perfil) { this.perfil = perfil; }
     public LocalDate getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDate dataCadastro) { this.dataCadastro = dataCadastro; }
-    public Boolean getAtivo() { return ativo; }
-    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }
