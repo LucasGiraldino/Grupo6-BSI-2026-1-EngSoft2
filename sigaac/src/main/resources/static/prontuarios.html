@@ -28,8 +28,9 @@
             <a href="/alimentos.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="package" class="w-5 h-5"></i>Alimentos</a>
             <a href="/exames.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="test-tube" class="w-5 h-5"></i>Exames</a>
         </nav>
-        <div class="p-4 border-t border-gray-200">
+        <div class="p-4 border-t border-gray-200 space-y-1">
             <a href="/configuracao.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="settings" class="w-5 h-5"></i>Configurações</a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors"><i data-lucide="log-out" class="w-5 h-5"></i>Sair</button>
         </div>
     </aside>
     <div class="flex-1 flex flex-col overflow-hidden">
@@ -65,6 +66,12 @@
     </div>
 </div>
 <script src="/js/app.js"></script>
-<script>lucide.createIcons();</script>
+<script>
+    lucide.createIcons();
+    function logout() {
+        localStorage.removeItem('userEmail');
+        window.location.href = '/';
+    }
+</script>
 </body>
 </html>
