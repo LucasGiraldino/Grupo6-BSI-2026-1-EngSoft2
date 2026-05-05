@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGAAC - Pacientes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }</script>
+    <style>[data-lucide] { display: inline-block; }</style>
+</head>
+<body class="font-sans bg-white text-gray-900 min-h-screen flex overflow-x-hidden">
+<div class="flex h-screen overflow-hidden w-full">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+        <div class="px-6 py-6 border-b border-gray-200">
+            <div class="text-xl font-semibold text-gray-900">SIGAAC</div>
+            <div class="text-sm text-gray-500 mt-1">Sistema Integrado de Gestão</div>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="/dashboard.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="home" class="w-5 h-5"></i>Dashboard</a>
+            <a href="/pacientes.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-[#030213] text-white font-medium transition-colors"><i data-lucide="users" class="w-5 h-5"></i>Pacientes</a>
+            <a href="/profissionais.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="user-cog" class="w-5 h-5"></i>Profissionais</a>
+            <a href="/consultas.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="calendar" class="w-5 h-5"></i>Consultas</a>
+            <a href="/prontuarios.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="file-text" class="w-5 h-5"></i>Prontuários</a>
+            <a href="/alimentos.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="package" class="w-5 h-5"></i>Alimentos</a>
+            <a href="/exames.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="test-tube" class="w-5 h-5"></i>Exames</a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/configuracao.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors"><i data-lucide="settings" class="w-5 h-5"></i>Configurações</a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors"><i data-lucide="menu" class="w-5 h-5"></i></button>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">Pacientes</h2>
+                    <p class="text-sm text-gray-500">Associação do Câncer - Gestão Integrada</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">Admin User</p>
+                        <p class="text-xs text-gray-500">Administrador</p>
+                    </div>
+                    <div class="w-10 h-10 bg-[#030213] rounded-full flex items-center justify-center text-white text-sm font-bold">AU</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 bg-white">
+            <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                <i data-lucide="users" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Módulo Pacientes</h2>
+                <p class="text-gray-500">Esta seção está em desenvolvimento</p>
+            </div>
+        </main>
+    </div>
+</div>
+<script src="/js/app.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
