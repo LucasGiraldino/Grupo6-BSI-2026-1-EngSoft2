@@ -1,4 +1,8 @@
 # Grupo6-BSI-2026-1-EngSoft2
+
+## Design
+
+- [Figma - SIGAAC System Layout Design](https://www.figma.com/make/gnVH3w0Peb7blLgHsfCPLr/SIGAAC-System-Layout-Design?fullscreen=1&t=RX0CCf6873XpA7lC-1)
 O SIGAAC (Sistema Integrado de Gestão e Apoio à Associação do Câncer) é um sistema que tem por objetivo informatizar setores da Organização e promover melhorias, possibilita cadastros básicos de pacientes, profissionais e alimentos.
 
 ## Pré-requisitos

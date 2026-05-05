@@ -3,379 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SIGAAC - Sistema Integrado de Gestão e Apoio à Associação do Câncer. Painel administrativo.">
     <title>SIGAAC - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(12px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.4s ease forwards',
-                        'fade-in-up-delay-1': 'fadeInUp 0.4s ease forwards 0.05s',
-                        'fade-in-up-delay-2': 'fadeInUp 0.4s ease forwards 0.1s',
-                        'fade-in-up-delay-3': 'fadeInUp 0.4s ease forwards 0.15s',
-                        'fade-in-up-delay-4': 'fadeInUp 0.4s ease forwards 0.2s',
-                        'fade-in': 'fadeIn 0.5s ease forwards 0.25s',
-                    },
-                },
-            },
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
         }
     </script>
+    <style>
+        [data-lucide] { display: inline-block; }
+    </style>
 </head>
-<body class="font-sans bg-gray-100 text-gray-900 min-h-screen flex overflow-x-hidden antialiased">
-    <div class="flex min-h-screen w-full">
+<body class="font-sans bg-white text-gray-900 min-h-screen flex overflow-x-hidden">
+<div class="flex h-screen overflow-hidden w-full">
 
-        <!-- Sidebar Overlay (Mobile) -->
-        <div class="hidden fixed inset-0 bg-black/50 z-[99] opacity-0 transition-opacity duration-250" id="sidebar-overlay"></div>
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0" id="sidebar">
+        <div class="px-6 py-6 border-b border-gray-200">
+            <div class="text-xl font-semibold text-gray-900">SIGAAC</div>
+            <div class="text-sm text-gray-500 mt-1">Sistema Integrado de Gestão</div>
+        </div>
 
-        <!-- ========== SIDEBAR ========== -->
-        <aside class="w-[220px] min-h-screen bg-[#1a1a1a] flex flex-col fixed top-0 left-0 z-[100] transition-transform duration-250" id="sidebar">
-            <div class="px-5 pt-6 pb-5">
-                <div class="text-[1.35rem] font-extrabold text-white tracking-[0.5px]">SIGAAC</div>
-                <div class="text-[0.7rem] text-gray-400 mt-[2px] font-normal">Sistema Integrado de Gestão</div>
-            </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="/dashboard.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-[#030213] text-white font-medium transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                Dashboard
+            </a>
+            <a href="/pacientes.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                Pacientes
+            </a>
+            <a href="/profissionais.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="user-cog" class="w-5 h-5"></i>
+                Profissionais
+            </a>
+            <a href="/consultas.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+                Consultas
+            </a>
+            <a href="/prontuarios.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                Prontuários
+            </a>
+            <a href="/alimentos.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="package" class="w-5 h-5"></i>
+                Alimentos
+            </a>
+            <a href="/exames.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="test-tube" class="w-5 h-5"></i>
+                Exames
+            </a>
+        </nav>
 
-            <nav class="flex-1 px-3 py-2 flex flex-col">
-                <ul class="flex flex-col gap-[2px]">
-                    <li>
-                        <a href="/dashboard.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6 bg-[#d4a017] text-white font-semibold hover:bg-[#c4920f]" id="nav-dashboard">
-                            <span class="w-5 h-5 flex items-center justify-content flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <rect x="3" y="3" width="7" height="7" rx="1"/>
-                                    <rect x="14" y="3" width="7" height="7" rx="1"/>
-                                    <rect x="3" y="14" width="7" height="7" rx="1"/>
-                                    <rect x="14" y="14" width="7" height="7" rx="1"/>
-                                </svg>
-                            </span>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/pacientes.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-pacientes">
-                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                </svg>
-                            </span>
-                            Pacientes
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/profissionais.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-profissionais">
-                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="12" cy="7" r="4"/>
-                                </svg>
-                            </span>
-                            Profissionais
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/consultas.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-consultas">
-                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                    <line x1="16" y1="2" x2="16" y2="6"/>
-                                    <line x1="8" y1="2" x2="8" y2="6"/>
-                                    <line x1="3" y1="10" x2="21" y2="10"/>
-                                </svg>
-                            </span>
-                            Consultas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/prontuarios.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-prontuarios">
-                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                    <polyline points="14 2 14 8 20 8"/>
-                                    <line x1="16" y1="13" x2="8" y2="13"/>
-                                    <line x1="16" y1="17" x2="8" y2="17"/>
-                                    <polyline points="10 9 9 9 8 9"/>
-                                </svg>
-                            </span>
-                            Prontuários
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/alimentos.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-alimentos">
-                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
-                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-                                    <line x1="6" y1="1" x2="6" y2="4"/>
-                                    <line x1="10" y1="1" x2="10" y2="4"/>
-                                    <line x1="14" y1="1" x2="14" y2="4"/>
-                                </svg>
-                            </span>
-                            Alimentos
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/exames.html" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-exames">
-                            <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                    <polyline points="16 17 21 12 16 7"/>
-                                    <line x1="21" y1="12" x2="9" y2="12"/>
-                                </svg>
-                            </span>
-                            Exames
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/configuracao.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-colors">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                Configurações
+            </a>
+        </div>
+    </aside>
 
-            <div class="p-3 border-t border-white/8 mt-auto">
-                <a href="/configuracao" class="flex items-center gap-3 px-3.5 py-[11px] rounded-lg text-gray-400 text-sm font-medium cursor-pointer transition-all duration-150 relative hover:text-white hover:bg-white/6" id="nav-configuracoes">
-                    <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px] stroke-[1.8]">
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                        </svg>
-                    </span>
-                    Configurações
-                </a>
-            </div>
-        </aside>
+    <!-- MAIN -->
+    <div class="flex-1 flex flex-col overflow-hidden">
 
-        <!-- ========== MAIN CONTENT ========== -->
-        <main class="flex-1 ml-[220px] flex flex-col min-h-screen">
-
-            <!-- Header -->
-            <header class="bg-white px-7 py-4 flex items-center justify-between border-b border-gray-200 sticky top-0 z-50">
-                <div class="flex items-center gap-4">
-                    <button class="hidden w-9 h-9 items-center justify-center rounded-lg hover:bg-black/5 transition-colors text-gray-900 md:flex" id="menu-toggle" aria-label="Abrir menu">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                            <line x1="3" y1="6" x2="21" y2="6"/>
-                            <line x1="3" y1="12" x2="21" y2="12"/>
-                            <line x1="3" y1="18" x2="21" y2="18"/>
-                        </svg>
-                    </button>
-                    <div class="flex flex-col">
-                        <h1 class="text-[1.15rem] font-bold text-gray-900">Bem-vindo ao SIGAAC</h1>
-                        <p class="text-[0.8rem] text-gray-500 mt-[1px]">Associação do Câncer – Gestão Integrada</p>
-                    </div>
+        <!-- HEADER -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors" id="menu-toggle">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">Bem-vindo ao SIGAAC</h2>
+                    <p class="text-sm text-gray-500">Associação do Câncer - Gestão Integrada</p>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button class="relative w-[38px] h-[38px] flex items-center justify-center rounded-full hover:bg-black/5 transition-colors text-gray-500 hover:text-gray-900" id="btn-notifications" aria-label="Notificações">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                        </svg>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    <div class="flex items-center gap-2.5 cursor-pointer px-1.5 py-1 rounded-lg hover:bg-black/3 transition-colors" id="user-menu">
-                        <div class="text-right hidden md:block">
-                            <div class="text-[0.85rem] font-semibold text-gray-900">Admin User</div>
-                            <div class="text-[0.72rem] text-gray-500">Administrador</div>
-                        </div>
-                        <div class="w-[38px] h-[38px] rounded-full bg-[#1a1a1a] text-white flex items-center justify-center text-[0.8rem] font-bold tracking-[0.5px]">AU</div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">Admin User</p>
+                        <p class="text-xs text-gray-500">Administrador</p>
                     </div>
+                    <div class="w-10 h-10 bg-[#030213] rounded-full flex items-center justify-center text-white text-sm font-bold">AU</div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Dashboard -->
-            <section class="p-6 pr-7 pb-10 flex flex-col gap-6">
+        <!-- CONTENT -->
+        <main class="flex-1 overflow-y-auto p-6 bg-white">
+            <div class="space-y-6">
 
                 <!-- Stats Cards -->
-                <div class="grid grid-cols-4 gap-[18px] lg:grid-cols-2 md:grid-cols-1">
-                    <div class="bg-white rounded-xl p-5 flex items-center justify-between shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-250 cursor-default animate-fade-in-up-delay-1" id="card-pacientes-ativos">
-                        <div class="flex flex-col gap-[2px]">
-                            <span class="text-[0.8rem] text-gray-500 font-medium">Pacientes Ativos</span>
-                            <span class="text-[1.75rem] font-extrabold text-gray-900 leading-tight">248</span>
-                            <span class="text-[0.75rem] font-semibold mt-[2px] text-green-500">+12%</span>
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Pacientes Ativos</p>
+                            <h3 class="text-3xl font-semibold text-gray-900 mt-2">248</h3>
+                            <p class="text-sm text-green-500 font-medium mt-1">+12%</p>
                         </div>
-                        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 bg-green-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[22px] h-[22px] text-white">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                <circle cx="9" cy="7" r="4"/>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
+                        <div class="bg-blue-500 p-3 rounded-lg">
+                            <i data-lucide="users" class="w-6 h-6 text-white"></i>
                         </div>
                     </div>
-                    <div class="bg-white rounded-xl p-5 flex items-center justify-between shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-250 cursor-default animate-fade-in-up-delay-2" id="card-consultas-hoje">
-                        <div class="flex flex-col gap-[2px]">
-                            <span class="text-[0.8rem] text-gray-500 font-medium">Consultas Hoje</span>
-                            <span class="text-[1.75rem] font-extrabold text-gray-900 leading-tight">18</span>
-                            <span class="text-[0.75rem] font-semibold mt-[2px] text-green-500">+5%</span>
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Consultas Hoje</p>
+                            <h3 class="text-3xl font-semibold text-gray-900 mt-2">18</h3>
+                            <p class="text-sm text-green-500 font-medium mt-1">+5%</p>
                         </div>
-                        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 bg-green-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[22px] h-[22px] text-white">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                <line x1="16" y1="2" x2="16" y2="6"/>
-                                <line x1="8" y1="2" x2="8" y2="6"/>
-                                <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
+                        <div class="bg-green-500 p-3 rounded-lg">
+                            <i data-lucide="calendar" class="w-6 h-6 text-white"></i>
                         </div>
                     </div>
-                    <div class="bg-white rounded-xl p-5 flex items-center justify-between shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-250 cursor-default animate-fade-in-up-delay-3" id="card-exames-pendentes">
-                        <div class="flex flex-col gap-[2px]">
-                            <span class="text-[0.8rem] text-gray-500 font-medium">Exames Pendentes</span>
-                            <span class="text-[1.75rem] font-extrabold text-gray-900 leading-tight">34</span>
-                            <span class="text-[0.75rem] font-semibold mt-[2px] text-red-500">-8%</span>
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Exames Pendentes</p>
+                            <h3 class="text-3xl font-semibold text-gray-900 mt-2">34</h3>
+                            <p class="text-sm text-red-500 font-medium mt-1">-8%</p>
                         </div>
-                        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 bg-yellow-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[22px] h-[22px] text-white">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14 2 14 8 20 8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
-                            </svg>
+                        <div class="bg-yellow-500 p-3 rounded-lg">
+                            <i data-lucide="test-tube" class="w-6 h-6 text-white"></i>
                         </div>
                     </div>
-                    <div class="bg-white rounded-xl p-5 flex items-center justify-between shadow-sm border border-gray-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-250 cursor-default animate-fade-in-up-delay-4" id="card-estoque-baixo">
-                        <div class="flex flex-col gap-[2px]">
-                            <span class="text-[0.8rem] text-gray-500 font-medium">Estoque Baixo</span>
-                            <span class="text-[1.75rem] font-extrabold text-gray-900 leading-tight">7</span>
-                            <span class="text-[0.75rem] font-semibold mt-[2px] text-red-500 font-semibold">Alerta</span>
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Estoque Baixo</p>
+                            <h3 class="text-3xl font-semibold text-gray-900 mt-2">7</h3>
+                            <p class="text-sm text-red-500 font-medium mt-1">Alerta</p>
                         </div>
-                        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 bg-red-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[22px] h-[22px] text-white">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="12" y1="8" x2="12" y2="12"/>
-                                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
+                        <div class="bg-red-500 p-3 rounded-lg">
+                            <i data-lucide="alert-circle" class="w-6 h-6 text-white"></i>
                         </div>
                     </div>
                 </div>
 
-                <!-- Content Grid -->
-                <div class="grid grid-cols-2 gap-5 lg:grid-cols-1">
-
+                <!-- Two Column Layout -->
+                <div class="grid grid-cols-2 gap-6">
                     <!-- Consultas de Hoje -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in" id="panel-consultas">
-                        <div class="px-[22px] pt-5 pb-4">
-                            <h2 class="text-[1rem] font-bold text-gray-900">Consultas de Hoje</h2>
+                    <div class="bg-white rounded-lg border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">Consultas de Hoje</h3>
                         </div>
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-[14px] px-[22px] py-[14px] border-t border-gray-200 hover:bg-black/1 cursor-pointer" id="consulta-1">
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                        <line x1="16" y1="2" x2="16" y2="6"/>
-                                        <line x1="8" y1="2" x2="8" y2="6"/>
-                                        <line x1="3" y1="10" x2="21" y2="10"/>
-                                    </svg>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                                        <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Ana Costa</p>
+                                        <p class="text-sm text-gray-500">Psicologia - Dra. Carla</p>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-[0.875rem] font-semibold text-gray-900">Ana Costa</div>
-                                    <div class="text-[0.78rem] text-gray-500 mt-[1px]">Psicologia – Dra. Carla</div>
-                                </div>
-                                <span class="text-[0.875rem] font-semibold text-gray-900 flex-shrink-0">09:00</span>
+                                <p class="font-medium text-gray-900">09:00</p>
                             </div>
-                            <div class="flex items-center gap-[14px] px-[22px] py-[14px] border-t border-gray-200 hover:bg-black/1 cursor-pointer" id="consulta-2">
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                        <line x1="16" y1="2" x2="16" y2="6"/>
-                                        <line x1="8" y1="2" x2="8" y2="6"/>
-                                        <line x1="3" y1="10" x2="21" y2="10"/>
-                                    </svg>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                                        <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Pedro Lima</p>
+                                        <p class="text-sm text-gray-500">Fisioterapia - Dr. Roberto</p>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-[0.875rem] font-semibold text-gray-900">Pedro Lima</div>
-                                    <div class="text-[0.78rem] text-gray-500 mt-[1px]">Fisioterapia – Dr. Roberto</div>
-                                </div>
-                                <span class="text-[0.875rem] font-semibold text-gray-900 flex-shrink-0">10:30</span>
+                                <p class="font-medium text-gray-900">10:30</p>
                             </div>
-                            <div class="flex items-center gap-[14px] px-[22px] py-[14px] border-t border-gray-200 hover:bg-black/1 cursor-pointer" id="consulta-3">
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                        <line x1="16" y1="2" x2="16" y2="6"/>
-                                        <line x1="8" y1="2" x2="8" y2="6"/>
-                                        <line x1="3" y1="10" x2="21" y2="10"/>
-                                    </svg>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                                        <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Lucia Mendes</p>
+                                        <p class="text-sm text-gray-500">Psicologia - Dra. Carla</p>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-[0.875rem] font-semibold text-gray-900">Lucia Mendes</div>
-                                    <div class="text-[0.78rem] text-gray-500 mt-[1px]">Psicologia – Dra. Carla</div>
-                                </div>
-                                <span class="text-[0.875rem] font-semibold text-gray-900 flex-shrink-0">14:00</span>
+                                <p class="font-medium text-gray-900">14:00</p>
                             </div>
-                            <div class="flex items-center gap-[14px] px-[22px] py-[14px] border-t border-gray-200 hover:bg-black/1 cursor-pointer" id="consulta-4">
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                        <line x1="16" y1="2" x2="16" y2="6"/>
-                                        <line x1="8" y1="2" x2="8" y2="6"/>
-                                        <line x1="3" y1="10" x2="21" y2="10"/>
-                                    </svg>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                                        <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Carlos Dias</p>
+                                        <p class="text-sm text-gray-500">Fisioterapia - Dr. Roberto</p>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-[0.875rem] font-semibold text-gray-900">Carlos Dias</div>
-                                    <div class="text-[0.78rem] text-gray-500 mt-[1px]">Fisioterapia – Dr. Roberto</div>
-                                </div>
-                                <span class="text-[0.875rem] font-semibold text-gray-900 flex-shrink-0">15:30</span>
+                                <p class="font-medium text-gray-900">15:30</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Atividades Recentes -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in" id="panel-atividades">
-                        <div class="px-[22px] pt-5 pb-4">
-                            <h2 class="text-[1rem] font-bold text-gray-900">Atividades Recentes</h2>
+                    <div class="bg-white rounded-lg border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">Atividades Recentes</h3>
                         </div>
-                        <div class="px-[22px] pb-4 flex flex-col">
-                            <div class="flex items-start gap-3 py-3 relative not-last:border-b border-black/4" id="atividade-1">
-                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-[5px] bg-green-500"></span>
-                                <div class="flex flex-col gap-[2px]">
-                                    <span class="text-[0.85rem] font-medium text-gray-900">Nova consulta agendada – Maria Silva</span>
-                                    <span class="text-[0.75rem] text-gray-400">Há 5 min</span>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-2 h-2 rounded-full mt-2 bg-green-500 flex-shrink-0"></div>
+                                <div>
+                                    <p class="text-gray-900">Nova consulta agendada - Maria Silva</p>
+                                    <p class="text-sm text-gray-500 mt-1">Há 5 min</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 py-3 relative not-last:border-b border-black/4" id="atividade-2">
-                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-[5px] bg-yellow-500"></span>
-                                <div class="flex flex-col gap-[2px]">
-                                    <span class="text-[0.85rem] font-medium text-gray-900">Estoque de arroz abaixo do mínimo</span>
-                                    <span class="text-[0.75rem] text-gray-400">Há 15 min</span>
+                            <div class="flex items-start gap-4">
+                                <div class="w-2 h-2 rounded-full mt-2 bg-yellow-500 flex-shrink-0"></div>
+                                <div>
+                                    <p class="text-gray-900">Estoque de arroz abaixo do mínimo</p>
+                                    <p class="text-sm text-gray-500 mt-1">Há 15 min</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 py-3 relative not-last:border-b border-black/4" id="atividade-3">
-                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-[5px] bg-green-500"></span>
-                                <div class="flex flex-col gap-[2px]">
-                                    <span class="text-[0.85rem] font-medium text-gray-900">Prontuário atualizado – João Santos</span>
-                                    <span class="text-[0.75rem] text-gray-400">Há 30 min</span>
+                            <div class="flex items-start gap-4">
+                                <div class="w-2 h-2 rounded-full mt-2 bg-green-500 flex-shrink-0"></div>
+                                <div>
+                                    <p class="text-gray-900">Prontuário atualizado - João Santos</p>
+                                    <p class="text-sm text-gray-500 mt-1">Há 30 min</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-3 py-3 relative not-last:border-b border-black/4" id="atividade-4">
-                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-[5px] bg-blue-500"></span>
-                                <div class="flex flex-col gap-[2px]">
-                                    <span class="text-[0.85rem] font-medium text-gray-900">Doação de alimentos recebida</span>
-                                    <span class="text-[0.75rem] text-gray-400">Há 1 hora</span>
+                            <div class="flex items-start gap-4">
+                                <div class="w-2 h-2 rounded-full mt-2 bg-blue-500 flex-shrink-0"></div>
+                                <div>
+                                    <p class="text-gray-900">Doação de alimentos recebida</p>
+                                    <p class="text-sm text-gray-500 mt-1">Há 1 hora</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-            </section>
+
+                <!-- Ações Rápidas -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+                    <div class="grid grid-cols-4 gap-4">
+                        <button class="p-4 bg-[#030213] text-white font-medium rounded-lg hover:opacity-90 transition-opacity">Novo Paciente</button>
+                        <button class="p-4 bg-green-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">Agendar Consulta</button>
+                        <button class="p-4 bg-blue-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">Registrar Doação</button>
+                        <button class="p-4 bg-yellow-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">Solicitar Exame</button>
+                    </div>
+                </div>
+
+            </div>
         </main>
     </div>
+</div>
 
-    <script src="/js/app.js"></script>
+<script src="/js/app.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>
