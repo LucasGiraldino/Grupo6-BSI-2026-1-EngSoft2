@@ -3,6 +3,7 @@ package com.sigaac.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "compras")
@@ -17,9 +18,8 @@ public class Compra {
     @Column(name = "id_compra")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_estoque", nullable = false)
-    private Estoque estoque;
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemCompra> itens;
 
     @Column(name = "data_compra", nullable = false)
     private LocalDateTime dataCompra;
