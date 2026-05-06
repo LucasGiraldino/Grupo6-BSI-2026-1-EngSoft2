@@ -9,6 +9,7 @@ import Compras from './pages/Compras'
 import Exames from './pages/Exames'
 import Configuracao from './pages/Configuracao'
 import Login from './pages/Login'
+import { EfetuarDoacao } from './pages/EfetuarDoacao'
 import { useAuth } from './hooks/useAuth'
 
 function App() {
@@ -31,6 +32,10 @@ function App() {
       <Route path="/alimentos" element={<Alimentos />} />
       <Route path="/compras" element={<Compras />} />
       <Route path="/exames" element={<Exames />} />
+
+      {/* Rota de Efetuar Doação adicionada aqui! */}
+      <Route path="/doacoes" element={<EfetuarDoacao />} />
+
       <Route
         path="/configuracao"
         element={
