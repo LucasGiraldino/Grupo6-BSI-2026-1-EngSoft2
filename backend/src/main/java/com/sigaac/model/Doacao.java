@@ -1,15 +1,10 @@
 package com.sigaac.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "doacoes")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Doacao {
 
     @Id
@@ -34,4 +29,34 @@ public class Doacao {
 
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
+
+    public Doacao() {}
+
+    public Doacao(Integer id, Profissional profissional, Paciente paciente, Estoque estoque,
+                  LocalDateTime dataDoacao, String observacoes) {
+        this.id = id;
+        this.profissional = profissional;
+        this.paciente = paciente;
+        this.estoque = estoque;
+        this.dataDoacao = dataDoacao;
+        this.observacoes = observacoes;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Profissional getProfissional() { return profissional; }
+    public void setProfissional(Profissional profissional) { this.profissional = profissional; }
+
+    public Paciente getPaciente() { return paciente; }
+    public void setPaciente(Paciente paciente) { this.paciente = paciente; }
+
+    public Estoque getEstoque() { return estoque; }
+    public void setEstoque(Estoque estoque) { this.estoque = estoque; }
+
+    public LocalDateTime getDataDoacao() { return dataDoacao; }
+    public void setDataDoacao(LocalDateTime dataDoacao) { this.dataDoacao = dataDoacao; }
+
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
 }

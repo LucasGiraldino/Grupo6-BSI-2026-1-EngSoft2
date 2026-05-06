@@ -1,8 +1,9 @@
-package com.sigaac.controller;
+package com.sigaac.controllers;
 
+import com.sigaac.dto.CompraDTO;
 import com.sigaac.model.Compra;
 import com.sigaac.service.CompraService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,30 +11,30 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/compras")
-@RequiredArgsConstructor
 public class CompraController {
 
-    private final CompraService compraService;
+    @Autowired
+    private CompraService compraService;
 
     @GetMapping
-    public List<Compra> listar() {
+    public List<CompraDTO> listar() {
         return compraService.listarTodas();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Compra> buscar(@PathVariable Integer id) {
+    public ResponseEntity<CompraDTO> buscar(@PathVariable Integer id) {
         return compraService.buscarPorId(id)
-                .map(ResponseEntity::ok)
+                .map(c -> ResponseEntity.ok(c))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Compra criar(@RequestBody Compra compra) {
+    public CompraDTO criar(@RequestBody Compra compra) {
         return compraService.salvar(compra);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Compra> atualizar(@PathVariable Integer id, @RequestBody Compra compra) {
+    public ResponseEntity<CompraDTO> atualizar(@PathVariable Integer id, @RequestBody Compra compra) {
         return compraService.buscarPorId(id)
                 .map(existing -> {
                     compra.setId(id);

@@ -5,6 +5,7 @@ import Profissionais from './pages/Profissionais'
 import Consultas from './pages/Consultas'
 import Prontuarios from './pages/Prontuarios'
 import Alimentos from './pages/Alimentos'
+import Compras from './pages/Compras'
 import Exames from './pages/Exames'
 import Configuracao from './pages/Configuracao'
 import Login from './pages/Login'
@@ -28,6 +29,7 @@ function App() {
       <Route path="/consultas" element={<Consultas />} />
       <Route path="/prontuarios" element={<Prontuarios />} />
       <Route path="/alimentos" element={<Alimentos />} />
+      <Route path="/compras" element={<Compras />} />
       <Route path="/exames" element={<Exames />} />
       <Route
         path="/configuracao"

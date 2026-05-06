@@ -1,15 +1,10 @@
 package com.sigaac.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "itens_doacao")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ItemDoacao {
 
     @Id
@@ -30,4 +25,29 @@ public class ItemDoacao {
 
     @Column(name = "peso", precision = 10, scale = 3)
     private BigDecimal peso;
+
+    public ItemDoacao() {}
+
+    public ItemDoacao(Integer id, Doacao doacao, Alimento alimento, BigDecimal quantidade, BigDecimal peso) {
+        this.id = id;
+        this.doacao = doacao;
+        this.alimento = alimento;
+        this.quantidade = quantidade;
+        this.peso = peso;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Doacao getDoacao() { return doacao; }
+    public void setDoacao(Doacao doacao) { this.doacao = doacao; }
+
+    public Alimento getAlimento() { return alimento; }
+    public void setAlimento(Alimento alimento) { this.alimento = alimento; }
+
+    public BigDecimal getQuantidade() { return quantidade; }
+    public void setQuantidade(BigDecimal quantidade) { this.quantidade = quantidade; }
+
+    public BigDecimal getPeso() { return peso; }
+    public void setPeso(BigDecimal peso) { this.peso = peso; }
 }

@@ -1,15 +1,10 @@
 package com.sigaac.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "itens_compra")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ItemCompra {
 
     @Id
@@ -30,4 +25,29 @@ public class ItemCompra {
 
     @Column(name = "preco", nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
+
+    public ItemCompra() {}
+
+    public ItemCompra(Integer id, Compra compra, Alimento alimento, BigDecimal quantidade, BigDecimal preco) {
+        this.id = id;
+        this.compra = compra;
+        this.alimento = alimento;
+        this.quantidade = quantidade;
+        this.preco = preco;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Compra getCompra() { return compra; }
+    public void setCompra(Compra compra) { this.compra = compra; }
+
+    public Alimento getAlimento() { return alimento; }
+    public void setAlimento(Alimento alimento) { this.alimento = alimento; }
+
+    public BigDecimal getQuantidade() { return quantidade; }
+    public void setQuantidade(BigDecimal quantidade) { this.quantidade = quantidade; }
+
+    public BigDecimal getPreco() { return preco; }
+    public void setPreco(BigDecimal preco) { this.preco = preco; }
 }

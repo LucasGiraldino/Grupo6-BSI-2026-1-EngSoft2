@@ -1,4 +1,4 @@
-package com.sigaac.controller;
+package com.sigaac.controllers;
 
 import com.sigaac.dto.ConfiguracaoSistemaDTO;
 import com.sigaac.dto.EnderecoDTO;
@@ -31,7 +31,7 @@ public class ParametrizacaoOngController {
     @GetMapping
     public ResponseEntity<List<ParametrizacaoOngDTO>> findAll() {
         List<ParametrizacaoOngDTO> result = service.findAll().stream()
-                .map(this::toDTO)
+                .map(param -> toDTO(param))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }
@@ -54,17 +54,17 @@ public class ParametrizacaoOngController {
     public ResponseEntity<ConfiguracaoSistemaDTO> getConfiguracaoSistema(
             @RequestParam(required = false) String email) {
         ConfiguracaoSistemaDTO config = new ConfiguracaoSistemaDTO();
-        
+
         boolean isAdmin = email != null && userService.isAdministrador(email);
         config.setUsuarioEhAdministrador(isAdmin);
-        
+
         var parametrizacaoOpt = service.findFirst();
         config.setParametrizacaoExiste(parametrizacaoOpt.isPresent());
-        
+
         if (parametrizacaoOpt.isPresent()) {
             config.setParametrizacao(toDTO(parametrizacaoOpt.get()));
         }
-        
+
         return ResponseEntity.ok(config);
     }
 
@@ -76,7 +76,7 @@ public class ParametrizacaoOngController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ParametrizacaoOngDTO> update(@PathVariable Integer id, 
+    public ResponseEntity<ParametrizacaoOngDTO> update(@PathVariable Integer id,
                                                         @Valid @RequestBody ParametrizacaoOngRequestDTO request) {
         ParametrizacaoOng parametrizacao = toEntity(request);
         ParametrizacaoOng updated = service.update(id, parametrizacao);
@@ -101,7 +101,7 @@ public class ParametrizacaoOngController {
         dto.setLogoUrl(param.getLogoUrl());
         dto.setDataFundacao(param.getDataFundacao());
         dto.setObservacoes(param.getObservacoes());
-        
+
         if (param.getEndereco() != null) {
             EnderecoDTO enderecoDTO = new EnderecoDTO();
             enderecoDTO.setId(param.getEndereco().getId());
@@ -114,7 +114,7 @@ public class ParametrizacaoOngController {
             enderecoDTO.setCep(param.getEndereco().getCep());
             dto.setEndereco(enderecoDTO);
         }
-        
+
         return dto;
     }
 
@@ -129,7 +129,7 @@ public class ParametrizacaoOngController {
         param.setLogoUrl(request.getLogoUrl());
         param.setDataFundacao(request.getDataFundacao());
         param.setObservacoes(request.getObservacoes());
-        
+
         if (request.getEndereco() != null) {
             Endereco endereco = new Endereco();
             endereco.setLogradouro(request.getEndereco().getLogradouro());
@@ -141,7 +141,7 @@ public class ParametrizacaoOngController {
             endereco.setCep(request.getEndereco().getCep());
             param.setEndereco(endereco);
         }
-        
+
         return param;
     }
 }

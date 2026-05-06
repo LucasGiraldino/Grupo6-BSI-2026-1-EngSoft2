@@ -1,16 +1,24 @@
 package com.sigaac.model;
 
-import lombok.*;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ProfissionalCompraId implements Serializable {
     private Integer profissional;
     private Integer compra;
+
+    public ProfissionalCompraId() {}
+
+    public ProfissionalCompraId(Integer profissional, Integer compra) {
+        this.profissional = profissional;
+        this.compra = compra;
+    }
+
+    public Integer getProfissional() { return profissional; }
+    public void setProfissional(Integer profissional) { this.profissional = profissional; }
+
+    public Integer getCompra() { return compra; }
+    public void setCompra(Integer compra) { this.compra = compra; }
 
     @Override
     public boolean equals(Object o) {

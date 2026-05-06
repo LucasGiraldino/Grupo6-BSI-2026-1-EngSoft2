@@ -1,15 +1,10 @@
 package com.sigaac.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Table(name = "profissionais_compras")
 @IdClass(ProfissionalCompraId.class)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ProfissionalCompra {
 
     @Id
@@ -21,4 +16,17 @@ public class ProfissionalCompra {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_compra", nullable = false)
     private Compra compra;
+
+    public ProfissionalCompra() {}
+
+    public ProfissionalCompra(Profissional profissional, Compra compra) {
+        this.profissional = profissional;
+        this.compra = compra;
+    }
+
+    public Profissional getProfissional() { return profissional; }
+    public void setProfissional(Profissional profissional) { this.profissional = profissional; }
+
+    public Compra getCompra() { return compra; }
+    public void setCompra(Compra compra) { this.compra = compra; }
 }

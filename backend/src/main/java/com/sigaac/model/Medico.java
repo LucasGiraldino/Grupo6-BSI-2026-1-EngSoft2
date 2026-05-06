@@ -1,7 +1,6 @@
 package com.sigaac.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.SQLDelete;
@@ -9,10 +8,6 @@ import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "medicos")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE medicos SET deleted_at = NOW() WHERE id_medico = ?")
 public class Medico {
@@ -41,4 +36,38 @@ public class Medico {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public Medico() {}
+
+    public Medico(Integer id, User usuario, Endereco endereco, String crm,
+                  String especialidadeMedica, LocalDate dataAdmissao, LocalDateTime deletedAt) {
+        this.id = id;
+        this.usuario = usuario;
+        this.endereco = endereco;
+        this.crm = crm;
+        this.especialidadeMedica = especialidadeMedica;
+        this.dataAdmissao = dataAdmissao;
+        this.deletedAt = deletedAt;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public User getUsuario() { return usuario; }
+    public void setUsuario(User usuario) { this.usuario = usuario; }
+
+    public Endereco getEndereco() { return endereco; }
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
+
+    public String getCrm() { return crm; }
+    public void setCrm(String crm) { this.crm = crm; }
+
+    public String getEspecialidadeMedica() { return especialidadeMedica; }
+    public void setEspecialidadeMedica(String especialidadeMedica) { this.especialidadeMedica = especialidadeMedica; }
+
+    public LocalDate getDataAdmissao() { return dataAdmissao; }
+    public void setDataAdmissao(LocalDate dataAdmissao) { this.dataAdmissao = dataAdmissao; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }
