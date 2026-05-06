@@ -1,6 +1,7 @@
 package com.sigaac.config;
 
 import com.sigaac.model.User;
+import com.sigaac.model.UserRole;
 import com.sigaac.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +30,7 @@ public class DataInitializer {
                 admin.setCpf("12345678901");
                 admin.setEmail("admin@sigaac.com");
                 admin.setSenhaHash(passwordEncoder.encode("admin123"));
-                admin.setPerfil("ADMINISTRADOR");
+                admin.setPerfil(UserRole.ADMIN);
                 admin.setDataCadastro(LocalDate.now());
 
                 User user = new User();
@@ -37,7 +38,7 @@ public class DataInitializer {
                 user.setCpf("98765432100");
                 user.setEmail("user@sigaac.com");
                 user.setSenhaHash(passwordEncoder.encode("user123"));
-                user.setPerfil("USUARIO");
+                user.setPerfil(UserRole.USUARIO);
                 user.setDataCadastro(LocalDate.now());
 
                 userRepository.save(admin);
