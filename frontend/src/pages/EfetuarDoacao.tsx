@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import { Trash2 } from 'lucide-react';
 
 interface Paciente {
   id: number;
@@ -29,15 +32,12 @@ interface TabelaItem {
 export const EfetuarDoacao: React.FC = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [pacienteSelecionadoId, setPacienteSelecionadoId] = useState<number | ''>('');
-
   const [estoque, setEstoque] = useState<EstoqueItem[]>([]);
   const [alimentoSelecionadoId, setAlimentoSelecionadoId] = useState<number | ''>('');
   const [quantidadeInput, setQuantidadeInput] = useState<string>('');
-
   const [cesta, setCesta] = useState<TabelaItem[]>([]);
   const [observacoes, setObservacoes] = useState('');
   const [dataDoacao, setDataDoacao] = useState(new Date().toISOString().split('T')[0]);
-
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
 
@@ -48,31 +48,21 @@ export const EfetuarDoacao: React.FC = () => {
 
   const carregarPacientes = async () => {
     try {
-      // Usando a URL completa do seu backend Spring Boot
-      const response = await axios.get<Paciente[]>('http://localhost:8080/api/pacientes');
-      if (Array.isArray(response.data)) {
-        setPacientes(response.data);
-      } else {
-        setPacientes([]);
-      }
+      const response = await axios.get<Paciente[]>('/api/pacientes');
+      setPacientes(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Erro ao buscar pacientes:', err);
-      setPacientes([]); // Garante array vazio em caso de erro 404/500
+      setPacientes([]);
     }
   };
 
   const carregarEstoque = async () => {
     try {
-      // Usando o endpoint correto do seu backend (ajuste a rota se for /api/alimentos)
-      const response = await axios.get<EstoqueItem[]>('http://localhost:8080/api/estoque');
-      if (Array.isArray(response.data)) {
-        setEstoque(response.data);
-      } else {
-        setEstoque([]);
-      }
+      const response = await axios.get<EstoqueItem[]>('/api/estoque');
+      setEstoque(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Erro ao buscar estoque:', err);
-      setEstoque([]); // Garante array vazio em caso de erro 404/500
+      setEstoque([]);
     }
   };
 
@@ -95,7 +85,7 @@ export const EfetuarDoacao: React.FC = () => {
     if (!itemEstoque) return;
 
     if (qtd > itemEstoque.quantidadeAtual) {
-      setMensagemErro(`Estoque insuficiente. Quantidade atual em estoque: ${itemEstoque.quantidadeAtual} ${itemEstoque.alimento.unidadeMedida}`);
+      setMensagemErro(`Estoque insuficiente. Disponível: ${itemEstoque.quantidadeAtual} ${itemEstoque.alimento.unidadeMedida}`);
       return;
     }
 
@@ -105,20 +95,19 @@ export const EfetuarDoacao: React.FC = () => {
       const novaQtd = novaCesta[itemExistenteIdx].quantidade + qtd;
 
       if (novaQtd > itemEstoque.quantidadeAtual) {
-        setMensagemErro(`A quantidade somada ultrapassa o estoque disponível de ${itemEstoque.quantidadeAtual} ${itemEstoque.alimento.unidadeMedida}`);
+        setMensagemErro(`Quantidade total ultrapassa estoque disponível de ${itemEstoque.quantidadeAtual} ${itemEstoque.alimento.unidadeMedida}`);
         return;
       }
 
       novaCesta[itemExistenteIdx].quantidade = novaQtd;
       setCesta(novaCesta);
     } else {
-      const novoItem: TabelaItem = {
+      setCesta([...cesta, {
         idAlimento: itemEstoque.alimento.id,
         nomeAlimento: itemEstoque.alimento.nome,
         quantidade: qtd,
         unidadeMedida: itemEstoque.alimento.unidadeMedida
-      };
-      setCesta([...cesta, novoItem]);
+      }]);
     }
 
     setAlimentoSelecionadoId('');
@@ -143,362 +132,183 @@ export const EfetuarDoacao: React.FC = () => {
       return;
     }
 
-    const payload = {
-      idPaciente: Number(pacienteSelecionadoId),
-      idProfissional: 1,
-      observacoes: observacoes,
-      itens: cesta.map(item => ({
-        idAlimento: item.idAlimento,
-        quantidade: item.quantidade
-      }))
-    };
-
     try {
-      await axios.post('http://localhost:8080/api/doacoes', payload);
-      setMensagemSucesso('Doação cadastrada com sucesso e estoque atualizado!');
+      await axios.post('/api/doacoes', {
+        idPaciente: Number(pacienteSelecionadoId),
+        idProfissional: 1,
+        observacoes,
+        itens: cesta.map(item => ({
+          idAlimento: item.idAlimento,
+          quantidade: item.quantidade
+        }))
+      });
 
+      setMensagemSucesso('Doação cadastrada com sucesso e estoque atualizado!');
       setCesta([]);
       setPacienteSelecionadoId('');
       setObservacoes('');
       carregarEstoque();
     } catch (err: any) {
-      const msg = err.response?.data || 'Erro ao registrar doação no servidor.';
-      setMensagemErro(msg);
+      setMensagemErro(err.response?.data || 'Erro ao registrar doação no servidor.');
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.header}>Efetuar Doação</h2>
+    <div className="flex h-screen overflow-hidden w-full">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header title="Efetuar Doação" subtitle="Associação do Câncer - Gestão Integrada" />
+        <main className="flex-1 overflow-y-auto p-6 bg-white">
+          <div className="grid grid-cols-[1fr_2fr] gap-6">
+            {/* Painel Esquerdo */}
+            <div className="flex flex-col gap-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h3 className="text-base font-semibold text-gray-700 mb-3">Beneficiário</h3>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                    value={pacienteSelecionadoId}
+                    onChange={(e) => setPacienteSelecionadoId(Number(e.target.value) || '')}
+                  >
+                    <option value="">Selecione o Paciente</option>
+                    {pacientes.map(p => (
+                      <option key={p.id} value={p.id}>{p.nome} (CPF: {p.cpf})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-      <div style={styles.layoutGrid}>
+              <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h3 className="text-base font-semibold text-gray-700 mb-3">Cesta de Alimentos</h3>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mantimento</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                    value={alimentoSelecionadoId}
+                    onChange={(e) => setAlimentoSelecionadoId(Number(e.target.value) || '')}
+                  >
+                    <option value="">Selecione o Item</option>
+                    {estoque.map(item => (
+                      <option key={item.id} value={item.alimento.id}>
+                        {item.alimento.nome} ({item.quantidadeAtual} {item.alimento.unidadeMedida} disp.)
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-        {/* Painel Esquerdo: Seleção do Beneficiário e Alimentos */}
-        <div style={styles.painelLateral}>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                  <input
+                    type="number"
+                    placeholder="Ex: 5"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                    value={quantidadeInput}
+                    onChange={(e) => setQuantidadeInput(e.target.value)}
+                  />
+                </div>
 
-          {/* Beneficiário */}
-          <div style={styles.sectionBox}>
-            <h3 style={styles.sectionTitle}>Beneficiário</h3>
-            <select
-              style={styles.select}
-              value={pacienteSelecionadoId}
-              onChange={(e) => setPacienteSelecionadoId(Number(e.target.value) || '')}
-            >
-              <option value="">Selecione o Paciente</option>
-              {Array.isArray(pacientes) && pacientes.map(p => (
-                <option key={p.id} value={p.id}>{p.nome} (CPF: {p.cpf})</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Cesta de Alimentos (Formulário de Entrada) */}
-          <div style={styles.sectionBox}>
-            <h3 style={styles.sectionTitle}>Cesta de Alimentos</h3>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Mantimento</label>
-              <select
-                style={styles.select}
-                value={alimentoSelecionadoId}
-                onChange={(e) => setAlimentoSelecionadoId(Number(e.target.value) || '')}
-              >
-                <option value="">Selecione o Item</option>
-                {Array.isArray(estoque) && estoque.map(item => (
-                  <option key={item.id} value={item.alimento.id}>
-                    {item.alimento.nome} ({item.quantidadeAtual} {item.alimento.unidadeMedida} disp.)
-                  </option>
-                ))}
-              </select>
+                <button
+                  type="button"
+                  onClick={handleAdicionarItem}
+                  className="w-full px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity mt-2"
+                >
+                  Adicionar mantimento
+                </button>
+              </div>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Quantidade</label>
-              <input
-                type="number"
-                placeholder="Ex: 5"
-                style={styles.input}
-                value={quantidadeInput}
-                onChange={(e) => setQuantidadeInput(e.target.value)}
-              />
-            </div>
+            {/* Painel Direito */}
+            <div className="flex flex-col">
+              <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col h-full">
+                <h3 className="text-base font-semibold text-gray-700 mb-3">Mantimentos Adicionados</h3>
 
-            <button type="button" onClick={handleAdicionarItem} style={styles.botaoAdicionar}>
-              Adicionar mantimento
-            </button>
-          </div>
-        </div>
+                <div className="flex-1 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Código</th>
+                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Item</th>
+                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantidade</th>
+                        <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cesta.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
+                            Nenhum alimento adicionado à cesta.
+                          </td>
+                        </tr>
+                      ) : (
+                        cesta.map(item => (
+                          <tr key={item.idAlimento} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4 font-medium text-gray-900">{item.idAlimento}</td>
+                            <td className="px-6 py-4 text-gray-600">{item.nomeAlimento}</td>
+                            <td className="px-6 py-4 text-gray-600">{item.quantidade} {item.unidadeMedida}</td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                onClick={() => handleRemoverItem(item.idAlimento)}
+                                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-900"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
-        {/* Painel Direito: Tabela e Confirmação */}
-        <div style={styles.painelPrincipal}>
-          <div style={styles.tableCard}>
-            <h3 style={styles.sectionTitle}>Mantimentos Adicionados</h3>
+                <div className="mt-auto border-t border-gray-200 pt-4 flex flex-col gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Data Doação</label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      value={dataDoacao}
+                      onChange={(e) => setDataDoacao(e.target.value)}
+                    />
+                  </div>
 
-            <table style={styles.tabela}>
-              <thead>
-                <tr style={styles.theadRow}>
-                  <th style={styles.th}>Código</th>
-                  <th style={styles.th}>Item</th>
-                  <th style={styles.th}>Quantidade</th>
-                  <th style={styles.th}>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cesta.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} style={styles.emptyRow}>Nenhum alimento adicionado à cesta.</td>
-                  </tr>
-                ) : (
-                  cesta.map(item => (
-                    <tr key={item.idAlimento} style={styles.trow}>
-                      <td style={styles.td}>{item.idAlimento}</td>
-                      <td style={styles.td}>{item.nomeAlimento}</td>
-                      <td style={styles.td}>{item.quantidade} {item.unidadeMedida}</td>
-                      <td style={styles.td}>
-                        <button
-                          style={styles.botaoLixeira}
-                          onClick={() => handleRemoverItem(item.idAlimento)}
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                    <textarea
+                      placeholder="Escreva alguma observação aqui..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] resize-none"
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                {mensagemSucesso && (
+                  <div className="px-3 py-2 rounded-lg bg-green-50 text-green-700 text-sm mt-3">
+                    {mensagemSucesso}
+                  </div>
                 )}
-              </tbody>
-            </table>
+                {mensagemErro && (
+                  <div className="px-3 py-2 rounded-lg bg-red-50 text-red-700 text-sm mt-3">
+                    {mensagemErro}
+                  </div>
+                )}
 
-            {/* Informações de Fechamento */}
-            <div style={styles.footerCampos}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Data Doação</label>
-                <input
-                  type="date"
-                  style={styles.input}
-                  value={dataDoacao}
-                  onChange={(e) => setDataDoacao(e.target.value)}
-                />
+                <div className="flex justify-end gap-3 mt-4">
+                  <button
+                    type="button"
+                    onClick={handleSalvarDoacao}
+                    className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Salvar
+                  </button>
+                </div>
               </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Observações</label>
-                <textarea
-                  placeholder="Escreva alguma observação aqui..."
-                  style={styles.textarea}
-                  value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
-                  rows={2}
-                />
-              </div>
-            </div>
-
-            {mensagemSucesso && <div style={styles.alertSucesso}>{mensagemSucesso}</div>}
-            {mensagemErro && <div style={styles.alertErro}>{mensagemErro}</div>}
-
-            <div style={styles.acoesContainer}>
-              <button
-                type="button"
-                onClick={() => setCesta([])}
-                style={styles.botaoCancelar}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSalvarDoacao}
-                style={styles.botaoSalvar}
-              >
-                Salvar
-              </button>
             </div>
           </div>
-        </div>
-
+        </main>
       </div>
     </div>
   );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    maxWidth: '1200px',
-    margin: '30px auto',
-    padding: '0 20px',
-    fontFamily: 'sans-serif'
-  },
-  header: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
-    color: '#333'
-  },
-  layoutGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 2fr',
-    gap: '24px'
-  },
-  painelLateral: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px'
-  },
-  painelPrincipal: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  sectionBox: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    padding: '16px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-  },
-  sectionTitle: {
-    fontSize: '15px',
-    fontWeight: 'bold',
-    color: '#444',
-    marginBottom: '14px',
-    marginTop: '0'
-  },
-  formGroup: {
-    marginBottom: '12px'
-  },
-  label: {
-    display: 'block',
-    fontSize: '12px',
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: '4px'
-  },
-  select: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-    backgroundColor: '#fff',
-    fontSize: '14px'
-  },
-  input: {
-    width: '100%',
-    padding: '9px',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-    fontSize: '14px',
-    boxSizing: 'border-box'
-  },
-  textarea: {
-    width: '100%',
-    padding: '9px',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-    fontSize: '14px',
-    fontFamily: 'sans-serif',
-    resize: 'none',
-    boxSizing: 'border-box'
-  },
-  botaoAdicionar: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    marginTop: '6px'
-  },
-  tableCard: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%'
-  },
-  tabela: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    marginBottom: '20px'
-  },
-  theadRow: {
-    borderBottom: '2px solid #eee'
-  },
-  th: {
-    textAlign: 'left',
-    padding: '10px',
-    fontSize: '13px',
-    color: '#555',
-    fontWeight: 'bold'
-  },
-  trow: {
-    borderBottom: '1px solid #f5f5f5'
-  },
-  td: {
-    padding: '10px',
-    fontSize: '14px',
-    color: '#333'
-  },
-  emptyRow: {
-    padding: '30px',
-    textAlign: 'center',
-    color: '#999',
-    fontSize: '14px'
-  },
-  botaoLixeira: {
-    background: 'none',
-    border: 'none',
-    fontSize: '16px',
-    cursor: 'pointer'
-  },
-  footerCampos: {
-    marginTop: 'auto',
-    borderTop: '1px solid #eee',
-    paddingTop: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px'
-  },
-  acoesContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-    marginTop: '16px'
-  },
-  botaoCancelar: {
-    padding: '10px 20px',
-    border: '1px solid #ccc',
-    borderRadius: '6px',
-    backgroundColor: '#fff',
-    color: '#666',
-    fontWeight: 'bold',
-    cursor: 'pointer'
-  },
-  botaoSalvar: {
-    padding: '10px 24px',
-    border: 'none',
-    borderRadius: '6px',
-    backgroundColor: '#28a745',
-    color: '#fff',
-    fontWeight: 'bold',
-    cursor: 'pointer'
-  },
-  alertSucesso: {
-    backgroundColor: '#d4edda',
-    color: '#155724',
-    padding: '12px',
-    borderRadius: '6px',
-    border: '1px solid #c3e6cb',
-    fontSize: '14px',
-    marginTop: '12px'
-  },
-  alertErro: {
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    padding: '12px',
-    borderRadius: '6px',
-    border: '1px solid #f5c6cb',
-    fontSize: '14px',
-    marginTop: '12px'
-  }
 };
