@@ -44,6 +44,12 @@ public class User implements UserDetails {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
+
+    @Column(name = "failed_attempts")
+    private Integer failedAttempts = 0;
+
     public Integer getId() {
         return id;
     }
@@ -133,7 +139,35 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return lockedUntil == null || LocalDateTime.now().isAfter(lockedUntil);
+    }
+
+    public void incrementFailedAttempts() {
+        this.failedAttempts++;
+        if (this.failedAttempts >= 5) {
+            this.lockedUntil = LocalDateTime.now().plusMinutes(15);
+        }
+    }
+
+    public void resetFailedAttempts() {
+        this.failedAttempts = 0;
+        this.lockedUntil = null;
+    }
+
+    public LocalDateTime getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public void setLockedUntil(LocalDateTime lockedUntil) {
+        this.lockedUntil = lockedUntil;
+    }
+
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
     }
 
     @Override

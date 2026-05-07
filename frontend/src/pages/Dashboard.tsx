@@ -2,6 +2,7 @@ import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import * as lucide from 'lucide-react'
+import api from '../services/api'
 
 interface ConfigData {
   parametrizacao?: {
@@ -16,9 +17,8 @@ export default function Dashboard() {
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
     if (email) {
-      fetch(`/api/parametrizacao/configuracao-sistema?email=${encodeURIComponent(email)}`)
-        .then(res => res.json())
-        .then(data => setConfig(data))
+      api.get(`/api/parametrizacao/configuracao-sistema`, { params: { email } })
+        .then(res => setConfig(res.data))
         .catch(() => {})
     }
   }, [])

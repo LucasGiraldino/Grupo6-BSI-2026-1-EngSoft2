@@ -24,29 +24,47 @@ function App() {
       />
       <Route
         path="/pacientes"
-        element={<Pacientes />}
+        element={isAuthenticated ? <Pacientes /> : <Navigate to="/login" />}
       />
-      <Route path="/profissionais" element={<Profissionais />} />
-      <Route path="/consultas" element={<Consultas />} />
-      <Route path="/prontuarios" element={<Prontuarios />} />
-      <Route path="/alimentos" element={<Alimentos />} />
-      <Route path="/compras" element={<Compras />} />
-      <Route path="/exames" element={<Exames />} />
-
-      {/* Rota de Efetuar Doação adicionada aqui! */}
-      <Route path="/doacoes" element={<EfetuarDoacao />} />
-
+      <Route
+        path="/profissionais"
+        element={isAuthenticated ? <Profissionais /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/consultas"
+        element={isAuthenticated ? <Consultas /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/prontuarios"
+        element={isAuthenticated ? <Prontuarios /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/alimentos"
+        element={isAuthenticated ? <Alimentos /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/compras"
+        element={isAuthenticated ? <Compras /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/exames"
+        element={isAuthenticated ? <Exames /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/doacoes"
+        element={isAuthenticated ? <EfetuarDoacao /> : <Navigate to="/login" />}
+      />
       <Route
         path="/configuracao"
         element={
           isAuthenticated && isAdmin ? (
             <Configuracao />
           ) : (
-            <Navigate to="/pacientes" />
+            <Navigate to="/dashboard" />
           )
         }
       />
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+      <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
     </Routes>
   )
 }

@@ -1,3 +1,5 @@
+import api from '../services/api';
+
 interface DecodedToken {
   sub: string;
   perfil: string;
@@ -6,13 +8,15 @@ interface DecodedToken {
 
 const decodeJwt = (token: string): DecodedToken | null => {
   try {
-    const base64Url = token.split('.')[1];
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64Url = parts[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -31,17 +35,27 @@ export function useAuth() {
       userEmail = decoded.sub;
     } else {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     }
   }
 
-  const login = (jwt: string) => {
+  const login = (jwt: string, refreshToken?: string) => {
     localStorage.setItem('token', jwt);
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
     window.location.href = '/dashboard';
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/login';
+    }
   };
 
   return {
