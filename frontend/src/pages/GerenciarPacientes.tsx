@@ -1,0 +1,516 @@
+import Sidebar from '../components/Sidebar'
+import Header from '../components/Header'
+import { useEffect, useState } from 'react'
+import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
+
+interface Endereco {
+  id?: number
+  cep: string
+  logradouro: string
+  numero: string
+  complemento?: string
+  bairro: string
+  cidade: string
+  estado: string
+  pais: string
+  descricao?: string
+}
+
+interface Paciente {
+  id: number
+  nome: string
+  cpf: string
+  dataNascimento: string
+  sexo: string
+  telefone?: string
+  email?: string
+  restricoesAlimentares?: string
+  dataCadastro: string
+  endereco?: Endereco
+}
+
+const SEXOS = ['MASCULINO', 'FEMININO', 'OUTRO']
+
+const ESTADOS = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
+  'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
+  'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+]
+
+const FORM_VAZIO = {
+  id: '',
+  nome: '',
+  cpf: '',
+  dataNascimento: '',
+  sexo: '',
+  telefone: '',
+  email: '',
+  restricoesAlimentares: '',
+  enderecoCep: '',
+  enderecoLogradouro: '',
+  enderecoNumero: '',
+  enderecoComplemento: '',
+  enderecoBairro: '',
+  enderecoCidade: '',
+  enderecoEstado: '',
+  enderecoPais: 'Brasil',
+}
+
+function limparCpf(valor: string) {
+  return valor.replace(/\D/g, '').slice(0, 11)
+}
+
+function limparCep(valor: string) {
+  return valor.replace(/\D/g, '').slice(0, 8)
+}
+
+function formatarCpf(valor: string) {
+  const digits = limparCpf(valor)
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+}
+
+function formatarCep(valor: string) {
+  const digits = limparCep(valor)
+  if (digits.length <= 5) return digits
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`
+}
+
+export default function GerenciarPacientes() {
+  const [pacientes, setPacientes] = useState<Paciente[]>([])
+  const [carregando, setCarregando] = useState(true)
+
+  const [modalAberto, setModalAberto] = useState(false)
+  const [form, setForm] = useState(FORM_VAZIO)
+  const [erroForm, setErroForm] = useState('')
+
+  const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+
+  useEffect(() => {
+    carregarPacientes()
+  }, [])
+
+  async function carregarPacientes() {
+    setCarregando(true)
+    try {
+      const res = await fetch('/api/pacientes')
+      setPacientes(await res.json())
+    } catch {}
+    setCarregando(false)
+  }
+
+  function abrirModalNovo() {
+    setForm(FORM_VAZIO)
+    setErroForm('')
+    setModalAberto(true)
+  }
+
+  function abrirModalEdicao(p: Paciente) {
+    setForm({
+      id: String(p.id),
+      nome: p.nome,
+      cpf: p.cpf,
+      dataNascimento: p.dataNascimento,
+      sexo: p.sexo,
+      telefone: p.telefone ?? '',
+      email: p.email ?? '',
+      restricoesAlimentares: p.restricoesAlimentares ?? '',
+      enderecoCep: p.endereco?.cep ?? '',
+      enderecoLogradouro: p.endereco?.logradouro ?? '',
+      enderecoNumero: p.endereco?.numero ?? '',
+      enderecoComplemento: p.endereco?.complemento ?? '',
+      enderecoBairro: p.endereco?.bairro ?? '',
+      enderecoCidade: p.endereco?.cidade ?? '',
+      enderecoEstado: p.endereco?.estado ?? '',
+      enderecoPais: p.endereco?.pais ?? 'Brasil',
+    })
+    setErroForm('')
+    setModalAberto(true)
+  }
+
+  async function salvar(e: React.FormEvent) {
+    e.preventDefault()
+    const body = {
+      nome: form.nome,
+      cpf: limparCpf(form.cpf),
+      dataNascimento: form.dataNascimento,
+      sexo: form.sexo,
+      telefone: form.telefone || null,
+      email: form.email || null,
+      restricoesAlimentares: form.restricoesAlimentares || null,
+      endereco: {
+        cep: limparCep(form.enderecoCep),
+        logradouro: form.enderecoLogradouro,
+        numero: form.enderecoNumero,
+        complemento: form.enderecoComplemento || null,
+        bairro: form.enderecoBairro,
+        cidade: form.enderecoCidade,
+        estado: form.enderecoEstado,
+        pais: form.enderecoPais,
+      },
+    }
+    const url = form.id ? `/api/pacientes/${form.id}` : '/api/pacientes'
+    const method = form.id ? 'PUT' : 'POST'
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      if (!res.ok) throw new Error()
+      setModalAberto(false)
+      carregarPacientes()
+    } catch {
+      setErroForm('Erro ao salvar paciente. Verifique os dados e tente novamente.')
+    }
+  }
+
+  async function confirmarDelete() {
+    if (idParaExcluir === null) return
+    try {
+      await fetch(`/api/pacientes/${idParaExcluir}`, { method: 'DELETE' })
+    } catch {}
+    setIdParaExcluir(null)
+    carregarPacientes()
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden w-full">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header title="Gerenciar Pacientes" subtitle="Associação do Câncer - Gestão Integrada" />
+        <main className="flex-1 overflow-y-auto p-6 bg-white">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">Lista de Pacientes</h3>
+            <button
+              onClick={abrirModalNovo}
+              className="flex items-center gap-2 px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Paciente
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">CPF</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Data Nasc.</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sexo</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Telefone</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cidade/UF</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {carregando ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
+                      <Loader className="w-6 h-6 mx-auto mb-2 animate-spin" />
+                      Carregando...
+                    </td>
+                  </tr>
+                ) : pacientes.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
+                      Nenhum paciente cadastrado
+                    </td>
+                  </tr>
+                ) : (
+                  pacientes.map(p => (
+                    <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{p.nome}</td>
+                      <td className="px-6 py-4 text-gray-600">{formatarCpf(p.cpf)}</td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {new Date(p.dataNascimento).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          {p.sexo === 'MASCULINO' ? 'Masculino' : p.sexo === 'FEMININO' ? 'Feminino' : 'Outro'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{p.telefone ?? '-'}</td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {p.endereco ? `${p.endereco.cidade}/${p.endereco.estado}` : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => abrirModalEdicao(p)}
+                            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-900"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setIdParaExcluir(p.id)}
+                            className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-gray-500 hover:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+
+      {/* MODAL CRIAR/EDITAR */}
+      {modalAberto && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">{form.id ? 'Editar Paciente' : 'Novo Paciente'}</h3>
+              <button onClick={() => setModalAberto(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={salvar} className="flex flex-col flex-1 overflow-hidden">
+              <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
+                {/* Dados Pessoais */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-100">Dados Pessoais</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Nome completo"
+                        value={form.nome}
+                        onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="000.000.000-00"
+                        value={formatarCpf(form.cpf)}
+                        onChange={e => setForm(f => ({ ...f, cpf: limparCpf(e.target.value) }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                      <input
+                        type="date"
+                        required
+                        value={form.dataNascimento}
+                        onChange={e => setForm(f => ({ ...f, dataNascimento: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                      <select
+                        required
+                        value={form.sexo}
+                        onChange={e => setForm(f => ({ ...f, sexo: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      >
+                        <option value="">Selecione...</option>
+                        {SEXOS.map(s => (
+                          <option key={s} value={s}>{s === 'MASCULINO' ? 'Masculino' : s === 'FEMININO' ? 'Feminino' : 'Outro'}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                      <input
+                        type="text"
+                        placeholder="(11) 99999-9999"
+                        value={form.telefone}
+                        onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        placeholder="paciente@email.com"
+                        value={form.email}
+                        onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Endereço */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-100">Endereço</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="00000-000"
+                        value={formatarCep(form.enderecoCep)}
+                        onChange={e => setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
+                      <input
+                        type="text"
+                        required
+                        value={form.enderecoPais}
+                        onChange={e => setForm(f => ({ ...f, enderecoPais: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Rua, Avenida..."
+                        value={form.enderecoLogradouro}
+                        onChange={e => setForm(f => ({ ...f, enderecoLogradouro: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="123"
+                        value={form.enderecoNumero}
+                        onChange={e => setForm(f => ({ ...f, enderecoNumero: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                      <input
+                        type="text"
+                        placeholder="Apto, Bloco..."
+                        value={form.enderecoComplemento}
+                        onChange={e => setForm(f => ({ ...f, enderecoComplemento: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Centro"
+                        value={form.enderecoBairro}
+                        onChange={e => setForm(f => ({ ...f, enderecoBairro: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="São Paulo"
+                          value={form.enderecoCidade}
+                          onChange={e => setForm(f => ({ ...f, enderecoCidade: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                        <select
+                          required
+                          value={form.enderecoEstado}
+                          onChange={e => setForm(f => ({ ...f, enderecoEstado: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        >
+                          <option value="">UF</option>
+                          {ESTADOS.map(uf => (
+                            <option key={uf} value={uf}>{uf}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Observações */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-100">Informações Adicionais</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Restrições Alimentares</label>
+                    <textarea
+                      rows={3}
+                      placeholder="Descreva as restrições alimentares do paciente..."
+                      value={form.restricoesAlimentares}
+                      onChange={e => setForm(f => ({ ...f, restricoesAlimentares: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                    />
+                  </div>
+                </div>
+
+                {erroForm && (
+                  <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{erroForm}</div>
+                )}
+              </div>
+
+              <div className="flex gap-3 px-6 py-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setModalAberto(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CONFIRMAÇÃO DELETE */}
+      {idParaExcluir !== null && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Excluir paciente</h3>
+                <p className="text-sm text-gray-500">Esta ação não pode ser desfeita.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIdParaExcluir(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

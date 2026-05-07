@@ -1,5 +1,6 @@
 package com.sigaac.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class Paciente {
     @Column(name = "id_paciente")
     private Integer id;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "paciente")
     private Prontuario prontuario;
 
