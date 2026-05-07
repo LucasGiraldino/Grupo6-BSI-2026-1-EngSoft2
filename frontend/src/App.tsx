@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
-import Pacientes from './pages/Pacientes'
+import PacientesPage from './pages/GerenciarPacientes'
 import Profissionais from './pages/Profissionais'
 import Consultas from './pages/Consultas'
 import Prontuarios from './pages/Prontuarios'
@@ -24,7 +24,7 @@ function App() {
       />
       <Route
         path="/pacientes"
-        element={isAuthenticated ? <Pacientes /> : <Navigate to="/login" />}
+        element={isAuthenticated ? <PacientesPage /> : <Navigate to="/login" />}
       />
       <Route
         path="/profissionais"
