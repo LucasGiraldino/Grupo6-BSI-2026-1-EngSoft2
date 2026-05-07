@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "api.security.token.secret",
+      "type": "java.lang.String",
+      "description": "Chave secreta usada para assinar os tokens JWT. Lida da variável de ambiente JWT_SECRET."
+    }
+  ]
+}
