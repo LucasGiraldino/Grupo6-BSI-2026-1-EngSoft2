@@ -2,6 +2,7 @@ import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Settings2, Loader } from 'lucide-react'
+import api from '../services/api'
 
 interface Categoria {
   id: number
@@ -43,16 +44,16 @@ export default function Alimentos() {
   async function carregarAlimentos() {
     setCarregando(true)
     try {
-      const res = await fetch('/api/alimentos')
-      setAlimentos(await res.json())
+      const res = await api.get('/api/alimentos')
+      setAlimentos(res.data)
     } catch {}
     setCarregando(false)
   }
 
   async function carregarCategorias() {
     try {
-      const res = await fetch('/api/alimentos/categorias')
-      setCategorias(await res.json())
+      const res = await api.get('/api/alimentos/categorias')
+      setCategorias(res.data)
     } catch {}
   }
 
@@ -87,8 +88,7 @@ export default function Alimentos() {
     const url = form.id ? `/api/alimentos/${form.id}` : '/api/alimentos'
     const method = form.id ? 'PUT' : 'POST'
     try {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      if (!res.ok) throw new Error()
+      await api({ url, method, data: body })
       setModalAberto(false)
       carregarAlimentos()
     } catch {
@@ -99,7 +99,7 @@ export default function Alimentos() {
   async function confirmarDelete() {
     if (idParaExcluir === null) return
     try {
-      await fetch(`/api/alimentos/${idParaExcluir}`, { method: 'DELETE' })
+      await api.delete(`/api/alimentos/${idParaExcluir}`)
     } catch {}
     setIdParaExcluir(null)
     carregarAlimentos()
@@ -109,17 +109,13 @@ export default function Alimentos() {
     e.preventDefault()
     const nome = novaCategoria.trim()
     if (!nome) return
-    await fetch('/api/alimentos/categorias', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome }),
-    })
+    await api.post('/api/alimentos/categorias', { nome })
     setNovaCategoria('')
     carregarCategorias()
   }
 
   async function excluirCategoria(id: number) {
-    await fetch(`/api/alimentos/categorias/${id}`, { method: 'DELETE' })
+    await api.delete(`/api/alimentos/categorias/${id}`)
     carregarCategorias()
   }
 

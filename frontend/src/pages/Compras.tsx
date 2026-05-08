@@ -2,6 +2,7 @@ import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
+import api from '../services/api'
 
 interface Alimento {
   id: number
@@ -51,16 +52,16 @@ export default function Compras() {
   async function carregarCompras() {
     setCarregando(true)
     try {
-      const res = await fetch('/api/compras')
-      setCompras(await res.json())
+      const res = await api.get('/api/compras')
+      setCompras(res.data)
     } catch {}
     setCarregando(false)
   }
 
   async function carregarAlimentos() {
     try {
-      const res = await fetch('/api/alimentos')
-      setAlimentos(await res.json())
+      const res = await api.get('/api/alimentos')
+      setAlimentos(res.data)
     } catch {}
   }
 
@@ -120,8 +121,8 @@ export default function Compras() {
     const url = form.id ? `/api/compras/${form.id}` : '/api/compras'
     const method = form.id ? 'PUT' : 'POST'
     try {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      if (!res.ok) throw new Error()
+      const res = await api({ url, method, data: body })
+      if (!res.data) throw new Error()
       setModalAberto(false)
       carregarCompras()
     } catch {
@@ -132,7 +133,7 @@ export default function Compras() {
   async function confirmarDelete() {
     if (idParaExcluir === null) return
     try {
-      await fetch(`/api/compras/${idParaExcluir}`, { method: 'DELETE' })
+      await api.delete(`/api/compras/${idParaExcluir}`)
     } catch {}
     setIdParaExcluir(null)
     carregarCompras()

@@ -1,6 +1,7 @@
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
+import api from '../services/api'
 
 interface ConfigData {
   razaoSocial?: string
@@ -18,11 +19,10 @@ export default function Configuracao() {
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
     if (email) {
-      fetch(`/api/parametrizacao/configuracao-sistema?email=${encodeURIComponent(email)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.parametrizacao) {
-            setConfig(data.parametrizacao)
+      api.get(`/api/parametrizacao/configuracao-sistema`, { params: { email } })
+        .then(res => {
+          if (res.data.parametrizacao) {
+            setConfig(res.data.parametrizacao)
           }
           setLoading(false)
         })

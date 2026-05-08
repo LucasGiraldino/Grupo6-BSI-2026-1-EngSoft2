@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { Trash2 } from 'lucide-react';
@@ -48,7 +48,7 @@ export const EfetuarDoacao: React.FC = () => {
 
   const carregarPacientes = async () => {
     try {
-      const response = await axios.get<Paciente[]>('/api/pacientes');
+      const response = await api.get<Paciente[]>('/api/pacientes');
       setPacientes(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Erro ao buscar pacientes:', err);
@@ -58,7 +58,7 @@ export const EfetuarDoacao: React.FC = () => {
 
   const carregarEstoque = async () => {
     try {
-      const response = await axios.get<EstoqueItem[]>('/api/estoque');
+      const response = await api.get<EstoqueItem[]>('/api/estoque');
       setEstoque(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Erro ao buscar estoque:', err);
@@ -133,7 +133,7 @@ export const EfetuarDoacao: React.FC = () => {
     }
 
     try {
-      await axios.post('/api/doacoes', {
+      await api.post('/api/doacoes', {
         idPaciente: Number(pacienteSelecionadoId),
         idProfissional: 1,
         observacoes,

@@ -15,20 +15,44 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    @Value("${api.security.token.secret:my-secret-key-123456789}")
+    @Value("${api.security.token.secret}")
     private String secret;
+
+    @Value("${api.security.token.issuer:sigaac}")
+    private String issuer;
+
+    @Value("${api.security.token.expiration-hours:2}")
+    private Integer expirationHours;
+
+    @Value("${api.security.token.refresh-expiration-hours:24}")
+    private Integer refreshExpirationHours;
 
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
-                    .withIssuer("sigaac")
+                    .withIssuer(issuer)
                     .withSubject(user.getEmail())
                     .withClaim("perfil", user.getPerfil())
-                    .withExpiresAt(genExpirationDate())
+                    .withClaim("type", "access")
+                    .withExpiresAt(genExpirationDate(expirationHours))
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Error while generating token", exception);
+        }
+    }
+
+    public String generateRefreshToken(User user) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.create()
+                    .withIssuer(issuer)
+                    .withSubject(user.getEmail())
+                    .withClaim("type", "refresh")
+                    .withExpiresAt(genExpirationDate(refreshExpirationHours))
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            throw new RuntimeException("Error while generating refresh token", exception);
         }
     }
 
@@ -36,7 +60,7 @@ public class TokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
-                    .withIssuer("sigaac")
+                    .withIssuer(issuer)
                     .build()
                     .verify(token)
                     .getSubject();
@@ -45,7 +69,20 @@ public class TokenService {
         }
     }
 
-    private Instant genExpirationDate() {
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    public boolean isTokenValid(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            JWT.require(algorithm)
+                    .withIssuer(issuer)
+                    .build()
+                    .verify(token);
+            return true;
+        } catch (JWTVerificationException exception) {
+            return false;
+        }
+    }
+
+    private Instant genExpirationDate(Integer hours) {
+        return LocalDateTime.now().plusHours(hours).toInstant(ZoneOffset.UTC);
     }
 }

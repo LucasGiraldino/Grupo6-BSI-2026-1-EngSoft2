@@ -1,6 +1,16 @@
 import { useState } from 'react';
-import axios from 'axios';
-import { useAuth } from '../hooks/useAuth';
+import api from '../services/api';
+
+interface LoginResponse {
+  message: string;
+  otpSent: boolean;
+}
+
+interface VerifyResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,7 +19,6 @@ export default function Login() {
   const [step, setStep] = useState<1 | 2>(1);
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,11 +26,14 @@ export default function Login() {
     setLoading(true);
     try {
       if (email && senha) {
-        await axios.post('/auth/login', { email, senha });
-        setStep(2);
+        const res = await api.post<LoginResponse>('/auth/login', { email, senha });
+        if (res.data.otpSent) {
+          setStep(2);
+        }
       }
-    } catch (err) {
-      setErro('Credenciais inválidas');
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Erro ao fazer login';
+      setErro(msg);
     } finally {
       setLoading(false);
     }
@@ -33,14 +45,16 @@ export default function Login() {
     setLoading(true);
     try {
       if (email && senha && codigo) {
-        const res = await axios.post('/auth/verify', { email, senha, codigo }, { responseType: 'text' });
-        const token = res.data;
-        if (token) {
-          login(token); 
+        const res = await api.post<VerifyResponse>('/auth/verify', { email, senha, codigo });
+        if (res.data.accessToken) {
+          localStorage.setItem('token', res.data.accessToken);
+          localStorage.setItem('refreshToken', res.data.refreshToken);
+          window.location.href = '/dashboard';
         }
       }
-    } catch (err) {
-      setErro('Código inválido ou expirado');
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Código inválido ou expirado';
+      setErro(msg);
     } finally {
       setLoading(false);
     }
@@ -66,6 +80,7 @@ export default function Login() {
                   className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] focus:border-transparent transition-colors"
                   placeholder="seu@email.com"
                   required
+                  autoComplete="email"
                 />
               </div>
               <div>
@@ -77,6 +92,7 @@ export default function Login() {
                   className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] focus:border-transparent transition-colors"
                   placeholder="••••••••"
                   required
+                  autoComplete="current-password"
                 />
               </div>
             </div>
@@ -105,8 +121,7 @@ export default function Login() {
               </div>
               <h2 className="text-lg font-medium text-gray-900 mb-1">Verificação em Duas Etapas</h2>
               <p className="text-sm text-gray-500">
-                Enviamos um código de 6 dígitos para<br />
-                <span className="font-medium text-gray-900">{email}</span>
+                Enviamos um código de 6 dígitos para o seu e-mail
               </p>
             </div>
 
@@ -119,6 +134,9 @@ export default function Login() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-[#030213] focus:border-transparent transition-colors font-mono"
                 placeholder="000000"
                 required
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                maxLength={6}
               />
             </div>
 
