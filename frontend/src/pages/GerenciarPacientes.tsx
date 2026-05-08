@@ -108,8 +108,14 @@ export default function GerenciarPacientes() {
     if (cpf.length !== 11) return
     setBuscandoCpf(true)
     try {
-      const res = await fetch(`/api/consulta-cpf/${cpf}`)
-      if (!res.ok) return
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000)
+      const res = await fetch(`/api/consulta-cpf/${cpf}`, { signal: controller.signal })
+      clearTimeout(timeout)
+      if (!res.ok) {
+        mostrarToast('Erro ao consultar CPF. Tente novamente.', 'erro')
+        return
+      }
       const data = await res.json()
       if (data.valido) {
         if (data.nome) {
@@ -132,9 +138,10 @@ export default function GerenciarPacientes() {
         mostrarToast(data.mensagem || 'CPF inv\u00e1lido. Verifique os d\u00edgitos e tente novamente.', 'erro')
       }
     } catch {
-      mostrarToast('Erro ao consultar CPF. Tente novamente.', 'erro')
+      mostrarToast('Erro ao consultar CPF. Verifique se o servidor est\u00e1 rodando.', 'erro')
+    } finally {
+      setBuscandoCpf(false)
     }
-    setBuscandoCpf(false)
   }
 
   async function carregarPacientes() {
