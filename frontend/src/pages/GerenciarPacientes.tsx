@@ -1,7 +1,8 @@
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Loader, Search } from 'lucide-react'
+import Toast from '../components/Toast'
 
 interface Endereco {
   id?: number
@@ -88,9 +89,53 @@ export default function GerenciarPacientes() {
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
 
+  const [toastAberto, setToastAberto] = useState(false)
+  const [toastMensagem, setToastMensagem] = useState('')
+  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('erro')
+  const [buscandoCpf, setBuscandoCpf] = useState(false)
+
+  function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'erro') {
+    setToastMensagem(mensagem)
+    setToastTipo(tipo)
+    setToastAberto(true)
+  }
+
   useEffect(() => {
     carregarPacientes()
   }, [])
+
+  async function buscarDadosPorCpf(cpf: string) {
+    if (cpf.length !== 11) return
+    setBuscandoCpf(true)
+    try {
+      const res = await fetch(`/api/consulta-cpf/${cpf}`)
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.valido) {
+        if (data.nome) {
+          setForm(f => ({ ...f, nome: data.nome }))
+          mostrarToast('Dados encontrados para o CPF informado!', 'sucesso')
+        }
+        if (data.dataNascimento) {
+          const partes = data.dataNascimento.split('/')
+          if (partes.length === 3) {
+            setForm(f => ({ ...f, dataNascimento: `${partes[2]}-${partes[1]}-${partes[0]}` }))
+          }
+        }
+        if (data.sexo) {
+          setForm(f => ({ ...f, sexo: data.sexo }))
+        }
+        if (!data.nome) {
+          mostrarToast('CPF v\u00e1lido!', 'sucesso')
+        }
+      } else {
+        mostrarToast(data.mensagem || 'CPF inv\u00e1lido. Verifique os d\u00edgitos e tente novamente.', 'erro')
+      }
+    } catch {
+      mostrarToast('Erro ao consultar CPF. Tente novamente.', 'erro')
+    }
+    setBuscandoCpf(false)
+  }
 
   async function carregarPacientes() {
     setCarregando(true)
@@ -287,14 +332,24 @@ export default function GerenciarPacientes() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="000.000.000-00"
-                        value={formatarCpf(form.cpf)}
-                        onChange={e => setForm(f => ({ ...f, cpf: limparCpf(e.target.value) }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          placeholder="000.000.000-00"
+                          value={formatarCpf(form.cpf)}
+                          onChange={e => setForm(f => ({ ...f, cpf: limparCpf(e.target.value) }))}
+                          onBlur={() => !form.id && buscarDadosPorCpf(limparCpf(form.cpf))}
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {buscandoCpf ? (
+                            <Loader className="w-4 h-4 text-gray-400 animate-spin" />
+                          ) : (
+                            <Search className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
@@ -511,6 +566,8 @@ export default function GerenciarPacientes() {
           </div>
         </div>
       )}
+
+      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </div>
   )
 }
