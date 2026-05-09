@@ -9,6 +9,7 @@ import Compras from './pages/Compras'
 import Exames from './pages/Exames'
 import Configuracao from './pages/Configuracao'
 import Login from './pages/Login'
+import VerifyOTP from './pages/VerifyOTP'
 import { EfetuarDoacao } from './pages/EfetuarDoacao'
 import { useAuth } from './hooks/useAuth'
 
@@ -18,13 +19,14 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/verificar" element={<VerifyOTP />} />
       <Route
         path="/dashboard"
         element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
       />
       <Route
         path="/pacientes"
-        element={isAuthenticated ? <PacientesPage /> : <Navigate to="/login" />}
+        element={isAuthenticated ? <PacientesPage /> : <Navigate to="/login" />}  
       />
       <Route
         path="/profissionais"

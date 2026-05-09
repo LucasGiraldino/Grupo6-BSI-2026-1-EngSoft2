@@ -1,9 +1,6 @@
 package com.sigaac.model;
 
-import java.io.Serializable;
-import java.util.Objects;
-
-public class ProfissionalCompraId implements Serializable {
+public class ProfissionalCompraId {
     private Integer profissional;
     private Integer compra;
 
@@ -16,7 +13,6 @@ public class ProfissionalCompraId implements Serializable {
 
     public Integer getProfissional() { return profissional; }
     public void setProfissional(Integer profissional) { this.profissional = profissional; }
-
     public Integer getCompra() { return compra; }
     public void setCompra(Integer compra) { this.compra = compra; }
 
@@ -25,11 +21,12 @@ public class ProfissionalCompraId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProfissionalCompraId that = (ProfissionalCompraId) o;
-        return Objects.equals(profissional, that.profissional) && Objects.equals(compra, that.compra);
+        return java.util.Objects.equals(profissional, that.profissional) &&
+               java.util.Objects.equals(compra, that.compra);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(profissional, compra);
+        return java.util.Objects.hash(profissional, compra);
     }
 }

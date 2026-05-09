@@ -1,42 +1,33 @@
 package com.sigaac.model;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "enderecos")
 public class Endereco {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_endereco")
     private Integer id;
-
-    @Column(name = "cep", length = 8, nullable = false)
     private String cep;
-
-    @Column(name = "logradouro", length = 150, nullable = false)
     private String logradouro;
-
-    @Column(name = "numero", length = 10, nullable = false)
     private String numero;
-
-    @Column(name = "complemento", length = 50)
     private String complemento;
-
-    @Column(name = "bairro", length = 100, nullable = false)
     private String bairro;
-
-    @Column(name = "cidade", length = 100, nullable = false)
     private String cidade;
-
-    @Column(name = "estado", length = 2, nullable = false)
     private String estado;
-
-    @Column(name = "pais", length = 50, nullable = false)
     private String pais = "Brasil";
-
-    @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
+
+    public Endereco() {}
+
+    public Endereco(Integer id, String cep, String logradouro, String numero, String complemento,
+                    String bairro, String cidade, String estado, String pais, String descricao) {
+        this.id = id;
+        this.cep = cep;
+        this.logradouro = logradouro;
+        this.numero = numero;
+        this.complemento = complemento;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+        this.pais = pais;
+        this.descricao = descricao;
+    }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

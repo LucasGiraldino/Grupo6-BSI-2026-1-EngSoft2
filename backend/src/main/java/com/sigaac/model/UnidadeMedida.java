@@ -30,6 +30,6 @@ public enum UnidadeMedida {
                 return u;
             }
         }
-        throw new IllegalArgumentException("Unidade de medida inválida: " + valor);
+        throw new IllegalArgumentException("Unidade de medida invalida: " + valor);
     }
 }

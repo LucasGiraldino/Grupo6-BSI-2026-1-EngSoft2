@@ -1,8 +1,6 @@
 package com.sigaac.model;
 
-import org.springframework.security.core.GrantedAuthority;
-
-public enum UserRole implements GrantedAuthority {
+public enum UserRole {
     ADMIN("ADMINISTRADOR"),
     USUARIO("USUARIO");
 
@@ -14,10 +12,5 @@ public enum UserRole implements GrantedAuthority {
 
     public String getRole() {
         return role;
-    }
-
-    @Override
-    public String getAuthority() {
-        return this.role;
     }
 }
