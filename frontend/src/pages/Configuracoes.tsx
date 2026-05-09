@@ -1,7 +1,7 @@
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import { useEffect, useState } from 'react'
-import { Loader } from 'lucide-react'
+import { Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
 
 const ESTADOS = [
@@ -33,11 +33,32 @@ function limparCnpj(valor: string) {
   return valor.replace(/\D/g, '').slice(0, 14)
 }
 
+function formatarCnpj(valor: string) {
+  const digits = limparCnpj(valor)
+  if (digits.length <= 2) return digits
+  if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`
+  if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`
+  if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`
+}
+
+function limparCep(valor: string) {
+  return valor.replace(/\D/g, '').slice(0, 8)
+}
+
+function formatarCep(valor: string) {
+  const digits = limparCep(valor)
+  if (digits.length <= 5) return digits
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`
+}
+
 export default function Configuracoes() {
   const [form, setForm] = useState(FORM_VAZIO)
   const [configId, setConfigId] = useState<number | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [buscandoCnpj, setBuscandoCnpj] = useState(false)
+  const [buscandoCep, setBuscandoCep] = useState(false)
   const [toastAberto, setToastAberto] = useState(false)
   const [toastMensagem, setToastMensagem] = useState('')
   const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
@@ -82,6 +103,71 @@ export default function Configuracoes() {
       mostrarToast('Erro ao carregar configurações. Verifique se o servidor está rodando.', 'erro')
     } finally {
       setCarregando(false)
+    }
+  }
+
+  async function buscarDadosPorCnpj(cnpj: string) {
+    if (cnpj.length !== 14) return
+    setBuscandoCnpj(true)
+    try {
+      const res = await fetch(`/api/consulta-cnpj/${cnpj}`)
+      if (!res.ok) {
+        mostrarToast('Erro ao consultar CNPJ. Tente novamente.', 'erro')
+        return
+      }
+      const data = await res.json()
+      if (data.valido) {
+        const updates: Record<string, string> = {}
+        if (data.razaoSocial) updates.razaoSocial = data.razaoSocial
+        if (data.nomeFantasia) updates.nomeFantasia = data.nomeFantasia
+        if (data.logradouro) updates.enderecoLogradouro = data.logradouro
+        if (data.numero) updates.enderecoNumero = data.numero
+        if (data.complemento) updates.enderecoComplemento = data.complemento
+        if (data.bairro) updates.enderecoBairro = data.bairro
+        if (data.municipio) updates.enderecoCidade = data.municipio
+        if (data.uf) updates.enderecoEstado = data.uf
+        if (data.cep) updates.enderecoCep = data.cep
+        if (data.telefone) updates.telefone = data.telefone
+        if (data.email) updates.email = data.email
+        setForm(f => ({ ...f, ...updates }))
+        mostrarToast('Dados encontrados para o CNPJ informado!', 'sucesso')
+      } else {
+        mostrarToast(data.mensagem || 'CNPJ inválido. Verifique os dígitos e tente novamente.', 'erro')
+      }
+    } catch {
+      mostrarToast('Erro ao consultar CNPJ. Verifique se o servidor está rodando.', 'erro')
+    } finally {
+      setBuscandoCnpj(false)
+    }
+  }
+
+  async function buscarDadosPorCep(cep: string) {
+    if (cep.length !== 8) return
+    setBuscandoCep(true)
+    try {
+      const res = await fetch(`/api/consulta-cep/${cep}`)
+      if (!res.ok) {
+        mostrarToast('Erro ao consultar CEP. Tente novamente.', 'erro')
+        return
+      }
+      const data = await res.json()
+      if (data.valido) {
+        setForm(f => ({
+          ...f,
+          enderecoLogradouro: data.logradouro || f.enderecoLogradouro,
+          enderecoComplemento: data.complemento || f.enderecoComplemento,
+          enderecoBairro: data.bairro || f.enderecoBairro,
+          enderecoCidade: data.localidade || f.enderecoCidade,
+          enderecoEstado: data.uf || f.enderecoEstado,
+        }))
+        mostrarToast('CEP encontrado!', 'sucesso')
+      } else {
+        mostrarToast(data.mensagem || 'CEP não encontrado.', 'erro')
+      }
+    } catch {
+      mostrarToast('Erro ao consultar CEP. Verifique se o servidor está rodando.', 'erro')
+    } finally {
+      setBuscandoCep(false)
     }
   }
 
@@ -192,14 +278,24 @@ export default function Configuracoes() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         CNPJ <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Apenas números"
-                        value={form.cnpj}
-                        onChange={e => setForm(f => ({ ...f, cnpj: limparCnpj(e.target.value) }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          placeholder="00.000.000/0000-00"
+                          value={formatarCnpj(form.cnpj)}
+                          onChange={e => setForm(f => ({ ...f, cnpj: limparCnpj(e.target.value) }))}
+                          onBlur={() => buscarDadosPorCnpj(limparCnpj(form.cnpj))}
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {buscandoCnpj ? (
+                            <Loader className="w-4 h-4 text-gray-400 animate-spin" />
+                          ) : (
+                            <Search className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
@@ -260,13 +356,23 @@ export default function Configuracoes() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                      <input
-                        type="text"
-                        placeholder="00000-000"
-                        value={form.enderecoCep}
-                        onChange={e => setForm(f => ({ ...f, enderecoCep: e.target.value.replace(/\D/g, '').slice(0, 8) }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="00000-000"
+                          value={formatarCep(form.enderecoCep)}
+                          onChange={e => setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) }))}
+                          onBlur={() => buscarDadosPorCep(limparCep(form.enderecoCep))}
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {buscandoCep ? (
+                            <Loader className="w-4 h-4 text-gray-400 animate-spin" />
+                          ) : (
+                            <Search className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>

@@ -37,6 +37,8 @@ public class SigaacApplication {
         TokenService tokenService = new TokenService(props);
         OtpService otpService = new OtpService(props);
         CpfService cpfService = new CpfService(props);
+        CnpjService cnpjService = new CnpjService();
+        CepService cepService = new CepService();
         RateLimiterService rateLimiterService = new RateLimiterService();
         UserService userService = new UserService(userRepo);
         PacienteService pacienteService = new PacienteService(pacienteRepo, enderecoRepo);
@@ -48,6 +50,8 @@ public class SigaacApplication {
         LoginController loginCtrl = new LoginController(userRepo, otpService, tokenService, rateLimiterService, json);
         PacienteController pacienteCtrl = new PacienteController(pacienteService, json);
         CpfController cpfCtrl = new CpfController(cpfService, json);
+        CnpjController cnpjCtrl = new CnpjController(cnpjService, json);
+        CepController cepCtrl = new CepController(cepService, json);
         UserController userCtrl = new UserController(userRepo, json);
         DoacaoController doacaoCtrl = new DoacaoController(doacaoService, json);
         CompraController compraCtrl = new CompraController(compraService, json);
@@ -59,6 +63,8 @@ public class SigaacApplication {
         loginCtrl.registerRoutes(router);
         pacienteCtrl.registerRoutes(router);
         cpfCtrl.registerRoutes(router);
+        cnpjCtrl.registerRoutes(router);
+        cepCtrl.registerRoutes(router);
         userCtrl.registerRoutes(router);
         doacaoCtrl.registerRoutes(router);
         compraCtrl.registerRoutes(router);
