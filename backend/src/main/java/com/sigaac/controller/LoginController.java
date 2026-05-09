@@ -5,22 +5,24 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sigaac.view.JsonView;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LoginController {
 
     private final UserRepository userRepository;
-    private final UserService userService;
     private final OtpService otpService;
     private final TokenService tokenService;
     private final RateLimiterService rateLimiterService;
     private final JsonView json;
+    private final ConcurrentHashMap<String, Instant> pendingVerifications = new ConcurrentHashMap<>();
+    private static final long PENDING_TTL_MINUTES = 10;
 
-    public LoginController(UserRepository userRepository, UserService userService,
+    public LoginController(UserRepository userRepository,
                            OtpService otpService, TokenService tokenService,
                            RateLimiterService rateLimiterService, JsonView json) {
         this.userRepository = userRepository;
-        this.userService = userService;
         this.otpService = otpService;
         this.tokenService = tokenService;
         this.rateLimiterService = rateLimiterService;
@@ -68,6 +70,7 @@ public class LoginController {
             return;
         }
 
+        pendingVerifications.put(user.getEmail(), Instant.now().plusSeconds(PENDING_TTL_MINUTES * 60));
         otpService.generateAndSendOtp(user.getEmail());
         json.send(exchange, 200, Map.of("message", "Código 2FA enviado para o email do usuário.", "otpSent", true));
     }
@@ -78,6 +81,12 @@ public class LoginController {
 
         if (!rateLimiterService.isAllowed(rateLimitKey)) {
             json.send(exchange, 429, Map.of("error", "Muitas tentativas. Aguarde 5 minutos."));
+            return;
+        }
+
+        Instant expiresAt = pendingVerifications.get(data.email());
+        if (expiresAt == null || Instant.now().isAfter(expiresAt)) {
+            json.send(exchange, 401, Map.of("error", "Credenciais inválidas."));
             return;
         }
 
@@ -94,11 +103,6 @@ public class LoginController {
 
         var user = userOpt.get();
 
-        if (!BCrypt.checkpw(data.senha(), user.getSenhaHash())) {
-            json.send(exchange, 401, Map.of("error", "Credenciais inválidas."));
-            return;
-        }
-
         if (!user.isAccountNonLocked()) {
             json.send(exchange, 423, Map.of("error", "Conta bloqueada por muitas tentativas. Tente novamente em 15 minutos."));
             return;
@@ -110,6 +114,7 @@ public class LoginController {
         String token = tokenService.generateToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
         rateLimiterService.reset(rateLimitKey);
+        pendingVerifications.remove(data.email());
 
         json.send(exchange, 200, Map.of(
                 "accessToken", token,

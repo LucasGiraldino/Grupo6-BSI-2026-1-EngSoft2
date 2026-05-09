@@ -45,7 +45,7 @@ public class SigaacApplication {
         AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);
         ParametrizacaoOngService parametrizacaoService = new ParametrizacaoOngService(parametrizacaoRepo);
 
-        LoginController loginCtrl = new LoginController(userRepo, userService, otpService, tokenService, rateLimiterService, json);
+        LoginController loginCtrl = new LoginController(userRepo, otpService, tokenService, rateLimiterService, json);
         PacienteController pacienteCtrl = new PacienteController(pacienteService, json);
         CpfController cpfCtrl = new CpfController(cpfService, json);
         UserController userCtrl = new UserController(userRepo, json);
