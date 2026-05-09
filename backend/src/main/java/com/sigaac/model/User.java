@@ -16,6 +16,7 @@ public class User {
     private LocalDateTime lockedUntil;
     private Integer failedAttempts = 0;
     private Boolean ativo = true;
+    private Integer parametrizacaoId;
 
     public User() {}
 
@@ -53,6 +54,8 @@ public class User {
     public void setLockedUntil(LocalDateTime lockedUntil) { this.lockedUntil = lockedUntil; }
     public Integer getFailedAttempts() { return failedAttempts; }
     public void setFailedAttempts(Integer failedAttempts) { this.failedAttempts = failedAttempts; }
+    public Integer getParametrizacaoId() { return parametrizacaoId; }
+    public void setParametrizacaoId(Integer parametrizacaoId) { this.parametrizacaoId = parametrizacaoId; }
 
     public boolean isAccountNonLocked() {
         return lockedUntil == null || LocalDateTime.now().isAfter(lockedUntil);

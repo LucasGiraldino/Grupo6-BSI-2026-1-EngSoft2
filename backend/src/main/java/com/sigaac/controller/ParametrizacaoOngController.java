@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ParametrizacaoOngController {
@@ -22,9 +23,9 @@ public class ParametrizacaoOngController {
 
     public void registerRoutes(HttpRouter router) {
         router.get("/api/parametrizacao", this::findAll);
-        router.get("/api/parametrizacao/{id}", this::findById);
         router.get("/api/parametrizacao/primeira", this::findFirst);
         router.get("/api/parametrizacao/configuracao-sistema", this::getConfiguracaoSistema);
+        router.get("/api/parametrizacao/{id}", this::findById);
         router.post("/api/parametrizacao", this::create);
         router.put("/api/parametrizacao/{id}", this::update);
         router.delete("/api/parametrizacao/{id}", this::delete);
@@ -48,7 +49,15 @@ public class ParametrizacaoOngController {
     }
 
     private void findFirst(HttpExchange exchange, Map<String, String> params) throws Exception {
-        var opt = service.findFirst().map(this::toDTO);
+        User currentUser = AuthContext.get();
+        Optional<ParametrizacaoOngDTO> opt;
+
+        if (currentUser != null && currentUser.getParametrizacaoId() != null) {
+            opt = service.findById(currentUser.getParametrizacaoId()).map(this::toDTO);
+        } else {
+            opt = service.findFirst().map(this::toDTO);
+        }
+
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -66,11 +75,17 @@ public class ParametrizacaoOngController {
         ConfiguracaoSistemaDTO config = new ConfiguracaoSistemaDTO();
         boolean isAdmin = email != null && userService.isAdministrador(email);
         config.setUsuarioEhAdministrador(isAdmin);
-        var parametrizacaoOpt = service.findFirst();
-        config.setParametrizacaoExiste(parametrizacaoOpt.isPresent());
-        if (parametrizacaoOpt.isPresent()) {
-            config.setParametrizacao(toDTO(parametrizacaoOpt.get()));
+
+        User currentUser = AuthContext.get();
+        Optional<ParametrizacaoOng> opt;
+        if (currentUser != null && currentUser.getParametrizacaoId() != null) {
+            opt = service.findById(currentUser.getParametrizacaoId());
+        } else {
+            opt = service.findFirst();
         }
+
+        config.setParametrizacaoExiste(opt.isPresent());
+        opt.ifPresent(p -> config.setParametrizacao(toDTO(p)));
         json.send(exchange, 200, config);
     }
 
@@ -78,6 +93,13 @@ public class ParametrizacaoOngController {
         ParametrizacaoOngRequestDTO request = json.read(exchange.getRequestBody(), ParametrizacaoOngRequestDTO.class);
         ParametrizacaoOng param = toEntity(request);
         ParametrizacaoOng saved = service.save(param);
+
+        User currentUser = AuthContext.get();
+        if (currentUser != null && currentUser.getParametrizacaoId() == null) {
+            currentUser.setParametrizacaoId(saved.getId());
+            userService.save(currentUser);
+        }
+
         json.send(exchange, 201, toDTO(saved));
     }
 
@@ -126,8 +148,8 @@ public class ParametrizacaoOngController {
         ParametrizacaoOng param = new ParametrizacaoOng();
         param.setRazaoSocial(request.getRazaoSocial());
         param.setNomeFantasia(request.getNomeFantasia());
-        param.setCnpj(request.getCnpj());
-        param.setTelefone(request.getTelefone());
+        param.setCnpj(request.getCnpj() != null ? request.getCnpj().replaceAll("\\D", "") : null);
+        param.setTelefone(request.getTelefone() != null ? request.getTelefone().replaceAll("\\D", "") : null);
         param.setEmail(request.getEmail());
         param.setSite(request.getSite());
         param.setLogoUrl(request.getLogoUrl());
@@ -141,7 +163,7 @@ public class ParametrizacaoOngController {
             end.setBairro(request.getEndereco().getBairro());
             end.setCidade(request.getEndereco().getCidade());
             end.setEstado(request.getEndereco().getEstado());
-            end.setCep(request.getEndereco().getCep());
+            end.setCep(request.getEndereco().getCep() != null ? request.getEndereco().getCep().replaceAll("\\D", "") : null);
             param.setEndereco(end);
         }
         return param;

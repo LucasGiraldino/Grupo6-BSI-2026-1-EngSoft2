@@ -75,7 +75,7 @@ public class SigaacApplication {
         DataInitializer initializer = new DataInitializer(userRepo);
         initializer.seed();
 
-        SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo);
+        SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo, json);
         CorsFilter corsFilter = new CorsFilter();
         StaticFileHandler staticHandler = new StaticFileHandler(
                 "/Users/lucasgiraldino/estudos/Grupo6-BSI-2026-1-EngSoft2/frontend/dist");

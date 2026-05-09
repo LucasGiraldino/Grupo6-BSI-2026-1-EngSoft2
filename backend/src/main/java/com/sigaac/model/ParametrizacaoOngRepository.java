@@ -33,12 +33,18 @@ public class ParametrizacaoOngRepository extends BaseRepository {
     }
 
     public ParametrizacaoOng save(ParametrizacaoOng param) {
+        if (param.getEndereco() != null) {
+            Endereco saved = enderecoRepo.save(param.getEndereco());
+            param.setEndereco(saved);
+        }
+        Integer idEndereco = param.getEndereco() != null ? param.getEndereco().getId() : null;
+
         if (param.getId() == null) {
             Number id = executeInsert(
                 "INSERT INTO parametrizacao_ong (razao_social, nome_fantasia, cnpj, telefone, email, site, id_endereco, logo_url, data_fundacao, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 param.getRazaoSocial(), param.getNomeFantasia(), param.getCnpj(),
                 param.getTelefone(), param.getEmail(), param.getSite(),
-                param.getEndereco() != null ? param.getEndereco().getId() : null,
+                idEndereco,
                 param.getLogoUrl(), param.getDataFundacao(), param.getObservacoes());
             if (id != null) param.setId(id.intValue());
         } else {
@@ -46,7 +52,7 @@ public class ParametrizacaoOngRepository extends BaseRepository {
                 "UPDATE parametrizacao_ong SET razao_social = ?, nome_fantasia = ?, cnpj = ?, telefone = ?, email = ?, site = ?, id_endereco = ?, logo_url = ?, data_fundacao = ?, observacoes = ? WHERE id_parametrizacao = ?",
                 param.getRazaoSocial(), param.getNomeFantasia(), param.getCnpj(),
                 param.getTelefone(), param.getEmail(), param.getSite(),
-                param.getEndereco() != null ? param.getEndereco().getId() : null,
+                idEndereco,
                 param.getLogoUrl(), param.getDataFundacao(), param.getObservacoes(),
                 param.getId());
         }

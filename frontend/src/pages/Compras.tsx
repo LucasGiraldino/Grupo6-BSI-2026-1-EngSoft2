@@ -1,5 +1,3 @@
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
 import api from '../services/api'
@@ -144,13 +142,9 @@ export default function Compras() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Compras" subtitle="Associação do Câncer - Gestão Integrada" />
-        <main className="flex-1 overflow-y-auto p-6 bg-white">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-gray-900">Lista de Compras</h3>
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-gray-900">Lista de Compras</h3>
             <button
               onClick={abrirModalNovo}
               className="flex items-center gap-2 px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
@@ -218,8 +212,6 @@ export default function Compras() {
               </tbody>
             </table>
           </div>
-        </main>
-      </div>
 
       {/* MODAL CRIAR/EDITAR */}
       {modalAberto && (
@@ -371,6 +363,6 @@ export default function Compras() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

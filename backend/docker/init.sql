@@ -8,12 +8,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE enderecos (
     id_endereco INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     cep VARCHAR(8) NOT NULL,
-    rua VARCHAR(150) NOT NULL,
+    logradouro VARCHAR(150) NOT NULL,
     numero VARCHAR(10) NOT NULL,
     bairro VARCHAR(100) NOT NULL,
     cidade VARCHAR(100) NOT NULL,
     estado VARCHAR(2) NOT NULL,
     pais VARCHAR(50) NOT NULL DEFAULT 'Brasil',
+    complemento VARCHAR(100),
     descricao TEXT
 );
 
@@ -38,7 +39,8 @@ CREATE TABLE users (
     senha_hash VARCHAR(255) NOT NULL,
     perfil VARCHAR(20) NOT NULL,
     data_cadastro DATE NOT NULL,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao)
 );
 
 -- Level 1 dependent tables

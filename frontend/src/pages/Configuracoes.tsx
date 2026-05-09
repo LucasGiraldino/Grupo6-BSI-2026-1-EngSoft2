@@ -1,8 +1,8 @@
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import { Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
+import api from '../services/api'
+import { useSystemConfig } from '../contexts/SystemConfigContext'
 
 const ESTADOS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
@@ -53,6 +53,7 @@ function formatarCep(valor: string) {
 }
 
 export default function Configuracoes() {
+  const { refresh } = useSystemConfig()
   const [form, setForm] = useState(FORM_VAZIO)
   const [configId, setConfigId] = useState<number | null>(null)
   const [carregando, setCarregando] = useState(true)
@@ -76,29 +77,27 @@ export default function Configuracoes() {
   async function carregarConfig() {
     setCarregando(true)
     try {
-      const res = await fetch('/api/parametrizacao/primeira')
-      if (res.ok) {
-        const data = await res.json()
-        setConfigId(data.id)
-        setForm({
-          razaoSocial: data.razaoSocial || '',
-          nomeFantasia: data.nomeFantasia || '',
-          cnpj: data.cnpj || '',
-          telefone: data.telefone || '',
-          email: data.email || '',
-          site: data.site || '',
-          dataFundacao: data.dataFundacao || '',
-          logoUrl: data.logoUrl || '',
-          observacoes: data.observacoes || '',
-          enderecoCep: data.endereco?.cep || '',
-          enderecoLogradouro: data.endereco?.logradouro || '',
-          enderecoNumero: data.endereco?.numero || '',
-          enderecoComplemento: data.endereco?.complemento || '',
-          enderecoBairro: data.endereco?.bairro || '',
-          enderecoCidade: data.endereco?.cidade || '',
-          enderecoEstado: data.endereco?.estado || '',
-        })
-      }
+      const res = await api.get('/api/parametrizacao/primeira')
+      const data = res.data
+      setConfigId(data.id)
+      setForm({
+        razaoSocial: data.razaoSocial || '',
+        nomeFantasia: data.nomeFantasia || '',
+        cnpj: data.cnpj || '',
+        telefone: data.telefone || '',
+        email: data.email || '',
+        site: data.site || '',
+        dataFundacao: data.dataFundacao || '',
+        logoUrl: data.logoUrl || '',
+        observacoes: data.observacoes || '',
+        enderecoCep: data.endereco?.cep || '',
+        enderecoLogradouro: data.endereco?.logradouro || '',
+        enderecoNumero: data.endereco?.numero || '',
+        enderecoComplemento: data.endereco?.complemento || '',
+        enderecoBairro: data.endereco?.bairro || '',
+        enderecoCidade: data.endereco?.cidade || '',
+        enderecoEstado: data.endereco?.estado || '',
+      })
     } catch {
       mostrarToast('Erro ao carregar configurações. Verifique se o servidor está rodando.', 'erro')
     } finally {
@@ -110,12 +109,8 @@ export default function Configuracoes() {
     if (cnpj.length !== 14) return
     setBuscandoCnpj(true)
     try {
-      const res = await fetch(`/api/consulta-cnpj/${cnpj}`)
-      if (!res.ok) {
-        mostrarToast('Erro ao consultar CNPJ. Tente novamente.', 'erro')
-        return
-      }
-      const data = await res.json()
+      const res = await api.get(`/api/consulta-cnpj/${cnpj}`)
+      const data = res.data
       if (data.valido) {
         const updates: Record<string, string> = {}
         if (data.razaoSocial) updates.razaoSocial = data.razaoSocial
@@ -145,12 +140,8 @@ export default function Configuracoes() {
     if (cep.length !== 8) return
     setBuscandoCep(true)
     try {
-      const res = await fetch(`/api/consulta-cep/${cep}`)
-      if (!res.ok) {
-        mostrarToast('Erro ao consultar CEP. Tente novamente.', 'erro')
-        return
-      }
-      const data = await res.json()
+      const res = await api.get(`/api/consulta-cep/${cep}`)
+      const data = res.data
       if (data.valido) {
         setForm(f => ({
           ...f,
@@ -203,51 +194,35 @@ export default function Configuracoes() {
       },
     }
     try {
-      const url = configId ? `/api/parametrizacao/${configId}` : '/api/parametrizacao'
-      const method = configId ? 'PUT' : 'POST'
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null)
-        throw new Error(errData?.error || 'Erro ao salvar')
-      }
-      const saved = await res.json()
+      const saved = configId
+        ? (await api.put(`/api/parametrizacao/${configId}`, body)).data
+        : (await api.post('/api/parametrizacao', body)).data
       if (!configId) setConfigId(saved.id)
+      refresh()
       mostrarToast('Configurações salvas com sucesso!', 'sucesso')
     } catch (err: any) {
-      mostrarToast(err.message || 'Erro ao salvar configurações. Verifique os dados e tente novamente.', 'erro')
+      const msg = err.response?.data?.error || err.message || 'Erro ao salvar configurações. Verifique os dados e tente novamente.'
+      mostrarToast(msg, 'erro')
     } finally {
       setSalvando(false)
     }
   }
 
   return (
-    <div className="flex h-screen overflow-hidden w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Configurações" subtitle="Associação do Câncer - Gestão Integrada" />
-        <main className="flex-1 overflow-y-auto p-6 bg-white">
-          {carregando ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader className="w-6 h-6 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <div className="max-w-3xl mx-auto">
+    <>
+      {carregando ? (
+        <div className="flex items-center justify-center h-full">
+          <Loader className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      ) : (
+        <div className="max-w-3xl mx-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-gray-900">Configurações do Sistema</h3>
-                {configId && (
-                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                    ID: {configId}
-                  </span>
-                )}
               </div>
-
+            
               <form onSubmit={salvar} className="space-y-8">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+                  <h4 className="text-sm f  ont-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
                     Dados da Organização
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
@@ -288,7 +263,7 @@ export default function Configuracoes() {
                           onBlur={() => buscarDadosPorCnpj(limparCnpj(form.cnpj))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                           {buscandoCnpj ? (
                             <Loader className="w-4 h-4 text-gray-400 animate-spin" />
                           ) : (
@@ -365,7 +340,7 @@ export default function Configuracoes() {
                           onBlur={() => buscarDadosPorCep(limparCep(form.enderecoCep))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                           {buscandoCep ? (
                             <Loader className="w-4 h-4 text-gray-400 animate-spin" />
                           ) : (
@@ -475,9 +450,7 @@ export default function Configuracoes() {
               </form>
             </div>
           )}
-        </main>
-      </div>
       <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
-    </div>
+    </>
   )
 }

@@ -1,90 +1,51 @@
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
-import { useEffect, useState } from 'react'
 import * as lucide from 'lucide-react'
-import api from '../services/api'
-
-interface ConfigData {
-  parametrizacao?: {
-    nomeFantasia: string
-    razaoSocial: string
-  }
-}
 
 export default function Dashboard() {
-  const [config, setConfig] = useState<ConfigData>({})
-
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    if (email) {
-      api.get(`/api/parametrizacao/configuracao-sistema`, { params: { email } })
-        .then(res => setConfig(res.data))
-        .catch(() => {})
-    }
-  }, [])
-
-  const systemName = config.parametrizacao?.nomeFantasia || 'SIGAAC'
-  const systemSubtitle = config.parametrizacao?.razaoSocial || 'Gestão Integrada'
-
   return (
-    <div className="flex h-screen overflow-hidden w-full">
-      <Sidebar systemName={systemName} systemSubtitle={systemSubtitle} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
-          title={`Bem-vindo ao ${systemName}`} 
-          subtitle={systemSubtitle} 
-        />
-        <main className="flex-1 overflow-y-auto p-6 bg-white">
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-4 gap-6">
-              <StatCard icon={lucide.Users} title="Pacientes Ativos" value="248" change="+12%" color="blue" />
-              <StatCard icon={lucide.Calendar} title="Consultas Hoje" value="18" change="+5%" color="green" />
-              <StatCard icon={lucide.TestTube} title="Exames Pendentes" value="34" change="-8%" color="yellow" negative />
-              <StatCard icon={lucide.AlertCircle} title="Estoque Baixo" value="7" change="Alerta" color="red" />
-            </div>
-
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-2 gap-6">
-              <Card title="Consultas de Hoje">
-                <div className="space-y-4">
-                  <ConsultaItem name="Ana Costa" specialty="Psicologia - Dra. Carla" time="09:00" />
-                  <ConsultaItem name="Pedro Lima" specialty="Fisioterapia - Dr. Roberto" time="10:30" />
-                  <ConsultaItem name="Lucia Mendes" specialty="Psicologia - Dra. Carla" time="14:00" />
-                  <ConsultaItem name="Carlos Dias" specialty="Fisioterapia - Dr. Roberto" time="15:30" />
-                </div>
-              </Card>
-
-              <Card title="Atividades Recentes">
-                <div className="space-y-4">
-                  <ActivityItem color="green" text="Nova consulta agendada - Maria Silva" time="Há 5 min" />
-                  <ActivityItem color="yellow" text="Estoque de arroz abaixo do mínimo" time="Há 15 min" />
-                  <ActivityItem color="green" text="Prontuário atualizado - João Santos" time="Há 30 min" />
-                  <ActivityItem color="blue" text="Doação de alimentos recebida" time="Há 1 hora" />
-                </div>
-              </Card>
-            </div>
-
-            {/* Quick Actions */}
-            <Card title="Ações Rápidas">
-              <div className="grid grid-cols-4 gap-4">
-                <button className="p-4 bg-[#030213] text-white font-medium rounded-lg hover:opacity-90">
-                  Novo Paciente
-                </button>
-                <button className="p-4 bg-green-600 text-white font-medium rounded-lg hover:opacity-90">
-                  Agendar Consulta
-                </button>
-                <button className="p-4 bg-blue-600 text-white font-medium rounded-lg hover:opacity-90">
-                  Registrar Doação
-                </button>
-                <button className="p-4 bg-yellow-600 text-white font-medium rounded-lg hover:opacity-90">
-                  Solicitar Exame
-                </button>
-              </div>
-            </Card>
-          </div>
-        </main>
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-6">
+        <StatCard icon={lucide.Users} title="Pacientes Ativos" value="248" change="+12%" color="blue" />
+        <StatCard icon={lucide.Calendar} title="Consultas Hoje" value="18" change="+5%" color="green" />
+        <StatCard icon={lucide.TestTube} title="Exames Pendentes" value="34" change="-8%" color="yellow" negative />
+        <StatCard icon={lucide.AlertCircle} title="Estoque Baixo" value="7" change="Alerta" color="red" />
       </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <Card title="Consultas de Hoje">
+          <div className="space-y-4">
+            <ConsultaItem name="Ana Costa" specialty="Psicologia - Dra. Carla" time="09:00" />
+            <ConsultaItem name="Pedro Lima" specialty="Fisioterapia - Dr. Roberto" time="10:30" />
+            <ConsultaItem name="Lucia Mendes" specialty="Psicologia - Dra. Carla" time="14:00" />
+            <ConsultaItem name="Carlos Dias" specialty="Fisioterapia - Dr. Roberto" time="15:30" />
+          </div>
+        </Card>
+
+        <Card title="Atividades Recentes">
+          <div className="space-y-4">
+            <ActivityItem color="green" text="Nova consulta agendada - Maria Silva" time="Há 5 min" />
+            <ActivityItem color="yellow" text="Estoque de arroz abaixo do mínimo" time="Há 15 min" />
+            <ActivityItem color="green" text="Prontuário atualizado - João Santos" time="Há 30 min" />
+            <ActivityItem color="blue" text="Doação de alimentos recebida" time="Há 1 hora" />
+          </div>
+        </Card>
+      </div>
+
+      <Card title="Ações Rápidas">
+        <div className="grid grid-cols-4 gap-4">
+          <button className="p-4 bg-[#030213] text-white font-medium rounded-lg hover:opacity-90">
+            Novo Paciente
+          </button>
+          <button className="p-4 bg-green-600 text-white font-medium rounded-lg hover:opacity-90">
+            Agendar Consulta
+          </button>
+          <button className="p-4 bg-blue-600 text-white font-medium rounded-lg hover:opacity-90">
+            Registrar Doação
+          </button>
+          <button className="p-4 bg-yellow-600 text-white font-medium rounded-lg hover:opacity-90">
+            Solicitar Exame
+          </button>
+        </div>
+      </Card>
     </div>
   )
 }

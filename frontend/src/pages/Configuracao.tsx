@@ -1,5 +1,3 @@
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 
@@ -31,13 +29,8 @@ export default function Configuracao() {
   }, [])
 
   return (
-    <div className="flex h-screen overflow-hidden w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Configurações" subtitle="Associação do Câncer - Gestão Integrada" />
-        <main className="flex-1 overflow-y-auto p-6 bg-white">
-          <div className="max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Configurações do Sistema</h3>
+    <div className="max-w-2xl mx-auto">
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">Configurações do Sistema</h3>
             
             {loading ? (
               <div className="text-center py-12 text-gray-400">Carregando...</div>
@@ -103,8 +96,5 @@ export default function Configuracao() {
               </form>
             )}
           </div>
-        </main>
-      </div>
-    </div>
   )
 }

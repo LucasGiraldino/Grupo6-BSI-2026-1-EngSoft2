@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import { Trash2 } from 'lucide-react';
 
 interface Paciente {
@@ -154,12 +152,7 @@ export const EfetuarDoacao: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Efetuar Doação" subtitle="Associação do Câncer - Gestão Integrada" />
-        <main className="flex-1 overflow-y-auto p-6 bg-white">
-          <div className="grid grid-cols-[1fr_2fr] gap-6">
+    <div className="grid grid-cols-[1fr_2fr] gap-6">
             {/* Painel Esquerdo */}
             <div className="flex flex-col gap-4">
               <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -304,11 +297,8 @@ export const EfetuarDoacao: React.FC = () => {
                     Salvar
                   </button>
                 </div>
-              </div>
-            </div>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
   );
 };

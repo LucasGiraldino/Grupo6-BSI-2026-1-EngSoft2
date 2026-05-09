@@ -3,35 +3,30 @@ package com.sigaac.controller;
 import com.sigaac.model.User;
 import com.sigaac.model.UserRepository;
 import com.sigaac.model.TokenService;
+import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 public class SecurityFilter extends Filter {
 
     private final TokenService tokenService;
     private final UserRepository userRepository;
-    private final Set<String> publicPaths = Set.of(
-            "/auth/login", "/auth/verify", "/auth/refresh",
-            "/api/parametrizacao/configuracao-sistema"
-    );
+    private final JsonView json;
 
-    public SecurityFilter(TokenService tokenService, UserRepository userRepository) {
+    public SecurityFilter(TokenService tokenService, UserRepository userRepository, JsonView json) {
         this.tokenService = tokenService;
         this.userRepository = userRepository;
+        this.json = json;
     }
 
     @Override
     public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
         String path = exchange.getRequestURI().getRawPath();
         String method = exchange.getRequestMethod();
-
-        if (isPublic(path, method)) {
-            chain.doFilter(exchange);
-            return;
-        }
 
         var token = recoverToken(exchange);
         if (token != null) {
@@ -45,6 +40,10 @@ public class SecurityFilter extends Filter {
         }
 
         try {
+            if (!isPublic(path, method) && AuthContext.get() == null) {
+                json.send(exchange, 401, Map.of("error", "Unauthorized"));
+                return;
+            }
             chain.doFilter(exchange);
         } finally {
             AuthContext.clear();

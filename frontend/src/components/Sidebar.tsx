@@ -31,9 +31,9 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-      <div className="px-6 py-6 border-b border-gray-200">
+      <div className="px-6 py-3.5 border-b border-gray-200">
         <div className="text-xl font-semibold text-gray-900">{systemName}</div>
-        <div className="text-sm text-gray-500 mt-1">{systemSubtitle}</div>
+        <div className="text-sm text-gray-500 mt-1 line-clamp-1">{systemSubtitle}</div>
       </div>
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {menuItems.map(item => (

@@ -43,18 +43,20 @@ public class UserRepository extends BaseRepository {
     public User save(User user) {
         if (user.getId() == null) {
             Number id = executeInsert(
-                "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, ativo) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, ativo, id_parametrizacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 user.getNome(), user.getCpf(), user.getEmail(), user.getSenhaHash(),
                 user.getRole() != null ? user.getRole().name() : null,
-                user.getDataCadastro(), user.getAtivo() != null ? user.getAtivo() : true);
+                user.getDataCadastro(), user.getAtivo() != null ? user.getAtivo() : true,
+                user.getParametrizacaoId());
             if (id != null) user.setId(id.intValue());
         } else {
             executeUpdate(
-                "UPDATE users SET nome = ?, cpf = ?, email = ?, senha_hash = ?, perfil = ?, failed_attempts = ?, locked_until = ?, ativo = ? WHERE id_usuario = ?",
+                "UPDATE users SET nome = ?, cpf = ?, email = ?, senha_hash = ?, perfil = ?, failed_attempts = ?, locked_until = ?, ativo = ?, id_parametrizacao = ? WHERE id_usuario = ?",
                 user.getNome(), user.getCpf(), user.getEmail(), user.getSenhaHash(),
                 user.getRole() != null ? user.getRole().name() : null,
                 user.getFailedAttempts(), user.getLockedUntil(),
-                user.getAtivo(), user.getId());
+                user.getAtivo(), user.getParametrizacaoId(),
+                user.getId());
         }
         return user;
     }
@@ -79,6 +81,7 @@ public class UserRepository extends BaseRepository {
         user.setLockedUntil(rs.getObject("locked_until", java.time.LocalDateTime.class));
         user.setFailedAttempts(rs.getObject("failed_attempts", Integer.class));
         user.setAtivo(rs.getObject("ativo", Boolean.class));
+        user.setParametrizacaoId(rs.getObject("id_parametrizacao", Integer.class));
         return user;
     }
 }

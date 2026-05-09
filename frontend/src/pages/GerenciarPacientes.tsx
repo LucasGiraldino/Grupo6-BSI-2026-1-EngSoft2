@@ -1,5 +1,3 @@
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
@@ -225,12 +223,8 @@ export default function GerenciarPacientes() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden w-full">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Gerenciar Pacientes" subtitle="Associação do Câncer - Gestão Integrada" />
-        <main className="flex-1 overflow-y-auto p-6 bg-white">
-          <div className="flex items-center justify-between mb-6">
+    <>
+      <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-900">Lista de Pacientes</h3>
             <button
               onClick={abrirModalNovo}
@@ -307,8 +301,6 @@ export default function GerenciarPacientes() {
               </tbody>
             </table>
           </div>
-        </main>
-      </div>
 
       {/* MODAL CRIAR/EDITAR */}
       {modalAberto && (
@@ -575,6 +567,6 @@ export default function GerenciarPacientes() {
       )}
 
       <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
-    </div>
+    </>
   )
 }
