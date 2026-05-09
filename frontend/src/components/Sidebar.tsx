@@ -53,7 +53,7 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
       </nav>
       <div className="p-4 border-t border-gray-200 space-y-1">
         <NavLink
-          to="/configuracao"
+          to="/configuracoes"
           className={({ isActive }) =>
             `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
               isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'

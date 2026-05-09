@@ -7,7 +7,7 @@ import Prontuarios from './pages/Prontuarios'
 import Alimentos from './pages/Alimentos'
 import Compras from './pages/Compras'
 import Exames from './pages/Exames'
-import Configuracao from './pages/Configuracao'
+import Configuracoes from './pages/Configuracoes'
 import Login from './pages/Login'
 import VerifyOTP from './pages/VerifyOTP'
 import { EfetuarDoacao } from './pages/EfetuarDoacao'
@@ -57,10 +57,10 @@ function App() {
         element={isAuthenticated ? <EfetuarDoacao /> : <Navigate to="/login" />}
       />
       <Route
-        path="/configuracao"
+        path="/configuracoes"
         element={
           isAuthenticated && isAdmin ? (
-            <Configuracao />
+            <Configuracoes />
           ) : (
             <Navigate to="/dashboard" />
           )
