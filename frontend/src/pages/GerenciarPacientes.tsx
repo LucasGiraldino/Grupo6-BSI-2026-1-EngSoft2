@@ -341,7 +341,7 @@ export default function GerenciarPacientes() {
                           onBlur={() => !form.id && buscarDadosPorCpf(limparCpf(form.cpf))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                           {buscandoCpf ? (
                             <Loader className="w-4 h-4 text-gray-400 animate-spin" />
                           ) : (
