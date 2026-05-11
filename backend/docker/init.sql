@@ -136,7 +136,7 @@ CREATE TABLE consultas (
     id_consulta INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_paciente INTEGER REFERENCES pacientes(id_paciente),
     id_agenda INTEGER REFERENCES agenda(id_agenda),
-    id_profissional INTEGER NOT NULL REFERENCES profissionais(id_profissional),
+    id_profissional INTEGER REFERENCES profissionais(id_profissional),
     tipo_consulta VARCHAR(50) NOT NULL,
     status VARCHAR(20) NOT NULL,
     observacoes TEXT,

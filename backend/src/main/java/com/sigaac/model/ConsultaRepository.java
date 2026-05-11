@@ -2,6 +2,7 @@ package com.sigaac.model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +67,18 @@ public class ConsultaRepository extends BaseRepository {
                 consulta.getId());
         }
         return consulta;
+    }
+
+    public List<Consulta> findByStatus(String status) {
+        return queryList(BASE_SELECT + "WHERE c.status = ? ORDER BY c.data_agendamento ASC", this::mapRow, status);
+    }
+
+    public List<Consulta> findByProfissionalAndDataBetween(Integer profissionalId, LocalDate inicio, LocalDate fim) {
+        return queryList(
+            BASE_SELECT +
+            "WHERE c.id_profissional = ? AND a.data BETWEEN ? AND ? " +
+            "ORDER BY a.data, a.hora_inicio",
+            this::mapRow, profissionalId, java.sql.Date.valueOf(inicio), java.sql.Date.valueOf(fim));
     }
 
     public void deleteById(Integer id) {

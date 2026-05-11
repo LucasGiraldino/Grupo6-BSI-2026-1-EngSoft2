@@ -1,5 +1,6 @@
 package com.sigaac.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,14 @@ public class ConsultaService {
         if (consulta.getDataAgendamento() != null) existente.setDataAgendamento(consulta.getDataAgendamento());
         if (consulta.getDataCancelamento() != null) existente.setDataCancelamento(consulta.getDataCancelamento());
         return repository.save(existente);
+    }
+
+    public List<Consulta> listarPorStatus(String status) {
+        return repository.findByStatus(status);
+    }
+
+    public List<Consulta> listarPorProfissionalEIntervalo(Integer profissionalId, LocalDate inicio, LocalDate fim) {
+        return repository.findByProfissionalAndDataBetween(profissionalId, inicio, fim);
     }
 
     public void deletar(Integer id) {

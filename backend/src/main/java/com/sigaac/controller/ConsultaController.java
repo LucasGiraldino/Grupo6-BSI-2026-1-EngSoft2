@@ -5,6 +5,7 @@ import com.sigaac.model.ConsultaService;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 public class ConsultaController {
@@ -18,6 +19,7 @@ public class ConsultaController {
     }
 
     public void registerRoutes(HttpRouter router) {
+        router.get("/api/consultas/agenda", this::listarAgenda);
         router.get("/api/consultas", this::listar);
         router.get("/api/consultas/{id}", this::buscarPorId);
         router.post("/api/consultas", this::criar);
@@ -26,7 +28,49 @@ public class ConsultaController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
+        String query = exchange.getRequestURI().getQuery();
+        if (query != null && query.contains("status=")) {
+            String status = null;
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] kv = pair.split("=");
+                if (kv.length == 2 && kv[0].equals("status")) {
+                    status = kv[1];
+                    break;
+                }
+            }
+            if (status != null) {
+                json.send(exchange, 200, service.listarPorStatus(status));
+                return;
+            }
+        }
         json.send(exchange, 200, service.listar());
+    }
+
+    private void listarAgenda(HttpExchange exchange, Map<String, String> params) throws Exception {
+        String query = exchange.getRequestURI().getQuery();
+        Integer profissionalId = null;
+        LocalDate dataInicio = null;
+        LocalDate dataFim = null;
+
+        if (query != null) {
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] kv = pair.split("=");
+                if (kv.length == 2) {
+                    if (kv[0].equals("profissional")) profissionalId = Integer.parseInt(kv[1]);
+                    if (kv[0].equals("dataInicio")) dataInicio = LocalDate.parse(kv[1]);
+                    if (kv[0].equals("dataFim")) dataFim = LocalDate.parse(kv[1]);
+                }
+            }
+        }
+
+        if (profissionalId == null || dataInicio == null || dataFim == null) {
+            json.error(exchange, 400, "profissional, dataInicio e dataFim sao obrigatorios");
+            return;
+        }
+
+        json.send(exchange, 200, service.listarPorProfissionalEIntervalo(profissionalId, dataInicio, dataFim));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
