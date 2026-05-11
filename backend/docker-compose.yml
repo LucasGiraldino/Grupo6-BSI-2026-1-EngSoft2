@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: sigaac-postgres
+    container_name: Grupo6-BSI-2026-1-EngSoft2
     restart: unless-stopped
     env_file:
       - .env
