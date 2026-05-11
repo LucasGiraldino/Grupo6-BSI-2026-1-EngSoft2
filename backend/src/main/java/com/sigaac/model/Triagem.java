@@ -15,12 +15,14 @@ public class Triagem {
     private String condicaoNutricional;
     private String condicaoSocial;
     private String observacoes;
+    private LocalDateTime deletedAt;
 
     public Triagem() {}
 
     public Triagem(Integer id, Prontuario prontuario, Medico medico, LocalDateTime dataTriagem,
                    String pressaoArterial, BigDecimal febre, String condicaoClinica,
-                   String condicaoNutricional, String condicaoSocial, String observacoes) {
+                   String condicaoNutricional, String condicaoSocial, String observacoes,
+                   LocalDateTime deletedAt) {
         this.id = id;
         this.prontuario = prontuario;
         this.medico = medico;
@@ -31,6 +33,7 @@ public class Triagem {
         this.condicaoNutricional = condicaoNutricional;
         this.condicaoSocial = condicaoSocial;
         this.observacoes = observacoes;
+        this.deletedAt = deletedAt;
     }
 
     public Integer getId() { return id; }
@@ -53,4 +56,6 @@ public class Triagem {
     public void setCondicaoSocial(String condicaoSocial) { this.condicaoSocial = condicaoSocial; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }

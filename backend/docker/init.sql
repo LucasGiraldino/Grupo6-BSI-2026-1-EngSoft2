@@ -141,7 +141,8 @@ CREATE TABLE consultas (
     status VARCHAR(20) NOT NULL,
     observacoes TEXT,
     data_agendamento TIMESTAMP NOT NULL,
-    data_cancelamento TIMESTAMP
+    data_cancelamento TIMESTAMP,
+    id_triagem INTEGER REFERENCES triagens(id_triagem)
 );
 
 CREATE TABLE compras (
@@ -208,7 +209,8 @@ CREATE TABLE triagens (
     condicao_clinica TEXT NOT NULL,
     condicao_nutricional TEXT,
     condicao_social TEXT,
-    observacoes TEXT
+    observacoes TEXT,
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE exames (

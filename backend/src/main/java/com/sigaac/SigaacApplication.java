@@ -37,6 +37,8 @@ public class SigaacApplication {
         ExameRepository exameRepo = new ExameRepository(db.getDataSource());
         MedicoRepository medicoRepo = new MedicoRepository(db.getDataSource());
         ProntuarioRepository prontuarioRepo = new ProntuarioRepository(db.getDataSource());
+        TriagemRepository triagemRepo = new TriagemRepository(db.getDataSource());
+        ConsultaRepository consultaRepo = new ConsultaRepository(db.getDataSource());
 
         TokenService tokenService = new TokenService(props);
         OtpService otpService = new OtpService(props);
@@ -51,6 +53,8 @@ public class SigaacApplication {
         AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);
         ParametrizacaoOngService parametrizacaoService = new ParametrizacaoOngService(parametrizacaoRepo);
         ExameService exameService = new ExameService(exameRepo);
+        ConsultaService consultaService = new ConsultaService(consultaRepo);
+        TriagemService triagemService = new TriagemService(triagemRepo, consultaService, prontuarioRepo);
 
         LoginController loginCtrl = new LoginController(userRepo, otpService, tokenService, rateLimiterService, json);
         PacienteController pacienteCtrl = new PacienteController(pacienteService, json);
@@ -65,6 +69,8 @@ public class SigaacApplication {
         ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(parametrizacaoService, userService, json);
         TipoExameController tipoExameCtrl = new TipoExameController(tipoExameRepo, json);
         ExameController exameCtrl = new ExameController(exameService, json);
+        TriagemController triagemCtrl = new TriagemController(triagemService, json);
+        ConsultaController consultaCtrl = new ConsultaController(consultaService, json);
 
         HttpRouter router = new HttpRouter();
         loginCtrl.registerRoutes(router);
@@ -80,6 +86,8 @@ public class SigaacApplication {
         parametrizacaoCtrl.registerRoutes(router);
         tipoExameCtrl.registerRoutes(router);
         exameCtrl.registerRoutes(router);
+        triagemCtrl.registerRoutes(router);
+        consultaCtrl.registerRoutes(router);
 
         DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo);
         initializer.seed();

@@ -7,6 +7,7 @@ import Prontuarios from './pages/Prontuarios'
 import Alimentos from './pages/Alimentos'
 import Compras from './pages/Compras'
 import Exames from './pages/Exames'
+import TriagemPage from './pages/Triagem'
 import Configuracoes from './pages/Configuracoes'
 import Login from './pages/Login'
 import VerifyOTP from './pages/VerifyOTP'
@@ -54,6 +55,10 @@ function App() {
         <Route
           path="/exames"
           element={isAuthenticated ? <AppLayout><Exames /></AppLayout> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/triagem"
+          element={isAuthenticated ? <AppLayout><TriagemPage /></AppLayout> : <Navigate to="/login" />}
         />
         <Route
           path="/doacoes"

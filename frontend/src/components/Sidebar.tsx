@@ -27,6 +27,7 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
 
     { to: '/compras', icon: lucide.ShoppingCart, label: 'Compras' },
     { to: '/exames', icon: lucide.TestTube, label: 'Exames' },
+    { to: '/triagem', icon: lucide.Stethoscope, label: 'Triagem' },
   ]
 
   return (

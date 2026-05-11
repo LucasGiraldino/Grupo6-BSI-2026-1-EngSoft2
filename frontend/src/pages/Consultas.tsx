@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Loader, Eye, Stethoscope } from 'lucide-react'
 
 interface Paciente {
   id: number
@@ -20,11 +20,23 @@ interface AgendaDisponivel {
   horaFim: string
 }
 
+interface TriagemResumo {
+  id: number
+  pressaoArterial?: string
+  febre?: number
+  condicaoClinica: string
+  condicaoNutricional?: string
+  condicaoSocial?: string
+  observacoes?: string
+  dataTriagem: string
+  medico?: { usuario?: { nome: string }; crm?: string }
+}
+
 interface Consulta {
   id: number
   paciente: Paciente
-  profissional: Profissional
-  agenda: {
+  profissional?: Profissional
+  agenda?: {
     id: number
     data: string
     horaInicio: string
@@ -34,12 +46,14 @@ interface Consulta {
   status: string
   observacoes?: string
   dataAgendamento: string
+  triagem?: TriagemResumo
 }
 
 const STATUS_CORES: Record<string, string> = {
   AGENDADA: 'bg-blue-100 text-blue-700',
   CONCLUIDA: 'bg-green-100 text-green-700',
   CANCELADA: 'bg-red-100 text-red-700',
+  ESPERANDO: 'bg-orange-100 text-orange-700',
 }
 
 const FORM_VAZIO = { id: '', idPaciente: '', idProfissional: '', dataConsulta: '', idAgenda: '', tipoConsulta: '', observacoes: '' }
@@ -56,6 +70,8 @@ export default function Consultas() {
   const [erroForm, setErroForm] = useState('')
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+
+  const [modalDetalhesTriagem, setModalDetalhesTriagem] = useState<TriagemResumo | null>(null)
 
   useEffect(() => {
     carregarConsultas()
@@ -97,9 +113,9 @@ export default function Consultas() {
     setForm({
       id: String(c.id),
       idPaciente: String(c.paciente.id),
-      idProfissional: String(c.profissional.id),
-      dataConsulta: c.agenda.data ? c.agenda.data.substring(0, 10) : '',
-      idAgenda: String(c.agenda.id || ''),
+      idProfissional: String(c.profissional?.id ?? ''),
+      dataConsulta: c.agenda?.data ? c.agenda.data.substring(0, 10) : '',
+      idAgenda: String(c.agenda?.id ?? ''),
       tipoConsulta: c.tipoConsulta || '',
       observacoes: c.observacoes ?? '',
     })
@@ -125,18 +141,24 @@ export default function Consultas() {
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.idPaciente || !form.idProfissional || !form.idAgenda || !form.tipoConsulta) {
+    if (!form.idPaciente || !form.tipoConsulta) {
       setErroForm('Preencha todos os campos obrigatórios.')
       return
     }
-    const body = {
-      idPaciente: parseInt(form.idPaciente),
-      idProfissional: parseInt(form.idProfissional),
-      idAgenda: parseInt(form.idAgenda),
+    const body: Record<string, unknown> = {
+      paciente: { id: parseInt(form.idPaciente) },
       tipoConsulta: form.tipoConsulta,
       observacoes: form.observacoes || null,
-      status: 'AGENDADA',
       dataAgendamento: new Date().toISOString(),
+    }
+    if (form.idProfissional) {
+      body.profissional = { id: parseInt(form.idProfissional) }
+      body.status = 'AGENDADA'
+    } else {
+      body.status = 'ESPERANDO'
+    }
+    if (form.idAgenda) {
+      body.agenda = { id: parseInt(form.idAgenda) }
     }
     const url = form.id ? `/api/consultas/${form.id}` : '/api/consultas'
     try {
@@ -164,6 +186,11 @@ export default function Consultas() {
 
   function formatarHora(hora: string) {
     return hora ? hora.substring(0, 5) : ''
+  }
+
+  function formatarDataHora(d: string | undefined) {
+    if (!d) return '-'
+    return new Date(d).toLocaleString('pt-BR')
   }
 
   return (
@@ -225,6 +252,15 @@ export default function Consultas() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {c.triagem && (
+                            <button
+                              onClick={() => setModalDetalhesTriagem(c.triagem!)}
+                              title="Ver dados da triagem"
+                              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-900"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => abrirModalEdicao(c)}
                             className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-900"
@@ -262,7 +298,6 @@ export default function Consultas() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Profissional</label>
                     <select
-                      required
                       value={form.idProfissional}
                       onChange={e => handleProfissionalChange(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
@@ -277,7 +312,6 @@ export default function Consultas() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Data da Consulta</label>
                     <input
                       type="date"
-                      required
                       value={form.dataConsulta}
                       onChange={e => handleDataChange(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
@@ -289,7 +323,6 @@ export default function Consultas() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Horário Disponível</label>
                     <select
-                      required
                       value={form.idAgenda}
                       onChange={e => setForm(f => ({ ...f, idAgenda: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
@@ -363,6 +396,73 @@ export default function Consultas() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETALHES DA TRIAGEM */}
+      {modalDetalhesTriagem && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center gap-2">
+                <Stethoscope className="w-5 h-5 text-[#030213]" />
+                <h3 className="text-lg font-semibold text-gray-900">Dados da Triagem</h3>
+              </div>
+              <button onClick={() => setModalDetalhesTriagem(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Data da Triagem</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{formatarDataHora(modalDetalhesTriagem.dataTriagem)}</p>
+                </div>
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Médico Responsável</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.medico?.usuario?.nome ?? '-'}</p>
+                </div>
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Pressão Arterial</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.pressaoArterial ?? '-'}</p>
+                </div>
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Febre</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.febre != null ? `${modalDetalhesTriagem.febre}°C` : '-'}</p>
+                </div>
+              </div>
+              <div>
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Condição Clínica</span>
+                <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.condicaoClinica}</p>
+              </div>
+              {modalDetalhesTriagem.condicaoNutricional && (
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Condição Nutricional</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.condicaoNutricional}</p>
+                </div>
+              )}
+              {modalDetalhesTriagem.condicaoSocial && (
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Condição Social</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.condicaoSocial}</p>
+                </div>
+              )}
+              {modalDetalhesTriagem.observacoes && (
+                <div>
+                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Observações</span>
+                  <p className="text-sm text-gray-900 mt-0.5">{modalDetalhesTriagem.observacoes}</p>
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setModalDetalhesTriagem(null)}
+                className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

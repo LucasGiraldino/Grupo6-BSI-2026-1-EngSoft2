@@ -13,12 +13,14 @@ public class Consulta {
     private String observacoes;
     private LocalDateTime dataAgendamento;
     private LocalDateTime dataCancelamento;
+    private Triagem triagem;
 
     public Consulta() {}
 
     public Consulta(Integer id, Paciente paciente, Agenda agenda, Profissional profissional,
                     String tipoConsulta, String status, String observacoes,
-                    LocalDateTime dataAgendamento, LocalDateTime dataCancelamento) {
+                    LocalDateTime dataAgendamento, LocalDateTime dataCancelamento,
+                    Triagem triagem) {
         this.id = id;
         this.paciente = paciente;
         this.agenda = agenda;
@@ -28,6 +30,7 @@ public class Consulta {
         this.observacoes = observacoes;
         this.dataAgendamento = dataAgendamento;
         this.dataCancelamento = dataCancelamento;
+        this.triagem = triagem;
     }
 
     public Integer getId() { return id; }
@@ -48,4 +51,6 @@ public class Consulta {
     public void setDataAgendamento(LocalDateTime dataAgendamento) { this.dataAgendamento = dataAgendamento; }
     public LocalDateTime getDataCancelamento() { return dataCancelamento; }
     public void setDataCancelamento(LocalDateTime dataCancelamento) { this.dataCancelamento = dataCancelamento; }
+    public Triagem getTriagem() { return triagem; }
+    public void setTriagem(Triagem triagem) { this.triagem = triagem; }
 }
