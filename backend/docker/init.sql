@@ -1,10 +1,9 @@
 -- SIGAAC Database Initialization Script
--- Generated from JPA entity models
 -- PostgreSQL DDL for SIGAAC database
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Independent tables
+-- Level 0: sem dependências
 CREATE TABLE enderecos (
     id_endereco INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     cep VARCHAR(8) NOT NULL,
@@ -31,6 +30,22 @@ CREATE TABLE tipos_exame (
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- Level 1: depende de enderecos
+CREATE TABLE parametrizacao_ong (
+    id_parametrizacao INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    razao_social VARCHAR(150) NOT NULL,
+    nome_fantasia VARCHAR(150),
+    cnpj VARCHAR(14) NOT NULL UNIQUE,
+    telefone VARCHAR(20),
+    email VARCHAR(150),
+    site VARCHAR(150),
+    id_endereco INTEGER REFERENCES enderecos(id_endereco),
+    logo_url VARCHAR(255),
+    data_fundacao DATE,
+    observacoes TEXT
+);
+
+-- Level 2: depende de parametrizacao_ong
 CREATE TABLE users (
     id_usuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -43,7 +58,7 @@ CREATE TABLE users (
     id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao)
 );
 
--- Level 1 dependent tables
+-- Level 2: depende de enderecos
 CREATE TABLE pacientes (
     id_paciente INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_endereco INTEGER REFERENCES enderecos(id_endereco),
@@ -58,6 +73,17 @@ CREATE TABLE pacientes (
     ativo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+CREATE TABLE alimentos (
+    id_alimento INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_categoria INTEGER NOT NULL REFERENCES categorias_alimentos(id_categoria),
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    unidade_medida VARCHAR(20) NOT NULL,
+    data_vencimento DATE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Level 3: depende de users + enderecos
 CREATE TABLE profissionais (
     id_profissional INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_usuario INTEGER NOT NULL UNIQUE REFERENCES users(id_usuario),
@@ -87,31 +113,6 @@ CREATE TABLE agenda (
     disponivel BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE parametrizacao_ong (
-    id_parametrizacao INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    razao_social VARCHAR(150) NOT NULL,
-    nome_fantasia VARCHAR(150),
-    cnpj VARCHAR(14) NOT NULL UNIQUE,
-    telefone VARCHAR(20),
-    email VARCHAR(150),
-    site VARCHAR(150),
-    id_endereco INTEGER REFERENCES enderecos(id_endereco),
-    logo_url VARCHAR(255),
-    data_fundacao DATE,
-    observacoes TEXT
-);
-
-CREATE TABLE alimentos (
-    id_alimento INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_categoria INTEGER NOT NULL REFERENCES categorias_alimentos(id_categoria),
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    unidade_medida VARCHAR(20) NOT NULL,
-    data_vencimento DATE,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE
-);
-
--- Level 2 dependent tables
 CREATE TABLE estoque (
     id_estoque INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_alimento INTEGER NOT NULL UNIQUE REFERENCES alimentos(id_alimento),
@@ -120,6 +121,7 @@ CREATE TABLE estoque (
     data_ultima_atualizacao TIMESTAMP NOT NULL
 );
 
+-- Level 4: depende de medicos, users, pacientes
 CREATE TABLE prontuarios (
     id_prontuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_medico INTEGER NOT NULL REFERENCES medicos(id_medico),
@@ -167,7 +169,7 @@ CREATE TABLE notificacoes (
     status_envio VARCHAR(20) NOT NULL
 );
 
--- Level 3 dependent tables
+-- Level 5: depende de prontuarios
 CREATE TABLE itens_prontuario (
     id_item_prontuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_prontuario INTEGER NOT NULL REFERENCES prontuarios(id_prontuario),
