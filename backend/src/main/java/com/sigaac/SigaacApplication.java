@@ -39,6 +39,7 @@ public class SigaacApplication {
         ProntuarioRepository prontuarioRepo = new ProntuarioRepository(db.getDataSource());
         TriagemRepository triagemRepo = new TriagemRepository(db.getDataSource());
         ConsultaRepository consultaRepo = new ConsultaRepository(db.getDataSource());
+        AgendaRepository agendaRepo = new AgendaRepository(db.getDataSource());
 
         TokenService tokenService = new TokenService(props);
         OtpService otpService = new OtpService(props);
@@ -71,6 +72,8 @@ public class SigaacApplication {
         ExameController exameCtrl = new ExameController(exameService, json);
         TriagemController triagemCtrl = new TriagemController(triagemService, json);
         ConsultaController consultaCtrl = new ConsultaController(consultaService, json);
+        ProfissionalController profissionalCtrl = new ProfissionalController(profissionalRepo, json);
+        AgendaController agendaCtrl = new AgendaController(agendaRepo, json);
 
         HttpRouter router = new HttpRouter();
         loginCtrl.registerRoutes(router);
@@ -88,8 +91,10 @@ public class SigaacApplication {
         exameCtrl.registerRoutes(router);
         triagemCtrl.registerRoutes(router);
         consultaCtrl.registerRoutes(router);
+        profissionalCtrl.registerRoutes(router);
+        agendaCtrl.registerRoutes(router);
 
-        DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo);
+        DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo, profissionalRepo, agendaRepo);
         initializer.seed();
 
         SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo, json);

@@ -58,7 +58,8 @@ Para alterar essas configurações, edite o arquivo `backend/.env`.
 
 ```bash
 cd backend
-JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./mvnw spring-boot:run
+./mvnw clean package -DskipTests
+java -jar target/sigaac-1.0.0-SNAPSHOT.jar
 ```
 
 O backend estará disponível em: `http://localhost:8080/api`

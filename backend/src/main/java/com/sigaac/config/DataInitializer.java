@@ -13,16 +13,21 @@ public class DataInitializer {
     private final PacienteRepository pacienteRepository;
     private final EnderecoRepository enderecoRepository;
     private final ProntuarioRepository prontuarioRepository;
+    private final ProfissionalRepository profissionalRepository;
+    private final AgendaRepository agendaRepository;
 
     public DataInitializer(UserRepository userRepository, TipoExameRepository tipoExameRepository,
             MedicoRepository medicoRepository, PacienteRepository pacienteRepository,
-            EnderecoRepository enderecoRepository, ProntuarioRepository prontuarioRepository) {
+            EnderecoRepository enderecoRepository, ProntuarioRepository prontuarioRepository,
+            ProfissionalRepository profissionalRepository, AgendaRepository agendaRepository) {
         this.userRepository = userRepository;
         this.tipoExameRepository = tipoExameRepository;
         this.medicoRepository = medicoRepository;
         this.pacienteRepository = pacienteRepository;
         this.enderecoRepository = enderecoRepository;
         this.prontuarioRepository = prontuarioRepository;
+        this.profissionalRepository = profissionalRepository;
+        this.agendaRepository = agendaRepository;
     }
 
     public void seed() {
@@ -101,6 +106,38 @@ public class DataInitializer {
         medicoAna.setEspecialidadeMedica("Cardiologista");
         medicoAna.setDataAdmissao(LocalDate.now());
         medicoRepository.save(medicoAna);
+
+        // --- PROFISSIONAIS ---
+        var profCarlos = new Profissional();
+        profCarlos.setUsuario(drCarlos);
+        profCarlos.setEspecialidade("Clínico Geral");
+        profCarlos.setRegistroProfissional("12345-SP");
+        profCarlos.setDataAdmissao(LocalDate.now());
+        profissionalRepository.save(profCarlos);
+
+        var profAna = new Profissional();
+        profAna.setUsuario(draAna);
+        profAna.setEspecialidade("Cardiologista");
+        profAna.setRegistroProfissional("67890-SP");
+        profAna.setDataAdmissao(LocalDate.now());
+        profissionalRepository.save(profAna);
+
+        // --- AGENDA ---
+        var agenda1 = new Agenda();
+        agenda1.setUsuario(drCarlos);
+        agenda1.setData(LocalDate.now().plusDays(1));
+        agenda1.setHoraInicio(java.time.LocalTime.of(9, 0));
+        agenda1.setHoraFim(java.time.LocalTime.of(10, 0));
+        agenda1.setDisponivel(true);
+        agendaRepository.save(agenda1);
+
+        var agenda2 = new Agenda();
+        agenda2.setUsuario(drCarlos);
+        agenda2.setData(LocalDate.now().plusDays(1));
+        agenda2.setHoraInicio(java.time.LocalTime.of(10, 0));
+        agenda2.setHoraFim(java.time.LocalTime.of(11, 0));
+        agenda2.setDisponivel(true);
+        agendaRepository.save(agenda2);
 
         // --- ENDEREÇOS ---
         var end1 = new Endereco();
