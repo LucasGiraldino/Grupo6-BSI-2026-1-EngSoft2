@@ -14,12 +14,13 @@ public class Exame {
     private String status;
     private String observacoesMedico;
     private LocalDate dataRealizacao;
+    private LocalDateTime deletedAt;
 
     public Exame() {}
 
     public Exame(Integer id, Prontuario prontuario, Medico medico, TipoExame tipoExame,
                  String justificativaClinica, LocalDateTime dataSolicitacao, String status,
-                 String observacoesMedico, LocalDate dataRealizacao) {
+                 String observacoesMedico, LocalDate dataRealizacao, LocalDateTime deletedAt) {
         this.id = id;
         this.prontuario = prontuario;
         this.medico = medico;
@@ -29,6 +30,7 @@ public class Exame {
         this.status = status;
         this.observacoesMedico = observacoesMedico;
         this.dataRealizacao = dataRealizacao;
+        this.deletedAt = deletedAt;
     }
 
     public Integer getId() { return id; }
@@ -49,4 +51,6 @@ public class Exame {
     public void setObservacoesMedico(String observacoesMedico) { this.observacoesMedico = observacoesMedico; }
     public LocalDate getDataRealizacao() { return dataRealizacao; }
     public void setDataRealizacao(LocalDate dataRealizacao) { this.dataRealizacao = dataRealizacao; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }

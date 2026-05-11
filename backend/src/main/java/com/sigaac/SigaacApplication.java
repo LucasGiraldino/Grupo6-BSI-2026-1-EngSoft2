@@ -33,6 +33,10 @@ public class SigaacApplication {
         AlimentoRepository alimentoRepo = new AlimentoRepository(db.getDataSource());
         CategoriaAlimentoRepository catAlimentoRepo = new CategoriaAlimentoRepository(db.getDataSource());
         ParametrizacaoOngRepository parametrizacaoRepo = new ParametrizacaoOngRepository(db.getDataSource());
+        TipoExameRepository tipoExameRepo = new TipoExameRepository(db.getDataSource());
+        ExameRepository exameRepo = new ExameRepository(db.getDataSource());
+        MedicoRepository medicoRepo = new MedicoRepository(db.getDataSource());
+        ProntuarioRepository prontuarioRepo = new ProntuarioRepository(db.getDataSource());
 
         TokenService tokenService = new TokenService(props);
         OtpService otpService = new OtpService(props);
@@ -46,6 +50,7 @@ public class SigaacApplication {
         CompraService compraService = new CompraService(compraRepo, alimentoRepo, db.getDataSource());
         AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);
         ParametrizacaoOngService parametrizacaoService = new ParametrizacaoOngService(parametrizacaoRepo);
+        ExameService exameService = new ExameService(exameRepo);
 
         LoginController loginCtrl = new LoginController(userRepo, otpService, tokenService, rateLimiterService, json);
         PacienteController pacienteCtrl = new PacienteController(pacienteService, json);
@@ -58,6 +63,8 @@ public class SigaacApplication {
         AlimentoController alimentoCtrl = new AlimentoController(alimentoRepo, alimentoService, json);
         CategoriaAlimentoController catAlimentoCtrl = new CategoriaAlimentoController(catAlimentoRepo, json);
         ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(parametrizacaoService, userService, json);
+        TipoExameController tipoExameCtrl = new TipoExameController(tipoExameRepo, json);
+        ExameController exameCtrl = new ExameController(exameService, json);
 
         HttpRouter router = new HttpRouter();
         loginCtrl.registerRoutes(router);
@@ -71,8 +78,10 @@ public class SigaacApplication {
         alimentoCtrl.registerRoutes(router);
         catAlimentoCtrl.registerRoutes(router);
         parametrizacaoCtrl.registerRoutes(router);
+        tipoExameCtrl.registerRoutes(router);
+        exameCtrl.registerRoutes(router);
 
-        DataInitializer initializer = new DataInitializer(userRepo);
+        DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo);
         initializer.seed();
 
         SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo, json);

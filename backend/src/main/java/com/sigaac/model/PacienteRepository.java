@@ -35,19 +35,19 @@ public class PacienteRepository extends BaseRepository {
     public Paciente save(Paciente paciente) {
         if (paciente.getId() == null) {
             Number id = executeInsert(
-                "INSERT INTO pacientes (id_endereco, nome, cpf, data_nascimento, sexo, telefone, email, restricoes_alimentares, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO pacientes (id_endereco, nome, cpf, data_nascimento, sexo, telefone, email, restricoes_alimentares, data_cadastro, ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 paciente.getEndereco() != null ? paciente.getEndereco().getId() : null,
                 paciente.getNome(), paciente.getCpf(), paciente.getDataNascimento(),
                 paciente.getSexo(), paciente.getTelefone(), paciente.getEmail(),
-                paciente.getRestricoesAlimentares(), paciente.getDataCadastro());
+                paciente.getRestricoesAlimentares(), paciente.getDataCadastro(), true);
             if (id != null) paciente.setId(id.intValue());
         } else {
             executeUpdate(
-                "UPDATE pacientes SET id_endereco = ?, nome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, restricoes_alimentares = ? WHERE id_paciente = ?",
+                "UPDATE pacientes SET id_endereco = ?, nome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, restricoes_alimentares = ?, ativo = ? WHERE id_paciente = ?",
                 paciente.getEndereco() != null ? paciente.getEndereco().getId() : null,
                 paciente.getNome(), paciente.getCpf(), paciente.getDataNascimento(),
                 paciente.getSexo(), paciente.getTelefone(), paciente.getEmail(),
-                paciente.getRestricoesAlimentares(), paciente.getId());
+                paciente.getRestricoesAlimentares(), true, paciente.getId());
         }
         return paciente;
     }

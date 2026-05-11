@@ -220,7 +220,8 @@ CREATE TABLE exames (
     data_solicitacao TIMESTAMP NOT NULL,
     status VARCHAR(20) NOT NULL,
     observacoes_medico TEXT,
-    data_realizacao DATE
+    data_realizacao DATE,
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE itens_compra (

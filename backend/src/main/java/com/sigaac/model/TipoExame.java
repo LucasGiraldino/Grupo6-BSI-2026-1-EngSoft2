@@ -1,21 +1,19 @@
 package com.sigaac.model;
 
-import java.time.LocalDateTime;
-
 public class TipoExame {
 
     private Integer id;
     private String nome;
     private String descricao;
-    private LocalDateTime deletedAt;
+    private Boolean ativo = true;
 
     public TipoExame() {}
 
-    public TipoExame(Integer id, String nome, String descricao, LocalDateTime deletedAt) {
+    public TipoExame(Integer id, String nome, String descricao, Boolean ativo) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
-        this.deletedAt = deletedAt;
+        this.ativo = ativo;
     }
 
     public Integer getId() { return id; }
@@ -24,6 +22,6 @@ public class TipoExame {
     public void setNome(String nome) { this.nome = nome; }
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+    public Boolean getAtivo() { return ativo; }
+    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
 }
