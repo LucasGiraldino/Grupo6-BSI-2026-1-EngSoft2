@@ -12,6 +12,7 @@ import Configuracoes from './pages/Configuracoes'
 import GerenciarUsuarios from './pages/GerenciarUsuarios'
 import Login from './pages/Login'
 import VerifyOTP from './pages/VerifyOTP'
+import EsqueciSenha from './pages/EsqueciSenha'
 import { EfetuarDoacao } from './pages/EfetuarDoacao'
 import { useAuth } from './hooks/useAuth'
 import AppLayout from './components/AppLayout'
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/verificar" element={<VerifyOTP />} />
+        <Route path="/esqueci-senha" element={<EsqueciSenha />} />
         <Route
           path="/dashboard"
           element={isAuthenticated ? <AppLayout><Dashboard /></AppLayout> : <Navigate to="/login" />}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 export default function Login() {
@@ -77,6 +77,15 @@ export default function Login() {
           >
             {loading ? 'Aguarde...' : 'Entrar'}
           </button>
+
+          <div className="text-right">
+            <Link
+              to="/esqueci-senha"
+              className="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors"
+            >
+              Esqueci a senha?
+            </Link>
+          </div>
         </form>
       </div>
     </div>

@@ -34,6 +34,8 @@ public class LoginController {
         router.post("/auth/verify", this::verify);
         router.post("/auth/logout", this::logout);
         router.post("/auth/refresh", this::refresh);
+        router.post("/auth/forgot-password", this::forgotPassword);
+        router.post("/auth/reset-password", this::resetPassword);
     }
 
     private void login(HttpExchange exchange, Map<String, String> params) throws Exception {
@@ -154,5 +156,68 @@ public class LoginController {
 
         String newToken = tokenService.generateToken(user);
         json.send(exchange, 200, Map.of("accessToken", newToken, "expiresIn", 7200));
+    }
+
+    private void forgotPassword(HttpExchange exchange, Map<String, String> params) throws Exception {
+        Map<String, String> body = json.read(exchange.getRequestBody(), Map.class);
+        String email = body.get("email");
+
+        if (email == null || email.isEmpty()) {
+            json.send(exchange, 400, Map.of("error", "Email é obrigatório"));
+            return;
+        }
+
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            json.send(exchange, 200, Map.of("message", "Se o email existir, você receberá um código de recuperação."));
+            return;
+        }
+
+        var user = userOpt.get();
+        if (user.getDeletedAt() != null || !user.getAtivo()) {
+            json.send(exchange, 200, Map.of("message", "Se o email existir, você receberá um código de recuperação."));
+            return;
+        }
+
+        String codigo = otpService.generateOtp(email);
+        json.send(exchange, 200, Map.of(
+                "message", "Código de recuperação gerado.",
+                "codigo", codigo
+        ));
+    }
+
+    private void resetPassword(HttpExchange exchange, Map<String, String> params) throws Exception {
+        Map<String, String> body = json.read(exchange.getRequestBody(), Map.class);
+        String email = body.get("email");
+        String codigo = body.get("codigo");
+        String novaSenha = body.get("novaSenha");
+
+        if (email == null || codigo == null || novaSenha == null) {
+            json.send(exchange, 400, Map.of("error", "Campos obrigatórios: email, codigo, novaSenha"));
+            return;
+        }
+
+        if (novaSenha.length() < 6) {
+            json.send(exchange, 400, Map.of("error", "Senha deve ter no mínimo 6 caracteres"));
+            return;
+        }
+
+        if (!otpService.validateOtp(email, codigo)) {
+            json.send(exchange, 401, Map.of("error", "Código inválido ou expirado"));
+            return;
+        }
+
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            json.send(exchange, 401, Map.of("error", "Usuário não encontrado"));
+            return;
+        }
+
+        var user = userOpt.get();
+        user.setSenhaHash(BCrypt.hashpw(novaSenha, BCrypt.gensalt()));
+        user.resetFailedAttempts();
+        userRepository.save(user);
+
+        json.send(exchange, 200, Map.of("message", "Senha redefinida com sucesso."));
     }
 }
