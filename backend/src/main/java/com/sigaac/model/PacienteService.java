@@ -4,8 +4,12 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class PacienteService {
+
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final PacienteRepository pacienteRepo;
     private final EnderecoRepository enderecoRepo;
@@ -29,6 +33,14 @@ public class PacienteService {
     public Paciente criar(Paciente paciente) {
         if (paciente.getCpf() != null && !CpfService.validarMatematicamente(paciente.getCpf())) {
             throw new IllegalArgumentException("CPF inválido. Verifique os dígitos.");
+        }
+        if (paciente.getTelefone() != null && paciente.getTelefone().length() != 10
+                && paciente.getTelefone().length() != 11) {
+            throw new IllegalArgumentException("Telefone inválido. Deve ter 10 ou 11 dígitos.");
+        }
+        if (paciente.getEmail() != null && !paciente.getEmail().isEmpty()
+                && !EMAIL_PATTERN.matcher(paciente.getEmail()).matches()) {
+            throw new IllegalArgumentException("E-mail inválido.");
         }
         if (paciente.getDataCadastro() == null) {
             paciente.setDataCadastro(LocalDate.now());

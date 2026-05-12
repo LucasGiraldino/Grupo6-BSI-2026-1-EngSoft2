@@ -1,6 +1,8 @@
 import * as lucide from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-6">
@@ -32,16 +34,16 @@ export default function Dashboard() {
 
       <Card title="Ações Rápidas">
         <div className="grid grid-cols-4 gap-4">
-          <button className="p-4 bg-[#030213] text-white font-medium rounded-lg hover:opacity-90">
+          <button className="p-4 bg-[#030213] text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/pacientes')}>
             Novo Paciente
           </button>
-          <button className="p-4 bg-green-600 text-white font-medium rounded-lg hover:opacity-90">
+          <button className="p-4 bg-green-600 text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/consultas')}>
             Agendar Consulta
           </button>
-          <button className="p-4 bg-blue-600 text-white font-medium rounded-lg hover:opacity-90">
+          <button className="p-4 bg-blue-600 text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/doacoes')}>
             Registrar Doação
           </button>
-          <button className="p-4 bg-yellow-600 text-white font-medium rounded-lg hover:opacity-90">
+          <button className="p-4 bg-yellow-600 text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/exames')}>
             Solicitar Exame
           </button>
         </div>

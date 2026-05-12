@@ -61,6 +61,29 @@ public class CnpjService {
         }
     }
 
+    public static boolean validarMatematicamente(String cnpj) {
+        if (cnpj == null || cnpj.length() != 14) return false;
+        if (cnpj.chars().allMatch(c -> c == cnpj.charAt(0))) return false;
+
+        try {
+            int[] pesos1 = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
+            int soma = 0;
+            for (int i = 0; i < 12; i++) soma += (cnpj.charAt(i) - '0') * pesos1[i];
+            int dig1 = 11 - (soma % 11);
+            if (dig1 > 9) dig1 = 0;
+            if (dig1 != cnpj.charAt(12) - '0') return false;
+
+            int[] pesos2 = {6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
+            soma = 0;
+            for (int i = 0; i < 13; i++) soma += (cnpj.charAt(i) - '0') * pesos2[i];
+            int dig2 = 11 - (soma % 11);
+            if (dig2 > 9) dig2 = 0;
+            return dig2 == cnpj.charAt(13) - '0';
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private String valor(JsonNode node, String campo) {
         JsonNode n = node.get(campo);
         return n != null && !n.isNull() ? n.asText() : null;

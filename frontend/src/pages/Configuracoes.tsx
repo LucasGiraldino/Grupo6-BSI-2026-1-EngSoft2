@@ -3,6 +3,7 @@ import { Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
 import { useSystemConfig } from '../contexts/SystemConfigContext'
+import { formatarTelefone, formatarCep, limparCep, formatarCnpj, limparCnpj, validarCnpj, validarTelefone, validarEmail } from '../utils/validators'
 
 const ESTADOS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
@@ -27,29 +28,6 @@ const FORM_VAZIO = {
   enderecoBairro: '',
   enderecoCidade: '',
   enderecoEstado: '',
-}
-
-function limparCnpj(valor: string) {
-  return valor.replace(/\D/g, '').slice(0, 14)
-}
-
-function formatarCnpj(valor: string) {
-  const digits = limparCnpj(valor)
-  if (digits.length <= 2) return digits
-  if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`
-  if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`
-  if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`
-  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`
-}
-
-function limparCep(valor: string) {
-  return valor.replace(/\D/g, '').slice(0, 8)
-}
-
-function formatarCep(valor: string) {
-  const digits = limparCep(valor)
-  if (digits.length <= 5) return digits
-  return `${digits.slice(0, 5)}-${digits.slice(5)}`
 }
 
 export default function Configuracoes() {
@@ -168,8 +146,16 @@ export default function Configuracoes() {
       mostrarToast('Razão Social e CNPJ são obrigatórios.', 'erro')
       return
     }
-    if (limparCnpj(form.cnpj).length !== 14) {
-      mostrarToast('CNPJ deve ter 14 dígitos.', 'erro')
+    if (!validarCnpj(form.cnpj)) {
+      mostrarToast('CNPJ inválido. Verifique os dígitos.', 'erro')
+      return
+    }
+    if (form.telefone && !validarTelefone(form.telefone)) {
+      mostrarToast('Telefone inválido. Deve ter 10 ou 11 dígitos.', 'erro')
+      return
+    }
+    if (form.email && !validarEmail(form.email)) {
+      mostrarToast('E-mail inválido.', 'erro')
       return
     }
     setSalvando(true)
@@ -277,8 +263,8 @@ export default function Configuracoes() {
                       <input
                         type="text"
                         placeholder="(11) 99999-9999"
-                        value={form.telefone}
-                        onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
+                        value={formatarTelefone(form.telefone)}
+                        onChange={e => setForm(f => ({ ...f, telefone: e.target.value.replace(/\D/g, '') }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                       />
                     </div>

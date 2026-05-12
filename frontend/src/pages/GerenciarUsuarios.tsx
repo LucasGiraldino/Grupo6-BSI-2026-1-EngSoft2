@@ -3,6 +3,7 @@ import { Plus, Trash2, X, Loader } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
 import { validarCpf, limparCpf, formatarCpf } from '../utils/cpf'
+import { validarEmail } from '../utils/validators'
 
 interface Usuario {
   id: number
@@ -78,6 +79,10 @@ export default function GerenciarUsuarios() {
     }
     if (!form.email.trim()) {
       setErroForm({ campo: 'email', mensagem: 'Email é obrigatório' })
+      return false
+    }
+    if (!validarEmail(form.email)) {
+      setErroForm({ campo: 'email', mensagem: 'Email inválido' })
       return false
     }
     if (limparCpf(form.cpf).length !== 11) {

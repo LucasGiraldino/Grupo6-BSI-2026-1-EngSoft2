@@ -73,7 +73,7 @@ function App() {
             isAuthenticated && isAdmin ? (
               <AppLayout><Configuracoes /></AppLayout>
             ) : (
-              <Navigate to="/dashboard" />
+              null
             )
           }
         />

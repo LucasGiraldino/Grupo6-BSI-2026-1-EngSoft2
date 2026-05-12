@@ -2,6 +2,7 @@ package com.sigaac.controller;
 
 import com.sigaac.model.*;
 import com.sigaac.view.JsonView;
+import java.util.regex.Pattern;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.util.List;
@@ -89,8 +90,32 @@ public class ParametrizacaoOngController {
         json.send(exchange, 200, config);
     }
 
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+
+    private String validateRequest(ParametrizacaoOngRequestDTO request) {
+        String cnpj = request.getCnpj() != null ? request.getCnpj().replaceAll("\\D", "") : null;
+        if (cnpj == null || !CnpjService.validarMatematicamente(cnpj)) {
+            return "CNPJ inválido. Verifique os dígitos.";
+        }
+        String telefone = request.getTelefone() != null ? request.getTelefone().replaceAll("\\D", "") : null;
+        if (telefone != null && telefone.length() != 10 && telefone.length() != 11) {
+            return "Telefone inválido. Deve ter 10 ou 11 dígitos.";
+        }
+        if (request.getEmail() != null && !request.getEmail().isEmpty()
+                && !EMAIL_PATTERN.matcher(request.getEmail()).matches()) {
+            return "E-mail inválido.";
+        }
+        return null;
+    }
+
     private void create(HttpExchange exchange, Map<String, String> params) throws Exception {
         ParametrizacaoOngRequestDTO request = json.read(exchange.getRequestBody(), ParametrizacaoOngRequestDTO.class);
+        String error = validateRequest(request);
+        if (error != null) {
+            json.send(exchange, 400, Map.of("error", error));
+            return;
+        }
         ParametrizacaoOng param = toEntity(request);
         ParametrizacaoOng saved = service.save(param);
 
@@ -106,6 +131,11 @@ public class ParametrizacaoOngController {
     private void update(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
         ParametrizacaoOngRequestDTO request = json.read(exchange.getRequestBody(), ParametrizacaoOngRequestDTO.class);
+        String error = validateRequest(request);
+        if (error != null) {
+            json.send(exchange, 400, Map.of("error", error));
+            return;
+        }
         ParametrizacaoOng param = toEntity(request);
         ParametrizacaoOng updated = service.update(id, param);
         json.send(exchange, 200, toDTO(updated));

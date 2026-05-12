@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import * as lucide from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 
 interface SidebarProps {
   systemName?: string
@@ -15,7 +16,7 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
     localStorage.removeItem('userEmail')
     navigate('/login')
   }
-
+  const { isAdmin } = useAuth()
   const menuItems = [
     { to: '/dashboard', icon: lucide.Home, label: 'Dashboard' },
     { to: '/pacientes', icon: lucide.Users, label: 'Pacientes' },
@@ -55,28 +56,34 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
         ))}
       </nav>
       <div className="p-4 border-t border-gray-200 space-y-1">
-        <NavLink
-          to="/configuracoes"
-          className={({ isActive }) =>
-            `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-              isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'
-            }`
-          }
-        >
-          <lucide.Settings className="w-5 h-5" />
-          Configurações
-        </NavLink>
-        <NavLink
-          to="/usuarios"
-          className={({ isActive }) =>
-            `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-              isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'
-            }`
-          }
-        >
-          <lucide.Users className="w-5 h-5" />
-          Usuários
-        </NavLink>
+        {
+          isAdmin && (
+            <div>
+              <NavLink
+                to="/configuracoes"
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <lucide.Settings className="w-5 h-5" />
+                Configurações
+              </NavLink>
+              <NavLink
+                to="/usuarios"
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <lucide.Users className="w-5 h-5" />
+                Usuários
+              </NavLink>
+            </div>
+          )
+        } 
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors"

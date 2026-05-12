@@ -11,8 +11,12 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class UserController {
+
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final UserRepository userRepository;
     private final JsonView json;
@@ -40,6 +44,11 @@ public class UserController {
 
         if (nome == null || email == null || cpf == null || senha == null) {
             json.send(exchange, 400, Map.of("error", "Campos obrigatórios: nome, email, cpf, senha"));
+            return;
+        }
+
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            json.send(exchange, 400, Map.of("error", "E-mail inválido."));
             return;
         }
 

@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, X, Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
 import { validarCpf, limparCpf, formatarCpf } from '../utils/cpf'
+import { formatarTelefone, limparTelefone, formatarCep, limparCep, validarTelefone } from '../utils/validators'
 
 interface Endereco {
   id?: number
@@ -55,16 +56,6 @@ const FORM_VAZIO = {
   enderecoCidade: '',
   enderecoEstado: '',
   enderecoPais: 'Brasil',
-}
-
-function limparCep(valor: string) {
-  return valor.replace(/\D/g, '').slice(0, 8)
-}
-
-function formatarCep(valor: string) {
-  const digits = limparCep(valor)
-  if (digits.length <= 5) return digits
-  return `${digits.slice(0, 5)}-${digits.slice(5)}`
 }
 
 export default function GerenciarPacientes() {
@@ -172,12 +163,16 @@ export default function GerenciarPacientes() {
       setErroForm('CPF inválido. Verifique os dígitos.')
       return
     }
+    if (form.telefone && !validarTelefone(form.telefone)) {
+      setErroForm('Telefone inválido. Deve ter 10 ou 11 dígitos.')
+      return
+    }
     const body = {
       nome: form.nome,
       cpf: limparCpf(form.cpf),
       dataNascimento: form.dataNascimento,
       sexo: form.sexo,
-      telefone: form.telefone || null,
+      telefone: limparTelefone(form.telefone) || null,
       email: form.email || null,
       restricoesAlimentares: form.restricoesAlimentares || null,
       endereco: {
@@ -373,8 +368,8 @@ export default function GerenciarPacientes() {
                       <input
                         type="text"
                         placeholder="(11) 99999-9999"
-                        value={form.telefone}
-                        onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
+                        value={formatarTelefone(form.telefone)}
+                        onChange={e => setForm(f => ({ ...f, telefone: e.target.value.replace(/\D/g, '') }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                       />
                     </div>
@@ -403,6 +398,7 @@ export default function GerenciarPacientes() {
                         placeholder="00000-000"
                         value={formatarCep(form.enderecoCep)}
                         onChange={e => setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) }))}
+
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                       />
                     </div>
