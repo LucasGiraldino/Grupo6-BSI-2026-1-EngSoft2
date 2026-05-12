@@ -54,7 +54,7 @@ public class SigaacApplication {
         AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);
         ParametrizacaoOngService parametrizacaoService = new ParametrizacaoOngService(parametrizacaoRepo);
         ExameService exameService = new ExameService(exameRepo);
-        ConsultaService consultaService = new ConsultaService(consultaRepo);
+        ConsultaService consultaService = new ConsultaService(consultaRepo, db.getDataSource());
         TriagemService triagemService = new TriagemService(triagemRepo, consultaService, prontuarioRepo);
 
         LoginController loginCtrl = new LoginController(userRepo, otpService, tokenService, rateLimiterService, json);

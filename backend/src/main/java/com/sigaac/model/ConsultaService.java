@@ -1,55 +1,66 @@
 package com.sigaac.model;
 
-import java.time.LocalDate;
+import com.zaxxer.hikari.HikariDataSource;
+
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public class ConsultaService {
 
     private final ConsultaRepository repository;
+    private final HikariDataSource ds;
 
-    public ConsultaService(ConsultaRepository repository) {
+    public ConsultaService(ConsultaRepository repository, HikariDataSource ds) {
         this.repository = repository;
+        this.ds = ds;
     }
 
     public List<Consulta> listar() {
         return repository.findAll();
     }
 
-    public Optional<Consulta> buscarPorId(Integer id) {
-        return repository.findById(id);
-    }
-
     public Consulta criar(Consulta consulta) {
-        if (consulta.getDataAgendamento() == null) {
-            consulta.setDataAgendamento(LocalDateTime.now());
-        }
         return repository.save(consulta);
     }
 
-    public Consulta atualizar(Integer id, Consulta consulta) {
-        var existente = repository.findById(id).orElseThrow();
-        if (consulta.getPaciente() != null) existente.setPaciente(consulta.getPaciente());
-        if (consulta.getProfissional() != null) existente.setProfissional(consulta.getProfissional());
-        if (consulta.getAgenda() != null) existente.setAgenda(consulta.getAgenda());
-        if (consulta.getTipoConsulta() != null) existente.setTipoConsulta(consulta.getTipoConsulta());
-        if (consulta.getStatus() != null) existente.setStatus(consulta.getStatus());
-        if (consulta.getObservacoes() != null) existente.setObservacoes(consulta.getObservacoes());
-        if (consulta.getDataAgendamento() != null) existente.setDataAgendamento(consulta.getDataAgendamento());
-        if (consulta.getDataCancelamento() != null) existente.setDataCancelamento(consulta.getDataCancelamento());
-        return repository.save(existente);
+    public Consulta buscarPorId(Integer id) {
+        return repository.findById(id).orElse(null);
     }
 
-    public List<Consulta> listarPorStatus(String status) {
-        return repository.findByStatus(status);
-    }
+    public void cancelar(Integer id) {
+        try (Connection conn = ds.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                var consulta = repository.findById(id);
+                if (consulta.isEmpty()) {
+                    throw new IllegalArgumentException("Consulta não encontrada.");
+                }
+                if (!"AGENDADA".equals(consulta.get().getStatus())) {
+                    throw new IllegalStateException("A consulta não está no status AGENDADA e não pode ser cancelada.");
+                }
 
-    public List<Consulta> listarPorProfissionalEIntervalo(Integer profissionalId, LocalDate inicio, LocalDate fim) {
-        return repository.findByProfissionalAndDataBetween(profissionalId, inicio, fim);
-    }
+                repository.cancelar(conn, id, LocalDateTime.now());
 
-    public void deletar(Integer id) {
-        repository.deleteById(id);
+                var idAgenda = repository.findIdAgendaById(conn, id);
+                idAgenda.ifPresent(agId -> {
+                    try (var stmt = conn.prepareStatement("UPDATE agenda SET disponivel = TRUE WHERE id_agenda = ?")) {
+                        stmt.setInt(1, agId);
+                        stmt.executeUpdate();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao cancelar consulta.", e);
+        }
     }
 }
