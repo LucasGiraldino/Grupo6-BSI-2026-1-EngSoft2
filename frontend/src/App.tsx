@@ -9,6 +9,7 @@ import Compras from './pages/Compras'
 import Exames from './pages/Exames'
 import TriagemPage from './pages/Triagem'
 import Configuracoes from './pages/Configuracoes'
+import GerenciarUsuarios from './pages/GerenciarUsuarios'
 import Login from './pages/Login'
 import VerifyOTP from './pages/VerifyOTP'
 import { EfetuarDoacao } from './pages/EfetuarDoacao'
@@ -69,6 +70,16 @@ function App() {
           element={
             isAuthenticated && isAdmin ? (
               <AppLayout><Configuracoes /></AppLayout>
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/usuarios"
+          element={
+            isAuthenticated && isAdmin ? (
+              <AppLayout><GerenciarUsuarios /></AppLayout>
             ) : (
               <Navigate to="/dashboard" />
             )

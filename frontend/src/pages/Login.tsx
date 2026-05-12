@@ -17,7 +17,7 @@ export default function Login() {
       if (email && senha) {
         const res = await axios.post('/auth/login', { email, senha });
         if (res.data.otpSent) {
-          navigate('/verificar', { state: { email, senha }, replace: true });
+          navigate('/verificar', { state: { email, senha, codigo: res.data.codigo }, replace: true });
         }
       }
     } catch (err: any) {

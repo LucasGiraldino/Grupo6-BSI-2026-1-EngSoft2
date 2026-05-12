@@ -66,6 +66,17 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
           <lucide.Settings className="w-5 h-5" />
           Configurações
         </NavLink>
+        <NavLink
+          to="/usuarios"
+          className={({ isActive }) =>
+            `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'
+            }`
+          }
+        >
+          <lucide.Users className="w-5 h-5" />
+          Usuários
+        </NavLink>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors"

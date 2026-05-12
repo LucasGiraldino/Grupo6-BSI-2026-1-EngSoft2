@@ -71,8 +71,12 @@ public class LoginController {
         }
 
         pendingVerifications.put(user.getEmail(), Instant.now().plusSeconds(PENDING_TTL_MINUTES * 60));
-        otpService.generateAndSendOtp(user.getEmail());
-        json.send(exchange, 200, Map.of("message", "Código 2FA enviado para o email do usuário.", "otpSent", true));
+        String codigo = otpService.generateOtp(user.getEmail());
+        json.send(exchange, 200, Map.of(
+                "message", "Código 2FA enviado.",
+                "otpSent", true,
+                "codigo", codigo
+        ));
     }
 
     private void verify(HttpExchange exchange, Map<String, String> params) throws Exception {

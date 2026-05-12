@@ -42,7 +42,7 @@ public class SigaacApplication {
         AgendaRepository agendaRepo = new AgendaRepository(db.getDataSource());
 
         TokenService tokenService = new TokenService(props);
-        OtpService otpService = new OtpService(props);
+        OtpService otpService = new OtpService();
         CpfService cpfService = new CpfService(props);
         CnpjService cnpjService = new CnpjService();
         CepService cepService = new CepService();
