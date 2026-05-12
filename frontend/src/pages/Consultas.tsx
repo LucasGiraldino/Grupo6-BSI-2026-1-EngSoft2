@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, User, X, Trash2, Loader, Stethoscope, CalendarDays } from 'lucide-react'
+import Toast from '../components/Toast'
 import api from '../services/api'
 
 interface Paciente {
@@ -97,6 +98,16 @@ export default function Consultas() {
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
   const [modalDetalhesTriagem, setModalDetalhesTriagem] = useState<TriagemResumo | null>(null)
+
+  const [toastAberto, setToastAberto] = useState(false)
+  const [toastMensagem, setToastMensagem] = useState('')
+  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
+
+  function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') {
+    setToastMensagem(mensagem)
+    setToastTipo(tipo)
+    setToastAberto(true)
+  }
 
   useEffect(() => {
     carregarProfissionais()
@@ -295,6 +306,7 @@ export default function Consultas() {
 
       setModalAberto(false)
       setPacienteTriagemSelecionado(null)
+      mostrarToast(modalTriagem ? 'Consulta agendada com sucesso!' : editandoId ? 'Consulta atualizada com sucesso!' : 'Consulta criada com sucesso!', 'sucesso')
       carregarDadosMes()
       carregarPacientesTriagem()
     } catch {
@@ -308,6 +320,7 @@ export default function Consultas() {
     if (idParaExcluir === null) return
     try {
       await api.delete(`/api/consultas/${idParaExcluir}`)
+      mostrarToast('Consulta cancelada com sucesso!', 'sucesso')
     } catch {}
     setIdParaExcluir(null)
     setModalAberto(false)
@@ -755,6 +768,8 @@ export default function Consultas() {
           </div>
         </div>
       )}
+
+      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </div>
   )
 }

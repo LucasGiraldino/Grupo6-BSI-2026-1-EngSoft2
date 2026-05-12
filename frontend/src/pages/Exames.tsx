@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Plus, Pencil, Trash2, X, Settings2, Loader, Search } from 'lucide-react'
+import Toast from '../components/Toast'
 import api from '../services/api'
 
 interface TipoExame {
@@ -83,6 +84,16 @@ export default function Exames() {
   const [novoTipoDesc, setNovoTipoDesc] = useState('')
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+
+  const [toastAberto, setToastAberto] = useState(false)
+  const [toastMensagem, setToastMensagem] = useState('')
+  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
+
+  function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') {
+    setToastMensagem(mensagem)
+    setToastTipo(tipo)
+    setToastAberto(true)
+  }
 
   useEffect(() => {
     carregarDados()
@@ -197,6 +208,7 @@ export default function Exames() {
     try {
       await api({ url, method, data: body })
       setModalAberto(false)
+      mostrarToast(form.id ? 'Exame atualizado com sucesso!' : 'Exame cadastrado com sucesso!', 'sucesso')
       carregarDados()
     } catch {
       setErroForm('Erro ao salvar exame. Verifique os dados e tente novamente.')
@@ -207,6 +219,7 @@ export default function Exames() {
     if (idParaExcluir === null) return
     try {
       await api.delete(`/api/exames/${idParaExcluir}`)
+      mostrarToast('Exame excluído com sucesso!', 'sucesso')
     } catch {}
     setIdParaExcluir(null)
     carregarDados()
@@ -215,17 +228,27 @@ export default function Exames() {
   async function criarTipoExame(e: React.FormEvent) {
     e.preventDefault()
     if (!novoTipoNome.trim()) return
-    await api.post('/api/tipos-exame', { nome: novoTipoNome.trim(), descricao: novoTipoDesc.trim() || null })
-    setNovoTipoNome('')
-    setNovoTipoDesc('')
-    const res = await api.get('/api/tipos-exame')
-    setTiposExame(res.data)
+    try {
+      await api.post('/api/tipos-exame', { nome: novoTipoNome.trim(), descricao: novoTipoDesc.trim() || null })
+      setNovoTipoNome('')
+      setNovoTipoDesc('')
+      mostrarToast('Tipo de exame criado com sucesso!', 'sucesso')
+      const res = await api.get('/api/tipos-exame')
+      setTiposExame(res.data)
+    } catch {
+      mostrarToast('Erro ao criar tipo de exame.', 'erro')
+    }
   }
 
   async function excluirTipoExame(id: number) {
-    await api.delete(`/api/tipos-exame/${id}`)
-    const res = await api.get('/api/tipos-exame')
-    setTiposExame(res.data)
+    try {
+      await api.delete(`/api/tipos-exame/${id}`)
+      mostrarToast('Tipo de exame excluído com sucesso!', 'sucesso')
+      const res = await api.get('/api/tipos-exame')
+      setTiposExame(res.data)
+    } catch {
+      mostrarToast('Erro ao excluir tipo de exame.', 'erro')
+    }
   }
 
   function formatarData(d: string | undefined) {
@@ -565,6 +588,8 @@ export default function Exames() {
           </div>
         </div>
       )}
+
+      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

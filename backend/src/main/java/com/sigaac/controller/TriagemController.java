@@ -44,6 +44,10 @@ public class TriagemController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Triagem triagem = json.read(exchange.getRequestBody(), Triagem.class);
+        if (triagem.getProntuario() == null || !service.prontuarioExiste(triagem.getProntuario().getId())) {
+            json.send(exchange, 400, Map.of("error", "Prontuário não encontrado. Cadastre o paciente primeiro."));
+            return;
+        }
         Triagem salvo = service.criar(triagem);
         json.send(exchange, 201, salvo);
     }

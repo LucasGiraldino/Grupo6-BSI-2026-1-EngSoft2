@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Plus, Pencil, Trash2, X, Loader, Search, Stethoscope } from 'lucide-react'
+import Toast from '../components/Toast'
 import api from '../services/api'
 
 interface Medico {
@@ -60,10 +61,21 @@ export default function TriagemPage() {
   const [prontuarioResults, setProntuarioResults] = useState<Prontuario[]>([])
   const [searchingProntuario, setSearchingProntuario] = useState(false)
   const [showProntuarioDropdown, setShowProntuarioDropdown] = useState(false)
+  const [searchEmpty, setSearchEmpty] = useState(false)
   const prontuarioRef = useRef<HTMLDivElement>(null)
   const searchTimer = useRef<ReturnType<typeof setTimeout>>()
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+
+  const [toastAberto, setToastAberto] = useState(false)
+  const [toastMensagem, setToastMensagem] = useState('')
+  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
+
+  function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') {
+    setToastMensagem(mensagem)
+    setToastTipo(tipo)
+    setToastAberto(true)
+  }
 
   useEffect(() => {
     carregarDados()
@@ -73,6 +85,7 @@ export default function TriagemPage() {
     function handleClick(e: MouseEvent) {
       if (prontuarioRef.current && !prontuarioRef.current.contains(e.target as Node)) {
         setShowProntuarioDropdown(false)
+        setSearchEmpty(false)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -96,15 +109,19 @@ export default function TriagemPage() {
     if (!termo.trim()) {
       setProntuarioResults([])
       setShowProntuarioDropdown(false)
+      setSearchEmpty(false)
       return
     }
     setSearchingProntuario(true)
     try {
       const res = await api.get(`/api/triagens/prontuarios?q=${encodeURIComponent(termo)}`)
       setProntuarioResults(res.data)
-      setShowProntuarioDropdown(res.data.length > 0)
+      const hasResults = res.data.length > 0
+      setShowProntuarioDropdown(hasResults)
+      setSearchEmpty(!hasResults)
     } catch {
       setProntuarioResults([])
+      setSearchEmpty(false)
     }
     setSearchingProntuario(false)
   }, [])
@@ -119,12 +136,14 @@ export default function TriagemPage() {
     setForm(f => ({ ...f, prontuarioId: String(p.id), prontuarioLabel: `${p.paciente?.nome}${p.paciente?.cpf ? ` (${p.paciente.cpf})` : ''}` }))
     setProntuarioSearch(`${p.paciente?.nome}${p.paciente?.cpf ? ` - ${p.paciente.cpf}` : ''}`)
     setShowProntuarioDropdown(false)
+    setSearchEmpty(false)
   }
 
   function limparProntuario() {
     setForm(f => ({ ...f, prontuarioId: '', prontuarioLabel: '' }))
     setProntuarioSearch('')
     setProntuarioResults([])
+    setSearchEmpty(false)
   }
 
   function abrirModalNovo() {
@@ -178,6 +197,7 @@ export default function TriagemPage() {
     try {
       await api({ url, method, data: body })
       setModalAberto(false)
+      mostrarToast(form.id ? 'Triagem atualizada com sucesso!' : 'Triagem cadastrada com sucesso!', 'sucesso')
       carregarDados()
     } catch {
       setErroForm('Erro ao salvar triagem. Verifique os dados e tente novamente.')
@@ -188,6 +208,7 @@ export default function TriagemPage() {
     if (idParaExcluir === null) return
     try {
       await api.delete(`/api/triagens/${idParaExcluir}`)
+      mostrarToast('Triagem excluída com sucesso!', 'sucesso')
     } catch {}
     setIdParaExcluir(null)
     carregarDados()
@@ -321,6 +342,14 @@ export default function TriagemPage() {
                           <span className="text-gray-400 ml-2 text-xs">#{p.id}</span>
                         </button>
                       ))}
+                    </div>
+                  )}
+                  {searchEmpty && !searchingProntuario && (
+                    <div className="mt-1 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+                      Nenhum paciente encontrado.{' '}
+                      <a href="/pacientes" className="underline font-medium hover:text-amber-800">
+                        Cadastrar novo paciente
+                      </a>
                     </div>
                   )}
                   {form.prontuarioId && !showProntuarioDropdown && (
@@ -464,6 +493,8 @@ export default function TriagemPage() {
           </div>
         </div>
       )}
+
+      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

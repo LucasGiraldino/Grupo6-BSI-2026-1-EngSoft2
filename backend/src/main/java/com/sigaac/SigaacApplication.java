@@ -48,7 +48,7 @@ public class SigaacApplication {
         CepService cepService = new CepService();
         RateLimiterService rateLimiterService = new RateLimiterService();
         UserService userService = new UserService(userRepo);
-        PacienteService pacienteService = new PacienteService(pacienteRepo, enderecoRepo);
+        PacienteService pacienteService = new PacienteService(pacienteRepo, enderecoRepo, prontuarioRepo);
         DoacaoService doacaoService = new DoacaoService(doacaoRepo, pacienteRepo, profissionalRepo, estoqueRepo, alimentoRepo, db.getDataSource());
         CompraService compraService = new CompraService(compraRepo, alimentoRepo, db.getDataSource());
         AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);

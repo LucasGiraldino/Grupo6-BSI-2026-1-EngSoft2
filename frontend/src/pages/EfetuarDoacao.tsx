@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Toast from '../components/Toast';
 import api from '../services/api';
 import { Trash2 } from 'lucide-react';
 
@@ -36,8 +37,17 @@ export const EfetuarDoacao: React.FC = () => {
   const [cesta, setCesta] = useState<TabelaItem[]>([]);
   const [observacoes, setObservacoes] = useState('');
   const [dataDoacao, setDataDoacao] = useState(new Date().toISOString().split('T')[0]);
-  const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
+
+  const [toastAberto, setToastAberto] = useState(false)
+  const [toastMensagem, setToastMensagem] = useState('')
+  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
+
+  function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') {
+    setToastMensagem(mensagem)
+    setToastTipo(tipo)
+    setToastAberto(true)
+  }
 
   useEffect(() => {
     carregarPacientes();
@@ -66,7 +76,6 @@ export const EfetuarDoacao: React.FC = () => {
 
   const handleAdicionarItem = () => {
     setMensagemErro('');
-    setMensagemSucesso('');
 
     if (!alimentoSelecionadoId) {
       setMensagemErro('Selecione um mantimento antes de adicionar.');
@@ -117,7 +126,6 @@ export const EfetuarDoacao: React.FC = () => {
   };
 
   const handleSalvarDoacao = async () => {
-    setMensagemSucesso('');
     setMensagemErro('');
 
     if (!pacienteSelecionadoId) {
@@ -141,7 +149,7 @@ export const EfetuarDoacao: React.FC = () => {
         }))
       });
 
-      setMensagemSucesso('Doação cadastrada com sucesso e estoque atualizado!');
+      mostrarToast('Doação cadastrada com sucesso!', 'sucesso');
       setCesta([]);
       setPacienteSelecionadoId('');
       setObservacoes('');
@@ -152,6 +160,7 @@ export const EfetuarDoacao: React.FC = () => {
   };
 
   return (
+    <>
     <div className="grid grid-cols-[1fr_2fr] gap-6">
             {/* Painel Esquerdo */}
             <div className="flex flex-col gap-4">
@@ -277,11 +286,6 @@ export const EfetuarDoacao: React.FC = () => {
                   </div>
                 </div>
 
-                {mensagemSucesso && (
-                  <div className="px-3 py-2 rounded-lg bg-green-50 text-green-700 text-sm mt-3">
-                    {mensagemSucesso}
-                  </div>
-                )}
                 {mensagemErro && (
                   <div className="px-3 py-2 rounded-lg bg-red-50 text-red-700 text-sm mt-3">
                     {mensagemErro}
@@ -300,5 +304,8 @@ export const EfetuarDoacao: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
+    </>
   );
 };

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Trash2, X, Loader } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
+import { validarCpf, limparCpf, formatarCpf } from '../utils/cpf'
 
 interface Usuario {
   id: number
@@ -47,17 +48,7 @@ export default function GerenciarUsuarios() {
     setToastAberto(true)
   }
 
-  function formatarCpf(valor: string) {
-    const digits = valor.replace(/\D/g, '').slice(0, 11)
-    if (digits.length <= 3) return digits
-    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
-    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
-  }
 
-  function limparCpf(valor: string) {
-    return valor.replace(/\D/g, '').slice(0, 11)
-  }
 
   useEffect(() => {
     carregarUsuarios()
@@ -91,6 +82,10 @@ export default function GerenciarUsuarios() {
     }
     if (limparCpf(form.cpf).length !== 11) {
       setErroForm({ campo: 'cpf', mensagem: 'CPF deve ter 11 dígitos' })
+      return false
+    }
+    if (!validarCpf(form.cpf)) {
+      setErroForm({ campo: 'cpf', mensagem: 'CPF inválido. Verifique os dígitos.' })
       return false
     }
     if (form.senha.length < 6) {

@@ -41,8 +41,12 @@ public class PacienteController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Paciente paciente = json.read(exchange.getRequestBody(), Paciente.class);
-        Paciente salvo = pacienteService.criar(paciente);
-        json.send(exchange, 201, salvo);
+        try {
+            Paciente salvo = pacienteService.criar(paciente);
+            json.send(exchange, 201, salvo);
+        } catch (IllegalArgumentException e) {
+            json.send(exchange, 400, Map.of("error", e.getMessage()));
+        }
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {

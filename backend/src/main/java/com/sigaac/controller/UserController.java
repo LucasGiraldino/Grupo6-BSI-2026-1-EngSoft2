@@ -1,5 +1,6 @@
 package com.sigaac.controller;
 
+import com.sigaac.model.CpfService;
 import com.sigaac.model.User;
 import com.sigaac.model.UserRepository;
 import com.sigaac.model.UserRole;
@@ -49,6 +50,11 @@ public class UserController {
 
         if (userRepository.findByCpf(cpf).isPresent()) {
             json.send(exchange, 409, Map.of("error", "CPF já cadastrado"));
+            return;
+        }
+
+        if (!CpfService.validarMatematicamente(cpf)) {
+            json.send(exchange, 400, Map.of("error", "CPF inválido. Verifique os dígitos."));
             return;
         }
 

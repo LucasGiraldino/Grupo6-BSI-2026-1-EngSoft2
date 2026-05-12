@@ -49,13 +49,14 @@ CREATE TABLE parametrizacao_ong (
 CREATE TABLE users (
     id_usuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    cpf VARCHAR(11) NOT NULL UNIQUE,
-    email VARCHAR(150) NOT NULL UNIQUE,
+    cpf VARCHAR(11) NOT NULL,
+    email VARCHAR(150) NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
     perfil VARCHAR(20) NOT NULL,
     data_cadastro DATE NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao)
+    id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao),
+    deleted_at TIMESTAMP
 );
 
 -- Level 2: depende de enderecos
@@ -63,14 +64,15 @@ CREATE TABLE pacientes (
     id_paciente INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_endereco INTEGER REFERENCES enderecos(id_endereco),
     nome VARCHAR(100) NOT NULL,
-    cpf VARCHAR(11) NOT NULL UNIQUE,
+    cpf VARCHAR(11) NOT NULL,
     data_nascimento DATE NOT NULL,
     sexo VARCHAR(10) NOT NULL,
     telefone VARCHAR(20),
     email VARCHAR(150),
     restricoes_alimentares TEXT,
     data_cadastro DATE NOT NULL,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE alimentos (
@@ -124,8 +126,8 @@ CREATE TABLE estoque (
 -- Level 4: depende de medicos, users, pacientes
 CREATE TABLE prontuarios (
     id_prontuario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_medico INTEGER NOT NULL REFERENCES medicos(id_medico),
-    id_usuario INTEGER NOT NULL REFERENCES users(id_usuario),
+    id_medico INTEGER REFERENCES medicos(id_medico),
+    id_usuario INTEGER REFERENCES users(id_usuario),
     id_paciente INTEGER REFERENCES pacientes(id_paciente),
     data_abertura DATE NOT NULL,
     data_fechamento DATE,
@@ -247,3 +249,8 @@ CREATE TABLE profissionais_compras (
     id_compra INTEGER NOT NULL REFERENCES compras(id_compra),
     PRIMARY KEY (id_profissional, id_compra)
 );
+
+-- Partial unique indexes (allow reusing CPF/email from soft-deleted records)
+CREATE UNIQUE INDEX uq_pacientes_cpf_ativo ON pacientes (cpf) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX uq_users_cpf_ativo ON users (cpf) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX uq_users_email_ativo ON users (email) WHERE deleted_at IS NULL;

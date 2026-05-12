@@ -76,4 +76,8 @@ public class TriagemService {
     public List<Prontuario> buscarProntuarios(String query) {
         return repository.searchProntuarios(query);
     }
+
+    public boolean prontuarioExiste(Integer prontuarioId) {
+        return prontuarioRepository.findById(prontuarioId).isPresent();
+    }
 }

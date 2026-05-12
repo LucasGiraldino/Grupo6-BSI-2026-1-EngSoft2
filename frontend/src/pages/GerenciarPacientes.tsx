@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
+import { validarCpf, limparCpf, formatarCpf } from '../utils/cpf'
 
 interface Endereco {
   id?: number
@@ -56,20 +57,8 @@ const FORM_VAZIO = {
   enderecoPais: 'Brasil',
 }
 
-function limparCpf(valor: string) {
-  return valor.replace(/\D/g, '').slice(0, 11)
-}
-
 function limparCep(valor: string) {
   return valor.replace(/\D/g, '').slice(0, 8)
-}
-
-function formatarCpf(valor: string) {
-  const digits = limparCpf(valor)
-  if (digits.length <= 3) return digits
-  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
-  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
 }
 
 function formatarCep(valor: string) {
@@ -179,6 +168,10 @@ export default function GerenciarPacientes() {
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault()
+    if (!validarCpf(form.cpf)) {
+      setErroForm('CPF inválido. Verifique os dígitos.')
+      return
+    }
     const body = {
       nome: form.nome,
       cpf: limparCpf(form.cpf),
@@ -201,8 +194,10 @@ export default function GerenciarPacientes() {
     try {
       if (form.id) {
         await api.put(`/api/pacientes/${form.id}`, body)
+        mostrarToast('Paciente atualizado com sucesso!', 'sucesso')
       } else {
         await api.post('/api/pacientes', body)
+        mostrarToast('Paciente cadastrado com sucesso!', 'sucesso')
       }
       setModalAberto(false)
       carregarPacientes()
@@ -215,6 +210,7 @@ export default function GerenciarPacientes() {
     if (idParaExcluir === null) return
     try {
       await api.delete(`/api/pacientes/${idParaExcluir}`)
+      mostrarToast('Paciente excluído com sucesso!', 'sucesso')
     } catch {}
     setIdParaExcluir(null)
     carregarPacientes()
