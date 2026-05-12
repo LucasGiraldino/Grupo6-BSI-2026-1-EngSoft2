@@ -6,19 +6,18 @@ interface SystemConfig {
   razaoSocial: string
 }
 
+const DEFAULT_CONFIG = { nomeFantasia: 'SIGAAC', razaoSocial: 'Sistema Integrado de Gestão' }
+
 const SystemConfigContext = createContext<{
   config: SystemConfig
   refresh: () => void
 }>({
-  config: { nomeFantasia: 'SIGAAC', razaoSocial: 'Sistema Integrado de Gestão' },
+  config: DEFAULT_CONFIG,
   refresh: () => {},
 })
 
 export function SystemConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<SystemConfig>({
-    nomeFantasia: 'SIGAAC',
-    razaoSocial: 'Sistema Integrado de Gestão',
-  })
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG)
 
   const fetchConfig = useCallback(() => {
     const token = localStorage.getItem('token')
@@ -35,8 +34,8 @@ export function SystemConfigProvider({ children }: { children: ReactNode }) {
           .then(res => {
             if (res.data.parametrizacao) {
               setConfig({
-                nomeFantasia: res.data.parametrizacao.nomeFantasia || 'SIGAAC',
-                razaoSocial: res.data.parametrizacao.razaoSocial || 'Sistema Integrado de Gestão',
+                nomeFantasia: res.data.parametrizacao.nomeFantasia || DEFAULT_CONFIG.nomeFantasia,
+                razaoSocial: res.data.parametrizacao.razaoSocial || DEFAULT_CONFIG.razaoSocial,
               })
             }
           })

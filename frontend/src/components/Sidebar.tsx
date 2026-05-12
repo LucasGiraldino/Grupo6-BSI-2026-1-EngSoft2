@@ -10,6 +10,8 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
   const navigate = useNavigate()
 
   const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('userEmail')
     navigate('/login')
   }

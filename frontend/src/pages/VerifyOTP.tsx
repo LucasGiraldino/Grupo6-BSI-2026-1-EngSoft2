@@ -34,7 +34,7 @@ export default function VerifyOTP() {
       if (refreshToken) {
         localStorage.setItem('refreshToken', refreshToken);
       }
-      navigate('/pacientes', { replace: true });
+      window.location.href = '/pacientes';
     } catch (err: any) {
       const msg = err.response?.data?.error || 'Código inválido ou expirado';
       setErro(msg);

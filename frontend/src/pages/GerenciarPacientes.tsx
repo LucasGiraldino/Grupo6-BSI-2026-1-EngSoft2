@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader, Search } from 'lucide-react'
 import Toast from '../components/Toast'
+import api from '../services/api'
 
 interface Endereco {
   id?: number
@@ -108,13 +109,9 @@ export default function GerenciarPacientes() {
     try {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 10000)
-      const res = await fetch(`/api/consulta-cpf/${cpf}`, { signal: controller.signal })
+      const res = await api.get(`/api/consulta-cpf/${cpf}`, { signal: controller.signal })
       clearTimeout(timeout)
-      if (!res.ok) {
-        mostrarToast('Erro ao consultar CPF. Tente novamente.', 'erro')
-        return
-      }
-      const data = await res.json()
+      const data = res.data
       if (data.valido) {
         if (data.nome) {
           setForm(f => ({ ...f, nome: data.nome }))
@@ -145,8 +142,8 @@ export default function GerenciarPacientes() {
   async function carregarPacientes() {
     setCarregando(true)
     try {
-      const res = await fetch('/api/pacientes')
-      setPacientes(await res.json())
+      const res = await api.get('/api/pacientes')
+      setPacientes(res.data)
     } catch {}
     setCarregando(false)
   }
@@ -201,11 +198,12 @@ export default function GerenciarPacientes() {
         pais: form.enderecoPais,
       },
     }
-    const url = form.id ? `/api/pacientes/${form.id}` : '/api/pacientes'
-    const method = form.id ? 'PUT' : 'POST'
     try {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      if (!res.ok) throw new Error()
+      if (form.id) {
+        await api.put(`/api/pacientes/${form.id}`, body)
+      } else {
+        await api.post('/api/pacientes', body)
+      }
       setModalAberto(false)
       carregarPacientes()
     } catch {
@@ -216,7 +214,7 @@ export default function GerenciarPacientes() {
   async function confirmarDelete() {
     if (idParaExcluir === null) return
     try {
-      await fetch(`/api/pacientes/${idParaExcluir}`, { method: 'DELETE' })
+      await api.delete(`/api/pacientes/${idParaExcluir}`)
     } catch {}
     setIdParaExcluir(null)
     carregarPacientes()

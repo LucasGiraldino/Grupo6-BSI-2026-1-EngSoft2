@@ -55,7 +55,6 @@ public class SecurityFilter extends Filter {
         if (path.equals("/auth/verify") && method.equals("POST")) return true;
         if (path.equals("/auth/refresh") && method.equals("POST")) return true;
         if (path.equals("/api/parametrizacao/configuracao-sistema") && method.equals("GET")) return true;
-        if (path.startsWith("/api/")) return true;
         return false;
     }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, User, X, Trash2, Loader, Stethoscope, CalendarDays } from 'lucide-react'
+import api from '../services/api'
 
 interface Paciente {
   id: number
@@ -111,22 +112,22 @@ export default function Consultas() {
 
   async function carregarProfissionais() {
     try {
-      const res = await fetch('/api/profissionais')
-      setProfissionais(await res.json())
+      const res = await api.get('/api/profissionais')
+      setProfissionais(res.data)
     } catch {}
   }
 
   async function carregarPacientes() {
     try {
-      const res = await fetch('/api/pacientes')
-      setPacientes(await res.json())
+      const res = await api.get('/api/pacientes')
+      setPacientes(res.data)
     } catch {}
   }
 
   async function carregarPacientesTriagem() {
     try {
-      const res = await fetch('/api/consultas?status=ESPERANDO')
-      setPacientesTriagem(await res.json())
+      const res = await api.get('/api/consultas', { params: { status: 'ESPERANDO' } })
+      setPacientesTriagem(res.data)
     } catch {}
   }
 
@@ -140,8 +141,8 @@ export default function Consultas() {
     const ultimoDia = `${ano}-${String(mes).padStart(2, '0')}-${String(ultimoDiaNum).padStart(2, '0')}`
 
     Promise.all([
-      fetch(`/api/agenda/disponivel/mes?idProfissional=${profissionalId}&ano=${ano}&mes=${mes}`).then(r => r.json()),
-      fetch(`/api/consultas/agenda?profissional=${profissionalId}&dataInicio=${primeiroDia}&dataFim=${ultimoDia}`).then(r => r.json()),
+      api.get(`/api/agenda/disponivel/mes`, { params: { idProfissional: profissionalId, ano, mes } }).then(r => r.data),
+      api.get(`/api/consultas/agenda`, { params: { profissional: profissionalId, dataInicio: primeiroDia, dataFim: ultimoDia } }).then(r => r.data),
     ])
       .then(([slots, consultas]) => {
         setSlotsMes(slots)
@@ -270,12 +271,7 @@ export default function Consultas() {
           agenda: { id: modalSlot!.id },
           status: 'AGENDADA',
         }
-        const res = await fetch(`/api/consultas/${modalTriagem.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!res.ok) throw new Error()
+        await api.put(`/api/consultas/${modalTriagem.id}`, body)
       } else if (editandoId) {
         const body: Record<string, unknown> = {
           paciente: { id: parseInt(formPaciente) },
@@ -283,12 +279,7 @@ export default function Consultas() {
           observacoes: formObs || null,
           status: formStatus,
         }
-        const res = await fetch(`/api/consultas/${editandoId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!res.ok) throw new Error()
+        await api.put(`/api/consultas/${editandoId}`, body)
       } else {
         const body: Record<string, unknown> = {
           paciente: { id: parseInt(formPaciente) },
@@ -299,12 +290,7 @@ export default function Consultas() {
           status: 'AGENDADA',
           dataAgendamento: new Date().toISOString(),
         }
-        const res = await fetch('/api/consultas', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!res.ok) throw new Error()
+        await api.post('/api/consultas', body)
       }
 
       setModalAberto(false)
@@ -321,7 +307,7 @@ export default function Consultas() {
   async function confirmarDelete() {
     if (idParaExcluir === null) return
     try {
-      await fetch(`/api/consultas/${idParaExcluir}`, { method: 'DELETE' })
+      await api.delete(`/api/consultas/${idParaExcluir}`)
     } catch {}
     setIdParaExcluir(null)
     setModalAberto(false)
