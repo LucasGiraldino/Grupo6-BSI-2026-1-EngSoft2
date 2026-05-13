@@ -108,11 +108,32 @@ public class DoacaoService {
     }
 
     public List<Doacao> listarTodas() {
-        return doacaoRepo.findAll();
+        return listarTodas(null, null, null);
+    }
+
+    public List<Doacao> listarTodas(String nomePaciente, String dataInicio, String dataFim) {
+        return doacaoRepo.findAll(nomePaciente, dataInicio, dataFim);
     }
 
     public Optional<Doacao> buscarPorId(Integer id) {
         return doacaoRepo.findById(id);
+    }
+
+    public Doacao atualizar(Integer id, DoacaoRequestDTO dto) {
+        Doacao existente = doacaoRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Doação não encontrada."));
+
+        if (dto.getIdPaciente() != null) {
+            Paciente paciente = pacienteRepo.findById(dto.getIdPaciente())
+                    .orElseThrow(() -> new IllegalArgumentException("Paciente não cadastrado."));
+            existente.setPaciente(paciente);
+        }
+        if (dto.getObservacoes() != null) {
+            existente.setObservacoes(dto.getObservacoes());
+        }
+
+        doacaoRepo.save(existente);
+        return existente;
     }
 
     public void deletar(Integer id) {

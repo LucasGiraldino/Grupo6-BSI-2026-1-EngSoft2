@@ -12,11 +12,23 @@ public class ProfissionalRepository extends BaseRepository {
     }
 
     public List<Profissional> findAll() {
-        return queryList(
-            "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +
-            "JOIN users u ON p.id_usuario = u.id_usuario " +
-            "ORDER BY u.nome",
-            this::mapRow);
+        return findAll(null, null);
+    }
+
+    public List<Profissional> findAll(String nome, String especialidade) {
+        String sql = "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +
+            "JOIN users u ON p.id_usuario = u.id_usuario WHERE 1=1";
+        java.util.List<Object> params = new java.util.ArrayList<>();
+        if (nome != null && !nome.isBlank()) {
+            sql += " AND u.nome ILIKE ?";
+            params.add("%" + nome.trim() + "%");
+        }
+        if (especialidade != null && !especialidade.isBlank()) {
+            sql += " AND p.especialidade ILIKE ?";
+            params.add("%" + especialidade.trim() + "%");
+        }
+        sql += " ORDER BY u.nome";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public Optional<Profissional> findById(Integer id) {

@@ -3,6 +3,7 @@ package com.sigaac.model;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +18,15 @@ public class ConsultaService {
     }
 
     public List<Consulta> listar() {
-        return repository.findAll();
+        return listar(null);
+    }
+
+    public List<Consulta> listar(String status) {
+        return repository.findAll(status);
+    }
+
+    public List<Consulta> listarPorAgenda(Integer profissional, String dataInicio, String dataFim) {
+        return repository.findByAgendaPeriodo(profissional, dataInicio, dataFim);
     }
 
     public Consulta criar(Consulta consulta) {

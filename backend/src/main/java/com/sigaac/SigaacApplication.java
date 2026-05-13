@@ -72,6 +72,7 @@ public class SigaacApplication {
         ExameController exameCtrl = new ExameController(exameService, json);
         TriagemController triagemCtrl = new TriagemController(triagemService, json);
         ConsultaController consultaCtrl = new ConsultaController(consultaService, json);
+        ProntuarioController prontuarioCtrl = new ProntuarioController(prontuarioRepo, json);
         ProfissionalController profissionalCtrl = new ProfissionalController(profissionalRepo, json);
         AgendaController agendaCtrl = new AgendaController(agendaRepo, json);
 
@@ -91,6 +92,7 @@ public class SigaacApplication {
         exameCtrl.registerRoutes(router);
         triagemCtrl.registerRoutes(router);
         consultaCtrl.registerRoutes(router);
+        prontuarioCtrl.registerRoutes(router);
         profissionalCtrl.registerRoutes(router);
         agendaCtrl.registerRoutes(router);
 

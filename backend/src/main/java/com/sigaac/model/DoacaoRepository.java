@@ -17,7 +17,27 @@ public class DoacaoRepository extends BaseRepository {
     }
 
     public List<Doacao> findAll() {
-        return queryList("SELECT * FROM doacoes ORDER BY data_doacao DESC", this::mapRow);
+        return findAll(null, null, null);
+    }
+
+    public List<Doacao> findAll(String nomePaciente, String dataInicio, String dataFim) {
+        String sql = "SELECT d.* FROM doacoes d " +
+            "LEFT JOIN pacientes p ON d.id_paciente = p.id_paciente WHERE 1=1";
+        java.util.List<Object> params = new java.util.ArrayList<>();
+        if (nomePaciente != null && !nomePaciente.isBlank()) {
+            sql += " AND p.nome ILIKE ?";
+            params.add("%" + nomePaciente.trim() + "%");
+        }
+        if (dataInicio != null && !dataInicio.isBlank()) {
+            sql += " AND d.data_doacao >= ?::timestamp";
+            params.add(dataInicio);
+        }
+        if (dataFim != null && !dataFim.isBlank()) {
+            sql += " AND d.data_doacao <= ?::timestamp";
+            params.add(dataFim);
+        }
+        sql += " ORDER BY d.data_doacao DESC";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public Optional<Doacao> findById(Integer id) {

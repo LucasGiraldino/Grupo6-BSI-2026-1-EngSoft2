@@ -28,14 +28,35 @@ public class ProntuarioRepository extends BaseRepository {
     }
 
     public Prontuario save(Prontuario prontuario) {
-        Number id = executeInsert(
-            "INSERT INTO prontuarios (id_medico, id_usuario, id_paciente, data_abertura) VALUES (?, ?, ?, ?)",
-            prontuario.getMedico() != null ? prontuario.getMedico().getId() : null,
-            prontuario.getUsuario() != null ? prontuario.getUsuario().getId() : null,
-            prontuario.getPaciente() != null ? prontuario.getPaciente().getId() : null,
-            prontuario.getDataAbertura());
-        if (id != null) prontuario.setId(id.intValue());
+        if (prontuario.getId() == null) {
+            Number id = executeInsert(
+                "INSERT INTO prontuarios (id_medico, id_usuario, id_paciente, data_abertura, observacoes_gerais) VALUES (?, ?, ?, ?, ?)",
+                prontuario.getMedico() != null ? prontuario.getMedico().getId() : null,
+                prontuario.getUsuario() != null ? prontuario.getUsuario().getId() : null,
+                prontuario.getPaciente() != null ? prontuario.getPaciente().getId() : null,
+                prontuario.getDataAbertura(), prontuario.getObservacoesGerais());
+            if (id != null) prontuario.setId(id.intValue());
+        } else {
+            executeUpdate(
+                "UPDATE prontuarios SET id_medico = ?, id_usuario = ?, id_paciente = ?, data_abertura = ?, data_fechamento = ?, observacoes_gerais = ? WHERE id_prontuario = ?",
+                prontuario.getMedico() != null ? prontuario.getMedico().getId() : null,
+                prontuario.getUsuario() != null ? prontuario.getUsuario().getId() : null,
+                prontuario.getPaciente() != null ? prontuario.getPaciente().getId() : null,
+                prontuario.getDataAbertura(), prontuario.getDataFechamento(),
+                prontuario.getObservacoesGerais(), prontuario.getId());
+        }
         return prontuario;
+    }
+
+    public List<Prontuario> searchProntuarios(String query) {
+        String sql = "SELECT p.*, pac.id_paciente, pac.nome AS paciente_nome, pac.cpf AS paciente_cpf FROM prontuarios p " +
+            "JOIN pacientes pac ON p.id_paciente = pac.id_paciente WHERE p.data_fechamento IS NULL";
+        if (query != null && !query.isBlank()) {
+            String pattern = "%" + query.trim() + "%";
+            sql += " AND (pac.nome ILIKE ? OR pac.cpf ILIKE ? OR CAST(p.id_prontuario AS TEXT) ILIKE ?)";
+            return queryList(sql + " ORDER BY pac.nome LIMIT 20", this::mapRow, pattern, pattern, pattern);
+        }
+        return queryList(sql + " ORDER BY pac.nome LIMIT 20", this::mapRow);
     }
 
     private Prontuario mapRow(ResultSet rs) throws SQLException {

@@ -16,16 +16,49 @@ public class ConsultaRepository extends BaseRepository {
     }
 
     public List<Consulta> findAll() {
-        return queryList(
-            "SELECT c.*, p.id_paciente, p.nome AS p_nome, p.cpf AS p_cpf, " +
+        return findAll(null);
+    }
+
+    public List<Consulta> findAll(String status) {
+        String sql = "SELECT c.*, p.id_paciente, p.nome AS p_nome, p.cpf AS p_cpf, " +
             "a.id_agenda, a.data AS a_data, a.hora_inicio, a.hora_fim, " +
             "pr.id_profissional, u.nome AS prof_nome " +
             "FROM consultas c " +
             "JOIN pacientes p ON p.id_paciente = c.id_paciente " +
             "LEFT JOIN agenda a ON a.id_agenda = c.id_agenda " +
             "LEFT JOIN profissionais pr ON pr.id_profissional = c.id_profissional " +
-            "LEFT JOIN users u ON u.id_usuario = pr.id_usuario " +
-            "ORDER BY c.data_agendamento DESC", this::mapRow);
+            "LEFT JOIN users u ON u.id_usuario = pr.id_usuario";
+        if (status != null && !status.isBlank()) {
+            sql += " WHERE c.status = ?";
+            return queryList(sql + " ORDER BY c.data_agendamento DESC", this::mapRow, status);
+        }
+        return queryList(sql + " ORDER BY c.data_agendamento DESC", this::mapRow);
+    }
+
+    public List<Consulta> findByAgendaPeriodo(Integer profissional, String dataInicio, String dataFim) {
+        String sql = "SELECT c.*, p.id_paciente, p.nome AS p_nome, p.cpf AS p_cpf, " +
+            "a.id_agenda, a.data AS a_data, a.hora_inicio, a.hora_fim, " +
+            "pr.id_profissional, u.nome AS prof_nome " +
+            "FROM consultas c " +
+            "JOIN pacientes p ON p.id_paciente = c.id_paciente " +
+            "LEFT JOIN agenda a ON a.id_agenda = c.id_agenda " +
+            "LEFT JOIN profissionais pr ON pr.id_profissional = c.id_profissional " +
+            "LEFT JOIN users u ON u.id_usuario = pr.id_usuario WHERE 1=1";
+        java.util.List<Object> params = new java.util.ArrayList<>();
+        if (profissional != null) {
+            sql += " AND c.id_profissional = ?";
+            params.add(profissional);
+        }
+        if (dataInicio != null && !dataInicio.isBlank()) {
+            sql += " AND a.data >= ?::date";
+            params.add(java.sql.Date.valueOf(LocalDate.parse(dataInicio)));
+        }
+        if (dataFim != null && !dataFim.isBlank()) {
+            sql += " AND a.data <= ?::date";
+            params.add(java.sql.Date.valueOf(LocalDate.parse(dataFim)));
+        }
+        sql += " ORDER BY a.data, a.hora_inicio";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public Optional<Consulta> findById(Integer id) {

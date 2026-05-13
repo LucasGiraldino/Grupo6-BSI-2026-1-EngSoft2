@@ -27,7 +27,20 @@ public class ProfissionalController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        List<Profissional> profissionais = repository.findAll();
+        String query = exchange.getRequestURI().getQuery();
+        String nome = null;
+        String especialidade = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2) {
+                    String val = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                    if ("nome".equals(pair[0])) nome = val;
+                    else if ("especialidade".equals(pair[0])) especialidade = val;
+                }
+            }
+        }
+        List<Profissional> profissionais = repository.findAll(nome, especialidade);
         json.send(exchange, 200, profissionais);
     }
 
