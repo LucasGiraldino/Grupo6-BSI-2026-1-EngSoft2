@@ -6,10 +6,15 @@ import com.sigaac.view.JsonView;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 public class LoginController {
+
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final UserRepository userRepository;
     private final OtpService otpService;
@@ -31,6 +36,7 @@ public class LoginController {
 
     public void registerRoutes(HttpRouter router) {
         router.post("/auth/login", this::login);
+        router.post("/auth/register", this::register);
         router.post("/auth/verify", this::verify);
         router.post("/auth/logout", this::logout);
         router.post("/auth/refresh", this::refresh);
@@ -78,6 +84,69 @@ public class LoginController {
                 "message", "Código 2FA enviado.",
                 "otpSent", true,
                 "codigo", codigo
+        ));
+    }
+
+    private void register(HttpExchange exchange, Map<String, String> params) throws Exception {
+        Map<String, String> payload = json.read(exchange.getRequestBody(), Map.class);
+        String nome = payload.get("nome");
+        String email = payload.get("email");
+        String cpf = payload.get("cpf");
+        String senha = payload.get("senha");
+
+        if (nome == null || email == null || cpf == null || senha == null) {
+            json.send(exchange, 400, Map.of("error", "Campos obrigatórios: nome, email, cpf, senha"));
+            return;
+        }
+
+        if (senha.length() < 6) {
+            json.send(exchange, 400, Map.of("error", "Senha deve ter no mínimo 6 caracteres"));
+            return;
+        }
+
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            json.send(exchange, 400, Map.of("error", "E-mail inválido."));
+            return;
+        }
+
+        if (userRepository.count() > 0) {
+            json.send(exchange, 403, Map.of("error", "Já existe um usuário cadastrado. Faça login."));
+            return;
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            json.send(exchange, 409, Map.of("error", "Email já cadastrado"));
+            return;
+        }
+
+        if (userRepository.findByCpf(cpf).isPresent()) {
+            json.send(exchange, 409, Map.of("error", "CPF já cadastrado"));
+            return;
+        }
+
+        if (!CpfService.validarMatematicamente(cpf)) {
+            json.send(exchange, 400, Map.of("error", "CPF inválido. Verifique os dígitos."));
+            return;
+        }
+
+        User user = new User();
+        user.setNome(nome);
+        user.setEmail(email);
+        user.setCpf(cpf);
+        user.setSenhaHash(BCrypt.hashpw(senha, BCrypt.gensalt()));
+        user.setPerfil(UserRole.ADMIN);
+        user.setDataCadastro(LocalDate.now());
+        user.setAtivo(true);
+
+        userRepository.save(user);
+
+        String token = tokenService.generateToken(user);
+        String refreshToken = tokenService.generateRefreshToken(user);
+
+        json.send(exchange, 201, Map.of(
+                "accessToken", token,
+                "refreshToken", refreshToken,
+                "expiresIn", 7200
         ));
     }
 

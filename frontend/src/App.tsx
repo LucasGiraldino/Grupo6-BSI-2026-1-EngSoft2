@@ -12,6 +12,7 @@ import TriagemPage from './pages/Triagem'
 import Configuracoes from './pages/Configuracoes'
 import GerenciarUsuarios from './pages/GerenciarUsuarios'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import VerifyOTP from './pages/VerifyOTP'
 import EsqueciSenha from './pages/EsqueciSenha'
 import Doacoes from './pages/Doacoes'
@@ -66,6 +67,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/verificar" element={<VerifyOTP />} />
       <Route path="/esqueci-senha" element={<EsqueciSenha />} />
       <Route

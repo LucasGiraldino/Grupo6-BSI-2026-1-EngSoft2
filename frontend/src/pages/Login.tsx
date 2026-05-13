@@ -78,7 +78,13 @@ export default function Login() {
             {loading ? 'Aguarde...' : 'Entrar'}
           </button>
 
-          <div className="text-right">
+          <div className="flex items-center justify-between">
+            <Link
+              to="/register"
+              className="text-sm text-[#030213] hover:underline font-medium transition-colors"
+            >
+              Primeiro acesso? Cadastre-se
+            </Link>
             <Link
               to="/esqueci-senha"
               className="text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors"

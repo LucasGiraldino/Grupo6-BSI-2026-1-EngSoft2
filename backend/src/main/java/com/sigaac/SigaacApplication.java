@@ -94,8 +94,12 @@ public class SigaacApplication {
         profissionalCtrl.registerRoutes(router);
         agendaCtrl.registerRoutes(router);
 
-        DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo, profissionalRepo, agendaRepo);
-        initializer.seed();
+        String seedData = props.getProperty("app.seed-data", "false");
+        if (Boolean.parseBoolean(seedData)) {
+            DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo, profissionalRepo, agendaRepo);
+            initializer.seed();
+            System.out.println("Seed data loaded.");
+        }
 
         SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo, json);
         CorsFilter corsFilter = new CorsFilter();
