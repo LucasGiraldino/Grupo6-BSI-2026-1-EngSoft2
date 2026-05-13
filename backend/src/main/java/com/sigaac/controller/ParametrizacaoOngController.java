@@ -110,6 +110,10 @@ public class ParametrizacaoOngController {
     }
 
     private void create(HttpExchange exchange, Map<String, String> params) throws Exception {
+        if (service.findFirst().isPresent()) {
+            json.send(exchange, 400, Map.of("error", "Já existe uma parametrização cadastrada. Utilize o método de alteração para modificar."));
+            return;
+        }
         ParametrizacaoOngRequestDTO request = json.read(exchange.getRequestBody(), ParametrizacaoOngRequestDTO.class);
         String error = validateRequest(request);
         if (error != null) {
