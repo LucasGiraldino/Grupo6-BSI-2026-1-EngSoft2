@@ -84,7 +84,7 @@ public class UserRepository extends BaseRepository {
     }
 
     public void deleteById(Integer id) {
-        executeUpdate("UPDATE users SET deleted_at = NOW() WHERE id_usuario = ?", id);
+        executeUpdate("UPDATE users SET deleted_at = NOW(), ativo = false WHERE id_usuario = ?", id);
     }
 
     private User mapRow(ResultSet rs) throws SQLException {
