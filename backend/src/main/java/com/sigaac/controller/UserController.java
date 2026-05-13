@@ -93,7 +93,21 @@ public class UserController {
     }
 
     private void listUsers(HttpExchange exchange, Map<String, String> params) throws Exception {
-        List<Map<String, Object>> safeUsers = userRepository.findAll().stream()
+        String query = exchange.getRequestURI().getQuery();
+        String nome = null;
+        String perfil = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2) {
+                    String key = pair[0];
+                    String val = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                    if ("nome".equals(key)) nome = val;
+                    else if ("perfil".equals(key)) perfil = val;
+                }
+            }
+        }
+        List<Map<String, Object>> safeUsers = userRepository.findAll(nome, perfil).stream()
                 .map(u -> Map.<String, Object>of(
                         "id", u.getId(),
                         "nome", u.getNome(),
@@ -143,6 +157,16 @@ public class UserController {
         }
 
         User user = userOpt.get();
+        String perfilAtual = user.getRole() != null ? user.getRole().name() : null;
+
+        if ("ADMIN".equals(perfilAtual) && !"ADMIN".equals(novoPerfil.toUpperCase())) {
+            long adminsAtivos = userRepository.countByPerfil("ADMIN");
+            if (adminsAtivos <= 1) {
+                json.send(exchange, 400, Map.of("error", "Não é possível rebaixar o único administrador do sistema."));
+                return;
+            }
+        }
+
         user.setPerfil(UserRole.valueOf(novoPerfil.toUpperCase()));
         userRepository.save(user);
         json.send(exchange, 200, Map.of("message", "Perfil atualizado com sucesso para: " + novoPerfil));
@@ -155,6 +179,18 @@ public class UserController {
             json.send(exchange, 404, Map.of("error", "Usuário não encontrado"));
             return;
         }
+
+        User user = userOpt.get();
+        String perfilAtual = user.getRole() != null ? user.getRole().name() : null;
+
+        if ("ADMIN".equals(perfilAtual)) {
+            long adminsAtivos = userRepository.countByPerfil("ADMIN");
+            if (adminsAtivos <= 1) {
+                json.send(exchange, 400, Map.of("error", "Não é possível desativar o único administrador do sistema."));
+                return;
+            }
+        }
+
         userRepository.deleteById(id);
         json.send(exchange, 200, Map.of("message", "Usuário desativado com sucesso"));
     }

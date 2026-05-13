@@ -2,6 +2,7 @@ package com.sigaac.model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,14 +31,35 @@ public class UserRepository extends BaseRepository {
     }
 
     public List<User> findAll() {
-        return queryList(
-            "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY id_usuario",
-            this::mapRow);
+        return findAll(null, null);
+    }
+
+    public List<User> findAll(String nome, String perfil) {
+        String sql = "SELECT * FROM users WHERE deleted_at IS NULL";
+        List<Object> params = new ArrayList<>();
+        if (nome != null && !nome.isBlank()) {
+            sql += " AND (nome ILIKE ? OR email ILIKE ?)";
+            String pattern = "%" + nome.trim() + "%";
+            params.add(pattern);
+            params.add(pattern);
+        }
+        if (perfil != null && !perfil.isBlank()) {
+            sql += " AND perfil = ?";
+            params.add(perfil);
+        }
+        sql += " ORDER BY id_usuario";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public long count() {
         return querySingle("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL",
             rs -> rs.getLong(1)).orElse(0L);
+    }
+
+    public long countByPerfil(String perfil) {
+        return querySingle(
+            "SELECT COUNT(*) FROM users WHERE perfil = ? AND deleted_at IS NULL AND ativo = true",
+            rs -> rs.getLong(1), perfil).orElse(0L);
     }
 
     public User save(User user) {
