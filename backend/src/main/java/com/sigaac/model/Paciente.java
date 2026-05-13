@@ -20,13 +20,14 @@ public class Paciente {
     private String email;
     private String restricoesAlimentares;
     private LocalDate dataCadastro;
+    private Boolean ativo = true;
     private LocalDateTime deletedAt;
 
     public Paciente() {}
 
     public Paciente(Integer id, Prontuario prontuario, Endereco endereco, String nome, String cpf,
                     LocalDate dataNascimento, String sexo, String telefone, String email,
-                    String restricoesAlimentares, LocalDate dataCadastro, LocalDateTime deletedAt) {
+                    String restricoesAlimentares, LocalDate dataCadastro, Boolean ativo, LocalDateTime deletedAt) {
         this.id = id;
         this.prontuario = prontuario;
         this.endereco = endereco;
@@ -38,6 +39,7 @@ public class Paciente {
         this.email = email;
         this.restricoesAlimentares = restricoesAlimentares;
         this.dataCadastro = dataCadastro;
+        this.ativo = ativo;
         this.deletedAt = deletedAt;
     }
 
@@ -63,6 +65,8 @@ public class Paciente {
     public void setRestricoesAlimentares(String restricoesAlimentares) { this.restricoesAlimentares = restricoesAlimentares; }
     public LocalDate getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDate dataCadastro) { this.dataCadastro = dataCadastro; }
+    public Boolean getAtivo() { return ativo; }
+    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
     public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }

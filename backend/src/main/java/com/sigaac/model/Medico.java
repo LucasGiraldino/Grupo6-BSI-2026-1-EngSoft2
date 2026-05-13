@@ -11,18 +11,20 @@ public class Medico {
     private String crm;
     private String especialidadeMedica;
     private LocalDate dataAdmissao;
+    private Boolean ativo = true;
     private LocalDateTime deletedAt;
 
     public Medico() {}
 
     public Medico(Integer id, User usuario, Endereco endereco, String crm,
-                  String especialidadeMedica, LocalDate dataAdmissao, LocalDateTime deletedAt) {
+                  String especialidadeMedica, LocalDate dataAdmissao, Boolean ativo, LocalDateTime deletedAt) {
         this.id = id;
         this.usuario = usuario;
         this.endereco = endereco;
         this.crm = crm;
         this.especialidadeMedica = especialidadeMedica;
         this.dataAdmissao = dataAdmissao;
+        this.ativo = ativo;
         this.deletedAt = deletedAt;
     }
 
@@ -38,6 +40,8 @@ public class Medico {
     public void setEspecialidadeMedica(String especialidadeMedica) { this.especialidadeMedica = especialidadeMedica; }
     public LocalDate getDataAdmissao() { return dataAdmissao; }
     public void setDataAdmissao(LocalDate dataAdmissao) { this.dataAdmissao = dataAdmissao; }
+    public Boolean getAtivo() { return ativo; }
+    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
     public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }

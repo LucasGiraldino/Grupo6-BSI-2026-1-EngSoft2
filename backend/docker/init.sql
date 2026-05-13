@@ -55,6 +55,8 @@ CREATE TABLE users (
     perfil VARCHAR(20) NOT NULL,
     data_cadastro DATE NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    failed_attempts INTEGER DEFAULT 0,
+    locked_until TIMESTAMP,
     id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao),
     deleted_at TIMESTAMP
 );
