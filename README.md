@@ -84,7 +84,7 @@ O frontend estará disponível em: `http://localhost:3000`
 ```bash
 cd backend
 ./mvnw package
-java -jar target/sigaac-*.jar
+java -jar target/sigaac-1.0.0-SNAPSHOT.jar
 ```
 
 ### Frontend

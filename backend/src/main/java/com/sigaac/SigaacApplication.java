@@ -17,7 +17,8 @@ public class SigaacApplication {
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         try (var is = SigaacApplication.class.getClassLoader().getResourceAsStream("application.properties")) {
-            if (is != null) props.load(is);
+            if (is != null)
+                props.load(is);
         }
 
         DatabaseConfig db = new DatabaseConfig(props);
@@ -49,7 +50,8 @@ public class SigaacApplication {
         RateLimiterService rateLimiterService = new RateLimiterService();
         UserService userService = new UserService(userRepo);
         PacienteService pacienteService = new PacienteService(pacienteRepo, enderecoRepo, prontuarioRepo);
-        DoacaoService doacaoService = new DoacaoService(doacaoRepo, pacienteRepo, profissionalRepo, estoqueRepo, alimentoRepo, db.getDataSource());
+        DoacaoService doacaoService = new DoacaoService(doacaoRepo, pacienteRepo, profissionalRepo, estoqueRepo,
+                alimentoRepo, db.getDataSource());
         CompraService compraService = new CompraService(compraRepo, alimentoRepo, db.getDataSource());
         AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);
         ParametrizacaoOngService parametrizacaoService = new ParametrizacaoOngService(parametrizacaoRepo);
@@ -67,7 +69,8 @@ public class SigaacApplication {
         CompraController compraCtrl = new CompraController(compraService, json);
         AlimentoController alimentoCtrl = new AlimentoController(alimentoRepo, alimentoService, json);
         CategoriaAlimentoController catAlimentoCtrl = new CategoriaAlimentoController(catAlimentoRepo, json);
-        ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(parametrizacaoService, userService, json);
+        ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(parametrizacaoService,
+                userService, json);
         TipoExameController tipoExameCtrl = new TipoExameController(tipoExameRepo, json);
         ExameController exameCtrl = new ExameController(exameService, json);
         TriagemController triagemCtrl = new TriagemController(triagemService, json);
@@ -98,7 +101,8 @@ public class SigaacApplication {
 
         String seedData = props.getProperty("app.seed-data", "false");
         if (Boolean.parseBoolean(seedData)) {
-            DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo, enderecoRepo, prontuarioRepo, profissionalRepo, agendaRepo);
+            DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo,
+                    enderecoRepo, prontuarioRepo, profissionalRepo, agendaRepo);
             initializer.seed();
             System.out.println("Seed data loaded.");
         }
@@ -106,7 +110,7 @@ public class SigaacApplication {
         SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo, json);
         CorsFilter corsFilter = new CorsFilter();
         StaticFileHandler staticHandler = new StaticFileHandler(
-                "/Users/lucasgiraldino/estudos/Grupo6-BSI-2026-1-EngSoft2/frontend/dist");
+                "../frontend/dist");
 
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
