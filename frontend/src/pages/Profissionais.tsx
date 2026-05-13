@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
+import { formatarCpf } from '../utils/cpf'
 
 interface Profissional {
   id: number
@@ -27,6 +28,7 @@ interface UsuarioItem {
   id: number
   nome: string
   email: string
+  cpf: string
 }
 
 const FORM_VAZIO = {
@@ -305,7 +307,7 @@ export default function Profissionais() {
                   </select>
                   {usuarioSelecionado && (
                     <p className="mt-1 text-xs text-gray-400">
-                      CPF: {usuarioSelecionado.email}
+                      CPF: {formatarCpf(usuarioSelecionado.cpf || '')}
                     </p>
                   )}
                 </div>

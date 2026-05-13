@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
+import { formatarCpf } from '../utils/cpf'
 
 interface Alimento {
   id: number
@@ -394,7 +395,7 @@ export default function Doacoes() {
                       >
                         <option value="">Selecione o Paciente</option>
                         {pacientes.map(p => (
-                          <option key={p.id} value={p.id}>{p.nome} (CPF: {p.cpf})</option>
+                          <option key={p.id} value={p.id}>{p.nome} (CPF: {formatarCpf(p.cpf)})</option>
                         ))}
                       </select>
                     </div>

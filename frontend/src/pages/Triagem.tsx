@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { Plus, Pencil, Trash2, X, Loader, Search, Stethoscope } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
+import { formatarCpf } from '../utils/cpf'
 
 interface Medico {
   id: number
@@ -140,8 +141,8 @@ export default function TriagemPage() {
   }
 
   function selecionarProntuario(p: Prontuario) {
-    setForm(f => ({ ...f, prontuarioId: String(p.id), prontuarioLabel: `${p.paciente?.nome}${p.paciente?.cpf ? ` (${p.paciente.cpf})` : ''}` }))
-    setProntuarioSearch(`${p.paciente?.nome}${p.paciente?.cpf ? ` - ${p.paciente.cpf}` : ''}`)
+    setForm(f => ({ ...f, prontuarioId: String(p.id), prontuarioLabel: `${p.paciente?.nome}${p.paciente?.cpf ? ` (${formatarCpf(p.paciente.cpf)})` : ''}` }))
+    setProntuarioSearch(`${p.paciente?.nome}${p.paciente?.cpf ? ` - ${formatarCpf(p.paciente.cpf)}` : ''}`)
     setShowProntuarioDropdown(false)
     setSearchEmpty(false)
   }
@@ -381,7 +382,7 @@ export default function TriagemPage() {
                           className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors"
                         >
                           <span className="font-medium text-gray-900">{p.paciente?.nome}</span>
-                          {p.paciente?.cpf && <span className="text-gray-400 ml-2">{p.paciente.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}</span>}
+                           {p.paciente?.cpf && <span className="text-gray-400 ml-2">{formatarCpf(p.paciente.cpf)}</span>}
                           <span className="text-gray-400 ml-2 text-xs">#{p.id}</span>
                         </button>
                       ))}
