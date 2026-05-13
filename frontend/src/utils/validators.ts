@@ -76,3 +76,12 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export function validarEmail(email: string): boolean {
   return EMAIL_REGEX.test(email)
 }
+
+export function formatarMoeda(valor: number): string {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+export function limparMoeda(valor: string): number {
+  const digits = valor.replace(/\D/g, '')
+  return parseFloat(digits) / 100
+}

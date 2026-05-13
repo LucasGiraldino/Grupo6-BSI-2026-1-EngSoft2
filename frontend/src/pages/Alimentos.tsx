@@ -33,16 +33,22 @@ export default function Alimentos() {
   const [novaCategoria, setNovaCategoria] = useState('')
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+  const [filtroNome, setFiltroNome] = useState('')
+  const [filtroCategoriaId, setFiltroCategoriaId] = useState('')
 
   useEffect(() => {
     carregarCategorias()
     carregarAlimentos()
   }, [])
 
-  async function carregarAlimentos() {
+  async function carregarAlimentos(nome?: string, categoriaId?: string) {
     setCarregando(true)
     try {
-      const res = await api.get('/api/alimentos')
+      const params = new URLSearchParams()
+      if (nome) params.append('nome', nome)
+      if (categoriaId) params.append('categoriaId', categoriaId)
+      const query = params.toString()
+      const res = await api.get(`/api/alimentos${query ? `?${query}` : ''}`)
       setAlimentos(res.data)
     } catch {}
     setCarregando(false)
@@ -127,6 +133,42 @@ export default function Alimentos() {
             >
               <Plus className="w-4 h-4" />
               Novo Alimento
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Buscar por nome do alimento..."
+              value={filtroNome}
+              onChange={e => setFiltroNome(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] w-64"
+            />
+            <select
+              value={filtroCategoriaId}
+              onChange={e => setFiltroCategoriaId(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+            >
+              <option value="">Todas as categorias</option>
+              {categorias.map(c => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => carregarAlimentos(filtroNome, filtroCategoriaId)}
+              className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Buscar
+            </button>
+            <button
+              onClick={() => {
+                setFiltroNome('')
+                setFiltroCategoriaId('')
+                carregarAlimentos()
+              }}
+              className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Limpar
             </button>
           </div>
 

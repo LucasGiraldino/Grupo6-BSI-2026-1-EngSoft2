@@ -72,6 +72,8 @@ export default function GerenciarPacientes() {
   const [toastMensagem, setToastMensagem] = useState('')
   const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('erro')
   const [buscandoCpf, setBuscandoCpf] = useState(false)
+  const [filtroNome, setFiltroNome] = useState('')
+  const [filtroCpf, setFiltroCpf] = useState('')
 
   function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'erro') {
     setToastMensagem(mensagem)
@@ -119,10 +121,14 @@ export default function GerenciarPacientes() {
     }
   }
 
-  async function carregarPacientes() {
+  async function carregarPacientes(nome?: string, cpf?: string) {
     setCarregando(true)
     try {
-      const res = await api.get('/api/pacientes')
+      const params = new URLSearchParams()
+      if (nome) params.append('nome', nome)
+      if (cpf) params.append('cpf', cpf)
+      const query = params.toString()
+      const res = await api.get(`/api/pacientes${query ? `?${query}` : ''}`)
       setPacientes(res.data)
     } catch {}
     setCarregando(false)
@@ -221,6 +227,39 @@ export default function GerenciarPacientes() {
             >
               <Plus className="w-4 h-4" />
               Novo Paciente
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Buscar por nome..."
+              value={filtroNome}
+              onChange={e => setFiltroNome(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] w-64"
+            />
+            <input
+              type="text"
+              placeholder="Buscar por CPF..."
+              value={formatarCpf(filtroCpf)}
+              onChange={e => setFiltroCpf(limparCpf(e.target.value))}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] w-48"
+            />
+            <button
+              onClick={() => carregarPacientes(filtroNome, filtroCpf)}
+              className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Buscar
+            </button>
+            <button
+              onClick={() => {
+                setFiltroNome('')
+                setFiltroCpf('')
+                carregarPacientes()
+              }}
+              className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Limpar
             </button>
           </div>
 

@@ -38,6 +38,8 @@ export default function GerenciarUsuarios() {
   const [erroForm, setErroForm] = useState<ErroForm | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+  const [filtroSearch, setFiltroSearch] = useState('')
+  const [filtroPerfil, setFiltroPerfil] = useState('')
 
   const [toastAberto, setToastAberto] = useState(false)
   const [toastMensagem, setToastMensagem] = useState('')
@@ -55,10 +57,14 @@ export default function GerenciarUsuarios() {
     carregarUsuarios()
   }, [])
 
-  async function carregarUsuarios() {
+  async function carregarUsuarios(search?: string, perfil?: string) {
     setCarregando(true)
     try {
-      const res = await api.get('/apis/user')
+      const params = new URLSearchParams()
+      if (search) params.append('search', search)
+      if (perfil) params.append('perfil', perfil)
+      const query = params.toString()
+      const res = await api.get(`/apis/user${query ? `?${query}` : ''}`)
       setUsuarios(res.data)
     } catch {
       mostrarToast('Erro ao carregar usuários', 'erro')
@@ -146,6 +152,42 @@ export default function GerenciarUsuarios() {
         >
           <Plus className="w-4 h-4" />
           Novo Usuário
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Buscar por nome ou email..."
+          value={filtroSearch}
+          onChange={e => setFiltroSearch(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] w-64"
+        />
+        <select
+          value={filtroPerfil}
+          onChange={e => setFiltroPerfil(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+        >
+          <option value="">Todos</option>
+          {PERFIS.map(p => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+        <button
+          onClick={() => carregarUsuarios(filtroSearch, filtroPerfil)}
+          className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+        >
+          Buscar
+        </button>
+        <button
+          onClick={() => {
+            setFiltroSearch('')
+            setFiltroPerfil('')
+            carregarUsuarios()
+          }}
+          className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Limpar
         </button>
       </div>
 

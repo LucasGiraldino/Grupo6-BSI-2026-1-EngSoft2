@@ -77,6 +77,9 @@ export default function TriagemPage() {
     setToastAberto(true)
   }
 
+  const [filtroPacienteNome, setFiltroPacienteNome] = useState('')
+  const [filtroMedicoId, setFiltroMedicoId] = useState('')
+
   useEffect(() => {
     carregarDados()
   }, [])
@@ -92,11 +95,15 @@ export default function TriagemPage() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  async function carregarDados() {
+  async function carregarDados(pacienteNome?: string, medicoId?: string) {
     setCarregando(true)
     try {
+      const params = new URLSearchParams()
+      if (pacienteNome) params.append('pacienteNome', pacienteNome)
+      if (medicoId) params.append('medicoId', medicoId)
+      const query = params.toString()
       const [triagensRes, medicosRes] = await Promise.all([
-        api.get('/api/triagens'),
+        api.get(`/api/triagens${query ? `?${query}` : ''}`),
         api.get('/api/triagens/medicos'),
       ])
       setTriagens(triagensRes.data)
@@ -234,6 +241,42 @@ export default function TriagemPage() {
         >
           <Plus className="w-4 h-4" />
           Nova Triagem
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Buscar por nome do paciente..."
+          value={filtroPacienteNome}
+          onChange={e => setFiltroPacienteNome(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] w-64"
+        />
+        <select
+          value={filtroMedicoId}
+          onChange={e => setFiltroMedicoId(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+        >
+          <option value="">Todos os médicos</option>
+          {medicos.map(m => (
+            <option key={m.id} value={m.id}>{m.usuario?.nome ?? `CRM ${m.crm}`}</option>
+          ))}
+        </select>
+        <button
+          onClick={() => carregarDados(filtroPacienteNome, filtroMedicoId)}
+          className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+        >
+          Buscar
+        </button>
+        <button
+          onClick={() => {
+            setFiltroPacienteNome('')
+            setFiltroMedicoId('')
+            carregarDados()
+          }}
+          className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Limpar
         </button>
       </div>
 

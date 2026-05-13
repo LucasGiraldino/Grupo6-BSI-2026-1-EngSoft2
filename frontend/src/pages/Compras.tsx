@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
 import api from '../services/api'
+import { formatarMoeda, limparMoeda } from '../utils/validators'
 
 interface Alimento {
   id: number
@@ -41,16 +42,24 @@ export default function Compras() {
   const [erroForm, setErroForm] = useState('')
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
+  const [filtroDataInicio, setFiltroDataInicio] = useState('')
+  const [filtroDataFim, setFiltroDataFim] = useState('')
+  const [filtroObservacoes, setFiltroObservacoes] = useState('')
 
   useEffect(() => {
     carregarCompras()
     carregarAlimentos()
   }, [])
 
-  async function carregarCompras() {
+  async function carregarCompras(dataInicio?: string, dataFim?: string, observacoes?: string) {
     setCarregando(true)
     try {
-      const res = await api.get('/api/compras')
+      const params = new URLSearchParams()
+      if (dataInicio) params.append('dataInicio', dataInicio)
+      if (dataFim) params.append('dataFim', dataFim)
+      if (observacoes) params.append('observacoes', observacoes)
+      const query = params.toString()
+      const res = await api.get(`/api/compras${query ? `?${query}` : ''}`)
       setCompras(res.data)
     } catch {}
     setCarregando(false)
@@ -81,7 +90,7 @@ export default function Compras() {
         ? c.itens.map(i => ({
             alimento: { id: i.alimento.id },
             quantidade: String(i.quantidade),
-            preco: String(i.preco),
+            preco: String(Math.round(i.preco * 100)),
           }))
         : [{ ...ITEM_VAZIO }]
     )
@@ -113,7 +122,7 @@ export default function Compras() {
       itens: itens.map(i => ({
         alimento: { id: i.alimento.id },
         quantidade: parseFloat(i.quantidade),
-        preco: parseFloat(i.preco),
+        preco: limparMoeda(i.preco),
       })),
     }
     const url = form.id ? `/api/compras/${form.id}` : '/api/compras'
@@ -151,6 +160,51 @@ export default function Compras() {
             >
               <Plus className="w-4 h-4" />
               Nova Compra
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-end gap-3 mb-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Data Início</label>
+              <input
+                type="date"
+                value={filtroDataInicio}
+                onChange={e => setFiltroDataInicio(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Data Fim</label>
+              <input
+                type="date"
+                value={filtroDataFim}
+                onChange={e => setFiltroDataFim(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Buscar observações..."
+              value={filtroObservacoes}
+              onChange={e => setFiltroObservacoes(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] w-64"
+            />
+            <button
+              onClick={() => carregarCompras(filtroDataInicio, filtroDataFim, filtroObservacoes)}
+              className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Buscar
+            </button>
+            <button
+              onClick={() => {
+                setFiltroDataInicio('')
+                setFiltroDataFim('')
+                setFiltroObservacoes('')
+                carregarCompras()
+              }}
+              className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Limpar
             </button>
           </div>
 
@@ -285,13 +339,11 @@ export default function Compras() {
                           className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                         />
                         <input
-                          type="number"
+                          type="text"
                           required
-                          min="0.01"
-                          step="0.01"
                           placeholder="Preço"
-                          value={item.preco}
-                          onChange={e => atualizarItem(index, 'preco', e.target.value)}
+                          value={item.preco ? formatarMoeda(Number(item.preco) / 100) : ''}
+                          onChange={e => atualizarItem(index, 'preco', e.target.value.replace(/\D/g, ''))}
                           className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                         />
                         {itens.length > 1 && (

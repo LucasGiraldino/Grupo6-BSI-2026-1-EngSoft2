@@ -10,28 +10,45 @@ const DEFAULT_CONFIG = { nomeFantasia: 'SIGAAC', razaoSocial: 'Sistema Integrado
 
 const SystemConfigContext = createContext<{
   config: SystemConfig
+  parametrizacaoExiste: boolean
+  usuarioEhAdministrador: boolean
+  loaded: boolean
   refresh: () => void
 }>({
   config: DEFAULT_CONFIG,
+  parametrizacaoExiste: false,
+  usuarioEhAdministrador: false,
+  loaded: false,
   refresh: () => {},
 })
 
 export function SystemConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG)
+  const [parametrizacaoExiste, setParametrizacaoExiste] = useState(false)
+  const [usuarioEhAdministrador, setUsuarioEhAdministrador] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   const fetchConfig = useCallback(() => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) {
+      setLoaded(true)
+      return
+    }
 
     try {
       const parts = token.split('.')
-      if (parts.length !== 3) return
+      if (parts.length !== 3) {
+        setLoaded(true)
+        return
+      }
       const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
       const email = payload.sub
 
       if (email) {
         api.get('/api/parametrizacao/configuracao-sistema', { params: { email } })
           .then(res => {
+            setParametrizacaoExiste(res.data.parametrizacaoExiste || false)
+            setUsuarioEhAdministrador(res.data.usuarioEhAdministrador || false)
             if (res.data.parametrizacao) {
               setConfig({
                 nomeFantasia: res.data.parametrizacao.nomeFantasia || DEFAULT_CONFIG.nomeFantasia,
@@ -40,8 +57,13 @@ export function SystemConfigProvider({ children }: { children: ReactNode }) {
             }
           })
           .catch(() => {})
+          .finally(() => setLoaded(true))
+      } else {
+        setLoaded(true)
       }
-    } catch {}
+    } catch {
+      setLoaded(true)
+    }
   }, [])
 
   useEffect(() => {
@@ -49,7 +71,7 @@ export function SystemConfigProvider({ children }: { children: ReactNode }) {
   }, [fetchConfig])
 
   return (
-    <SystemConfigContext.Provider value={{ config, refresh: fetchConfig }}>
+    <SystemConfigContext.Provider value={{ config, parametrizacaoExiste, usuarioEhAdministrador, loaded, refresh: fetchConfig }}>
       {children}
     </SystemConfigContext.Provider>
   )
