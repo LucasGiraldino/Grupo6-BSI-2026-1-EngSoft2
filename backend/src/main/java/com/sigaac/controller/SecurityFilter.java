@@ -3,6 +3,7 @@ package com.sigaac.controller;
 import com.sigaac.model.User;
 import com.sigaac.model.UserRepository;
 import com.sigaac.model.TokenService;
+import com.sigaac.model.UserRole;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
@@ -40,14 +41,27 @@ public class SecurityFilter extends Filter {
         }
 
         try {
-            if (!isPublic(path, method) && AuthContext.get() == null) {
-                json.send(exchange, 401, Map.of("error", "Unauthorized"));
+            User currentUser = AuthContext.get();
+            if (currentUser == null) {
+                if (!isPublic(path, method)) {
+                    json.send(exchange, 401, Map.of("error", "Unauthorized"));
+                    return;
+                }
+            } else if (isAdminRequired(path, method) && currentUser.getRole() != UserRole.ADMIN) {
+                json.send(exchange, 403, Map.of("error", "Acesso restrito a administradores"));
                 return;
             }
             chain.doFilter(exchange);
         } finally {
             AuthContext.clear();
         }
+    }
+
+    private boolean isAdminRequired(String path, String method) {
+        if (path.startsWith("/apis/user")) return true;
+        if (path.startsWith("/api/parametrizacao")
+                && !path.equals("/api/parametrizacao/configuracao-sistema")) return true;
+        return false;
     }
 
     private boolean isPublic(String path, String method) {
