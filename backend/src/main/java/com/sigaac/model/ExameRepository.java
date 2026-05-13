@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +32,22 @@ public class ExameRepository extends BaseRepository {
         "LEFT JOIN pacientes pac ON p.id_paciente = pac.id_paciente ";
 
     public List<Exame> findAll() {
-        return queryList(BASE_SELECT + "WHERE e.deleted_at IS NULL ORDER BY e.id_exame", this::mapRow);
+        return findAll(null, null);
+    }
+
+    public List<Exame> findAll(String status, Integer tipoExameId) {
+        String sql = BASE_SELECT + "WHERE e.deleted_at IS NULL";
+        List<Object> params = new ArrayList<>();
+        if (status != null && !status.isBlank()) {
+            sql += " AND e.status = ?";
+            params.add(status);
+        }
+        if (tipoExameId != null) {
+            sql += " AND e.id_tipo_exame = ?";
+            params.add(tipoExameId);
+        }
+        sql += " ORDER BY e.id_exame";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public Optional<Exame> findById(Integer id) {

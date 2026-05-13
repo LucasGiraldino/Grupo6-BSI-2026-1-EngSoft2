@@ -13,7 +13,11 @@ public class ExameService {
     }
 
     public List<Exame> listar() {
-        return repository.findAll();
+        return listar(null, null);
+    }
+
+    public List<Exame> listar(String status, Integer tipoExameId) {
+        return repository.findAll(status, tipoExameId);
     }
 
     public Optional<Exame> buscarPorId(Integer id) {

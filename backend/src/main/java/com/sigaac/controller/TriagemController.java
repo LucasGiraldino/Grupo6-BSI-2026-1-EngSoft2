@@ -29,7 +29,23 @@ public class TriagemController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, service.listar());
+        String query = exchange.getRequestURI().getQuery();
+        String nomePaciente = null;
+        Integer medicoId = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2) {
+                    String key = pair[0];
+                    String val = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                    if ("nomePaciente".equals(key)) nomePaciente = val;
+                    else if ("medicoId".equals(key)) {
+                        try { medicoId = Integer.parseInt(val); } catch (NumberFormatException e) {}
+                    }
+                }
+            }
+        }
+        json.send(exchange, 200, service.listar(nomePaciente, medicoId));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {

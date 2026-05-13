@@ -12,9 +12,26 @@ public class CompraRepository extends BaseRepository {
     }
 
     public List<Compra> findAll() {
-        List<Compra> compras = queryList(
-            "SELECT * FROM compras ORDER BY id_compra",
-            this::mapCompra);
+        return findAll(null, null, null);
+    }
+
+    public List<Compra> findAll(String dataInicio, String dataFim, String observacoes) {
+        String sql = "SELECT * FROM compras WHERE 1=1";
+        List<Object> params = new ArrayList<>();
+        if (dataInicio != null && !dataInicio.isBlank()) {
+            sql += " AND data_compra >= ?::timestamp";
+            params.add(dataInicio);
+        }
+        if (dataFim != null && !dataFim.isBlank()) {
+            sql += " AND data_compra <= ?::timestamp";
+            params.add(dataFim);
+        }
+        if (observacoes != null && !observacoes.isBlank()) {
+            sql += " AND observacoes ILIKE ?";
+            params.add("%" + observacoes.trim() + "%");
+        }
+        sql += " ORDER BY id_compra";
+        List<Compra> compras = queryList(sql, this::mapCompra, params.toArray());
         for (Compra c : compras) {
             c.setItens(findItensByCompraId(c.getId()));
         }

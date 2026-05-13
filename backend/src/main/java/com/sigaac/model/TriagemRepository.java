@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,22 @@ public class TriagemRepository extends BaseRepository {
         "LEFT JOIN pacientes pac ON p.id_paciente = pac.id_paciente ";
 
     public List<Triagem> findAll() {
-        return queryList(BASE_SELECT + "WHERE t.deleted_at IS NULL ORDER BY t.data_triagem DESC", this::mapRow);
+        return findAll(null, null);
+    }
+
+    public List<Triagem> findAll(String nomePaciente, Integer medicoId) {
+        String sql = BASE_SELECT + "WHERE t.deleted_at IS NULL";
+        List<Object> params = new ArrayList<>();
+        if (nomePaciente != null && !nomePaciente.isBlank()) {
+            sql += " AND pac.nome ILIKE ?";
+            params.add("%" + nomePaciente.trim() + "%");
+        }
+        if (medicoId != null) {
+            sql += " AND t.id_medico = ?";
+            params.add(medicoId);
+        }
+        sql += " ORDER BY t.data_triagem DESC";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public Optional<Triagem> findById(Integer id) {

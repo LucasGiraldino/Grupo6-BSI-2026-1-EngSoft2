@@ -29,7 +29,23 @@ public class AlimentoController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, alimentoRepository.findAll());
+        String query = exchange.getRequestURI().getQuery();
+        String nome = null;
+        Integer categoriaId = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2) {
+                    String key = pair[0];
+                    String val = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                    if ("nome".equals(key)) nome = val;
+                    else if ("categoriaId".equals(key)) {
+                        try { categoriaId = Integer.parseInt(val); } catch (NumberFormatException e) {}
+                    }
+                }
+            }
+        }
+        json.send(exchange, 200, alimentoRepository.findAll(nome, categoriaId));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {

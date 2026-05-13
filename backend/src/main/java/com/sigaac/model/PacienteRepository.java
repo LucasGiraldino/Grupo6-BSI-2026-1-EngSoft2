@@ -2,6 +2,7 @@ package com.sigaac.model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,9 +16,22 @@ public class PacienteRepository extends BaseRepository {
     }
 
     public List<Paciente> findAll() {
-        return queryList(
-            "SELECT * FROM pacientes WHERE deleted_at IS NULL ORDER BY id_paciente",
-            this::mapRow);
+        return findAll(null, null);
+    }
+
+    public List<Paciente> findAll(String nome, String cpf) {
+        String sql = "SELECT * FROM pacientes WHERE deleted_at IS NULL";
+        List<Object> params = new ArrayList<>();
+        if (nome != null && !nome.isBlank()) {
+            sql += " AND nome ILIKE ?";
+            params.add("%" + nome.trim() + "%");
+        }
+        if (cpf != null && !cpf.isBlank()) {
+            sql += " AND cpf ILIKE ?";
+            params.add("%" + cpf.trim() + "%");
+        }
+        sql += " ORDER BY nome";
+        return queryList(sql, this::mapRow, params.toArray());
     }
 
     public Optional<Paciente> findById(Integer id) {

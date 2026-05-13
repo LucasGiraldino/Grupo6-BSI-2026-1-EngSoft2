@@ -26,7 +26,21 @@ public class PacienteController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, pacienteService.listar());
+        String query = exchange.getRequestURI().getQuery();
+        String nome = null;
+        String cpf = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2) {
+                    String key = pair[0];
+                    String val = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                    if ("nome".equals(key)) nome = val;
+                    else if ("cpf".equals(key)) cpf = val;
+                }
+            }
+        }
+        json.send(exchange, 200, pacienteService.listar(nome, cpf));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {

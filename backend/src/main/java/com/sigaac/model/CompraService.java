@@ -22,7 +22,11 @@ public class CompraService {
     }
 
     public List<CompraDTO> listarTodas() {
-        return compraRepo.findAll().stream()
+        return listarTodas(null, null, null);
+    }
+
+    public List<CompraDTO> listarTodas(String dataInicio, String dataFim, String observacoes) {
+        return compraRepo.findAll(dataInicio, dataFim, observacoes).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

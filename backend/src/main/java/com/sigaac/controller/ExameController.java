@@ -29,7 +29,23 @@ public class ExameController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, service.listar());
+        String query = exchange.getRequestURI().getQuery();
+        String status = null;
+        Integer tipoExameId = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2) {
+                    String key = pair[0];
+                    String val = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                    if ("status".equals(key)) status = val;
+                    else if ("tipoExameId".equals(key)) {
+                        try { tipoExameId = Integer.parseInt(val); } catch (NumberFormatException e) {}
+                    }
+                }
+            }
+        }
+        json.send(exchange, 200, service.listar(status, tipoExameId));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {

@@ -23,7 +23,11 @@ public class PacienteService {
     }
 
     public List<Paciente> listar() {
-        return pacienteRepo.findAll();
+        return listar(null, null);
+    }
+
+    public List<Paciente> listar(String nome, String cpf) {
+        return pacienteRepo.findAll(nome, cpf);
     }
 
     public Optional<Paciente> buscarPorId(Integer id) {

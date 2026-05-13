@@ -18,7 +18,11 @@ public class TriagemService {
     }
 
     public List<Triagem> listar() {
-        return repository.findAll();
+        return listar(null, null);
+    }
+
+    public List<Triagem> listar(String nomePaciente, Integer medicoId) {
+        return repository.findAll(nomePaciente, medicoId);
     }
 
     public Optional<Triagem> buscarPorId(Integer id) {
