@@ -11,6 +11,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class DoacaoService {
 
@@ -103,5 +105,17 @@ public class DoacaoService {
         }
 
         return doacao;
+    }
+
+    public List<Doacao> listarTodas() {
+        return doacaoRepo.findAll();
+    }
+
+    public Optional<Doacao> buscarPorId(Integer id) {
+        return doacaoRepo.findById(id);
+    }
+
+    public void deletar(Integer id) {
+        doacaoRepo.deleteById(id);
     }
 }

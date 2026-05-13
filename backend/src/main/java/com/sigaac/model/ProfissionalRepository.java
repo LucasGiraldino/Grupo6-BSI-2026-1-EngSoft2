@@ -46,6 +46,10 @@ public class ProfissionalRepository extends BaseRepository {
         return p;
     }
 
+    public void deleteById(Integer id) {
+        executeUpdate("UPDATE profissionais SET data_demissao = NOW() WHERE id_profissional = ?", id);
+    }
+
     private Profissional mapRow(ResultSet rs) throws SQLException {
         Profissional p = new Profissional();
         p.setId(rs.getInt("id_profissional"));
