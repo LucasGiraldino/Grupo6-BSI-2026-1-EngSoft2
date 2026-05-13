@@ -68,11 +68,15 @@ public class UserController {
         }
 
         UserRole role;
-        try {
-            role = UserRole.valueOf(perfilStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            json.send(exchange, 400, Map.of("error", "Perfil inválido. Use ADMIN ou USUARIO"));
-            return;
+        if (userRepository.count() == 0) {
+            role = UserRole.ADMIN;
+        } else {
+            try {
+                role = UserRole.valueOf(perfilStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                json.send(exchange, 400, Map.of("error", "Perfil inválido. Use ADMIN ou USUARIO"));
+                return;
+            }
         }
 
         User user = new User();

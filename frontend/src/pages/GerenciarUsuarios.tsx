@@ -319,15 +319,22 @@ export default function GerenciarUsuarios() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Perfil</label>
-                <select
-                  value={form.perfil}
-                  onChange={e => setForm(f => ({ ...f, perfil: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] bg-white"
-                >
-                  {PERFIS.map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
+                {usuarios.length === 0 ? (
+                  <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-500 flex items-center gap-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">ADMIN</span>
+                    <span>Primeiro usuário será ADMIN</span>
+                  </div>
+                ) : (
+                  <select
+                    value={form.perfil}
+                    onChange={e => setForm(f => ({ ...f, perfil: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] bg-white"
+                  >
+                    {PERFIS.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {erroForm && (
