@@ -76,6 +76,7 @@ export default function Consultas() {
 
   const [profissionais, setProfissionais] = useState<Profissional[]>([])
   const [profissionalId, setProfissionalId] = useState('')
+  const [filtroStatus, setFiltroStatus] = useState('')
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [mesAtual, setMesAtual] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [slotsMes, setSlotsMes] = useState<AgendaDisponivel[]>([])
@@ -226,7 +227,10 @@ export default function Consultas() {
 
   function horariosDoDia(chave: string) {
     const slots = slotsMes.filter(s => s.data === chave)
-    const consultas = consultasMes.filter(c => c.agenda?.data === chave)
+    let consultas = consultasMes.filter(c => c.agenda?.data === chave)
+    if (filtroStatus) {
+      consultas = consultas.filter(c => c.status === filtroStatus)
+    }
     const items: { tipo: 'slot' | 'consulta'; slot?: AgendaDisponivel; consulta?: Consulta; ordenador: string }[] = []
     slots.forEach(s => items.push({ tipo: 'slot', slot: s, ordenador: s.horaInicio }))
     consultas.forEach(c => items.push({ tipo: 'consulta', consulta: c, ordenador: c.agenda!.horaInicio }))
@@ -356,6 +360,18 @@ export default function Consultas() {
             {profissionais.map(p => (
               <option key={p.id} value={p.id}>{p.usuario?.nome} - {p.especialidade}</option>
             ))}
+          </select>
+          <label className="text-sm font-medium text-gray-700 ml-2">Status:</label>
+          <select
+            value={filtroStatus}
+            onChange={e => setFiltroStatus(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+          >
+            <option value="">Todos</option>
+            <option value="AGENDADA">Agendada</option>
+            <option value="CONCLUIDA">Concluída</option>
+            <option value="CANCELADA">Cancelada</option>
+            <option value="ESPERANDO">Esperando</option>
           </select>
         </div>
 

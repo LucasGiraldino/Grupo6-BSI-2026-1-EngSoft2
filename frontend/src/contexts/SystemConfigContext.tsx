@@ -4,9 +4,10 @@ import api from '../services/api'
 interface SystemConfig {
   nomeFantasia: string
   razaoSocial: string
+  logoUrl: string | null
 }
 
-const DEFAULT_CONFIG = { nomeFantasia: 'SIGAAC', razaoSocial: 'Sistema Integrado de Gestão' }
+const DEFAULT_CONFIG = { nomeFantasia: 'SIGAAC', razaoSocial: 'Sistema Integrado de Gestão', logoUrl: null }
 
 const SystemConfigContext = createContext<{
   config: SystemConfig
@@ -30,40 +31,34 @@ export function SystemConfigProvider({ children }: { children: ReactNode }) {
 
   const fetchConfig = useCallback(() => {
     const token = localStorage.getItem('token')
-    if (!token) {
-      setLoaded(true)
-      return
+
+    let email: string | null = null
+    if (token) {
+      try {
+        const parts = token.split('.')
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+          email = payload.sub || null
+        }
+      } catch {}
     }
 
-    try {
-      const parts = token.split('.')
-      if (parts.length !== 3) {
-        setLoaded(true)
-        return
-      }
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
-      const email = payload.sub
-
-      if (email) {
-        api.get('/api/parametrizacao/configuracao-sistema', { params: { email } })
-          .then(res => {
-            setParametrizacaoExiste(res.data.parametrizacaoExiste || false)
-            setUsuarioEhAdministrador(res.data.usuarioEhAdministrador || false)
-            if (res.data.parametrizacao) {
-              setConfig({
-                nomeFantasia: res.data.parametrizacao.nomeFantasia || DEFAULT_CONFIG.nomeFantasia,
-                razaoSocial: res.data.parametrizacao.razaoSocial || DEFAULT_CONFIG.razaoSocial,
-              })
-            }
+    api.get('/api/parametrizacao/configuracao-sistema', { params: email ? { email } : {} })
+      .then(res => {
+        setParametrizacaoExiste(res.data.parametrizacaoExiste || false)
+        setUsuarioEhAdministrador(res.data.usuarioEhAdministrador || false)
+        if (res.data.parametrizacao) {
+          setConfig({
+            nomeFantasia: res.data.parametrizacao.nomeFantasia || DEFAULT_CONFIG.nomeFantasia,
+            razaoSocial: res.data.parametrizacao.razaoSocial || DEFAULT_CONFIG.razaoSocial,
+            logoUrl: res.data.parametrizacao.logoUrl || null,
           })
-          .catch(() => {})
-          .finally(() => setLoaded(true))
-      } else {
-        setLoaded(true)
-      }
-    } catch {
-      setLoaded(true)
-    }
+        } else {
+          setConfig(DEFAULT_CONFIG)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true))
   }, [])
 
   useEffect(() => {

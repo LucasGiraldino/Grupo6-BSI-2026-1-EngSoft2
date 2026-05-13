@@ -5,9 +5,10 @@ import { useAuth } from '../hooks/useAuth'
 interface SidebarProps {
   systemName?: string
   systemSubtitle?: string
+  logoUrl?: string | null
 }
 
-export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Sistema Integrado de Gestão' }: SidebarProps) {
+export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Sistema Integrado de Gestão', logoUrl }: SidebarProps) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -35,9 +36,14 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-      <div className="px-6 py-3.5 border-b border-gray-200">
-        <div className="text-xl font-semibold text-gray-900">{systemName}</div>
-        <div className="text-sm text-gray-500 mt-1 line-clamp-1">{systemSubtitle}</div>
+      <div className="px-6 py-3.5 border-b border-gray-200 flex items-center gap-3">
+        {logoUrl && (
+          <img src={logoUrl} alt={systemName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+        )}
+        <div className="min-w-0">
+          <div className="text-xl font-semibold text-gray-900 truncate">{systemName}</div>
+          <div className="text-sm text-gray-500 mt-1 line-clamp-1">{systemSubtitle}</div>
+        </div>
       </div>
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {menuItems.map(item => (

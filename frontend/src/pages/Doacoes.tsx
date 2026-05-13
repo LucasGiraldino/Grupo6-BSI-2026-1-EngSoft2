@@ -62,8 +62,7 @@ export default function Doacoes() {
   const [filtroDataFim, setFiltroDataFim] = useState('')
 
   const [modalCriarAberto, setModalCriarAberto] = useState(false)
-  const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false)
-  const [doacaoDetalhes, setDoacaoDetalhes] = useState<Doacao | null>(null)
+  const [editandoId, setEditandoId] = useState<number | null>(null)
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
 
   const [pacientes, setPacientes] = useState<Paciente[]>([])
@@ -122,6 +121,7 @@ export default function Doacoes() {
   }
 
   function abrirModalNovo() {
+    setEditandoId(null)
     setPacienteSelecionadoId('')
     setAlimentoSelecionadoId('')
     setQuantidadeInput('')
@@ -133,9 +133,20 @@ export default function Doacoes() {
     setModalCriarAberto(true)
   }
 
-  function abrirModalDetalhes(d: Doacao) {
-    setDoacaoDetalhes(d)
-    setModalDetalhesAberto(true)
+  function abrirModalEditar(d: Doacao) {
+    setEditandoId(d.id)
+    setPacienteSelecionadoId(d.paciente?.id || '')
+    setObservacoes(d.observacoes || '')
+    setCesta(d.itens?.map(i => ({
+      idAlimento: i.alimento.id,
+      nomeAlimento: i.alimento.nome,
+      quantidade: i.quantidade,
+      unidadeMedida: i.alimento.unidadeMedida || ''
+    })) || [])
+    setMensagemErro('')
+    carregarPacientes()
+    carregarEstoque()
+    setModalCriarAberto(true)
   }
 
   const handleAdicionarItem = () => {
@@ -192,16 +203,30 @@ export default function Doacoes() {
       return
     }
     try {
-      await api.post('/api/doacoes', {
-        idPaciente: Number(pacienteSelecionadoId),
-        idProfissional: 1,
-        observacoes,
-        itens: cesta.map(item => ({
-          idAlimento: item.idAlimento,
-          quantidade: item.quantidade
-        }))
-      })
-      mostrarToast('Doação cadastrada com sucesso!', 'sucesso')
+      if (editandoId) {
+        await api.put(`/api/doacoes/${editandoId}`, {
+          idPaciente: Number(pacienteSelecionadoId),
+          idProfissional: 1,
+          observacoes,
+          itens: cesta.map(item => ({
+            idAlimento: item.idAlimento,
+            quantidade: item.quantidade
+          }))
+        })
+        mostrarToast('Doação atualizada com sucesso!', 'sucesso')
+      } else {
+        await api.post('/api/doacoes', {
+          idPaciente: Number(pacienteSelecionadoId),
+          idProfissional: 1,
+          observacoes,
+          itens: cesta.map(item => ({
+            idAlimento: item.idAlimento,
+            quantidade: item.quantidade
+          }))
+        })
+        mostrarToast('Doação cadastrada com sucesso!', 'sucesso')
+      }
+      setEditandoId(null)
       setModalCriarAberto(false)
       carregarDoacoes()
       carregarEstoque()
@@ -323,7 +348,7 @@ export default function Doacoes() {
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => abrirModalDetalhes(d)}
+                        onClick={() => abrirModalEditar(d)}
                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-900"
                         title="Visualizar detalhes"
                       >
@@ -350,8 +375,8 @@ export default function Doacoes() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Nova Doação</h3>
-              <button onClick={() => setModalCriarAberto(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <h3 className="text-lg font-semibold text-gray-900">{editandoId ? 'Editar Doação' : 'Nova Doação'}</h3>
+              <button onClick={() => { setEditandoId(null); setModalCriarAberto(false) }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -478,7 +503,7 @@ export default function Doacoes() {
                     <div className="flex gap-3 mt-4">
                       <button
                         type="button"
-                        onClick={() => setModalCriarAberto(false)}
+                        onClick={() => { setEditandoId(null); setModalCriarAberto(false) }}
                         className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         Cancelar
@@ -499,76 +524,6 @@ export default function Doacoes() {
         </div>
       )}
 
-      {/* MODAL DETALHES DOAÇÃO */}
-      {modalDetalhesAberto && doacaoDetalhes && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Detalhes da Doação #{doacaoDetalhes.id}</h3>
-              <button onClick={() => setModalDetalhesAberto(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Paciente</label>
-                  <p className="text-sm text-gray-900">{doacaoDetalhes.paciente?.nome ?? '-'}</p>
-                  {doacaoDetalhes.paciente?.cpf && (
-                    <p className="text-xs text-gray-500">CPF: {doacaoDetalhes.paciente.cpf}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Profissional</label>
-                  <p className="text-sm text-gray-900">{doacaoDetalhes.profissional?.usuario?.nome ?? '-'}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Data da Doação</label>
-                  <p className="text-sm text-gray-900">{formatarDataHora(doacaoDetalhes.dataDoacao)}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Observações</label>
-                  <p className="text-sm text-gray-900">{doacaoDetalhes.observacoes || '-'}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Itens</label>
-                <table className="w-full text-sm border border-gray-200 rounded-lg">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500">Alimento</th>
-                      <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500">Quantidade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {doacaoDetalhes.itens?.length === 0 ? (
-                      <tr>
-                        <td colSpan={2} className="px-4 py-4 text-center text-gray-400">Nenhum item</td>
-                      </tr>
-                    ) : (
-                      doacaoDetalhes.itens?.map(item => (
-                        <tr key={item.id} className="border-b border-gray-100 last:border-0">
-                          <td className="px-4 py-2.5 text-gray-900">{item.alimento?.nome ?? '-'}</td>
-                          <td className="px-4 py-2.5 text-gray-600">{item.quantidade} {item.alimento?.unidadeMedida ?? ''}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="flex justify-end px-6 py-4 border-t border-gray-200">
-              <button
-                onClick={() => setModalDetalhesAberto(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MODAL CONFIRMAÇÃO DELETE */}
       {idParaExcluir !== null && (

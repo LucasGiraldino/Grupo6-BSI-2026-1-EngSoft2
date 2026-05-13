@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, X, Loader } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Loader } from 'lucide-react'
 import Toast from '../components/Toast'
 import api from '../services/api'
 import { validarCpf, limparCpf, formatarCpf } from '../utils/cpf'
@@ -44,6 +44,7 @@ export default function GerenciarUsuarios() {
   const [toastAberto, setToastAberto] = useState(false)
   const [toastMensagem, setToastMensagem] = useState('')
   const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
+  const [editandoId, setEditandoId] = useState<number | null>(null)
 
   function mostrarToast(mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') {
     setToastMensagem(mensagem)
@@ -73,7 +74,21 @@ export default function GerenciarUsuarios() {
   }
 
   function abrirModalNovo() {
+    setEditandoId(null)
     setForm({ ...FORM_VAZIO })
+    setErroForm(null)
+    setModalAberto(true)
+  }
+
+  function abrirModalEdicao(usuario: Usuario) {
+    setEditandoId(usuario.id)
+    setForm({
+      nome: usuario.nome,
+      email: usuario.email,
+      cpf: usuario.cpf,
+      senha: '',
+      perfil: usuario.perfil === 'ADMINISTRADOR' ? 'ADMIN' : usuario.perfil,
+    })
     setErroForm(null)
     setModalAberto(true)
   }
@@ -99,7 +114,11 @@ export default function GerenciarUsuarios() {
       setErroForm({ campo: 'cpf', mensagem: 'CPF inválido. Verifique os dígitos.' })
       return false
     }
-    if (form.senha.length < 6) {
+    if (!editandoId && form.senha.length < 6) {
+      setErroForm({ campo: 'senha', mensagem: 'Senha deve ter no mínimo 6 caracteres' })
+      return false
+    }
+    if (editandoId && form.senha.length > 0 && form.senha.length < 6) {
       setErroForm({ campo: 'senha', mensagem: 'Senha deve ter no mínimo 6 caracteres' })
       return false
     }
@@ -112,18 +131,29 @@ export default function GerenciarUsuarios() {
 
     setSalvando(true)
     try {
-      await api.post('/apis/user', {
+      const payload: Record<string, string> = {
         nome: form.nome.trim(),
         email: form.email.trim(),
         cpf: limparCpf(form.cpf),
-        senha: form.senha,
         perfil: form.perfil,
-      })
+      }
+      if (form.senha) {
+        payload.senha = form.senha
+      }
+
+      if (editandoId) {
+        await api.put(`/apis/user/${editandoId}`, payload)
+        mostrarToast('Usuário atualizado com sucesso!', 'sucesso')
+      } else {
+        payload.senha = form.senha
+        await api.post('/apis/user', payload)
+        mostrarToast('Usuário criado com sucesso!', 'sucesso')
+      }
+      setEditandoId(null)
       setModalAberto(false)
-      mostrarToast('Usuário criado com sucesso!', 'sucesso')
       carregarUsuarios()
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Erro ao criar usuário'
+      const msg = err.response?.data?.error || (editandoId ? 'Erro ao atualizar usuário' : 'Erro ao criar usuário')
       setErroForm({ mensagem: msg })
     } finally {
       setSalvando(false)
@@ -233,13 +263,22 @@ export default function GerenciarUsuarios() {
                     <td className="px-4 py-3 text-sm text-gray-500">{u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '-'}</td>
                     <td className="px-4 py-3 text-right">
                       {u.ativo && (
-                        <button
-                          onClick={() => setIdParaExcluir(u.id)}
-                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Desativar usuário"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => abrirModalEdicao(u)}
+                            className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors mr-1"
+                            title="Editar usuário"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setIdParaExcluir(u.id)}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Desativar usuário"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
                     </td>
                   </tr>
@@ -261,8 +300,8 @@ export default function GerenciarUsuarios() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h4 className="text-lg font-semibold text-gray-900">Novo Usuário</h4>
-              <button onClick={() => setModalAberto(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <h4 className="text-lg font-semibold text-gray-900">{editandoId ? 'Editar Usuário' : 'Novo Usuário'}</h4>
+              <button onClick={() => { setModalAberto(false); setEditandoId(null); }} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -305,14 +344,16 @@ export default function GerenciarUsuarios() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Senha {editandoId && <span className="text-gray-400 font-normal">(deixe em branco para manter)</span>}
+                </label>
                 <input
                   type="password"
                   value={form.senha}
                   onChange={e => setForm(f => ({ ...f, senha: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
-                  placeholder="Mínimo 6 caracteres"
-                  required
+                  placeholder={editandoId ? "Nova senha (opcional)" : "Mínimo 6 caracteres"}
+                  required={!editandoId}
                   minLength={6}
                 />
               </div>
@@ -346,7 +387,7 @@ export default function GerenciarUsuarios() {
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setModalAberto(false)}
+                  onClick={() => { setModalAberto(false); setEditandoId(null); }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancelar
@@ -357,7 +398,7 @@ export default function GerenciarUsuarios() {
                   className="px-6 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {salvando && <Loader className="w-4 h-4 animate-spin" />}
-                  {salvando ? 'Salvando...' : 'Criar Usuário'}
+                  {salvando ? 'Salvando...' : editandoId ? 'Salvar Alterações' : 'Criar Usuário'}
                 </button>
               </div>
             </form>

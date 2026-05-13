@@ -30,6 +30,7 @@ public class UserController {
         router.post("/apis/user", this::createUser);
         router.get("/apis/user", this::listUsers);
         router.get("/apis/user/{id}", this::getUser);
+        router.put("/apis/user/{id}", this::updateUser);
         router.put("/apis/user/{id}/perfil", this::changeUserProfile);
         router.delete("/apis/user/{id}", this::deleteUser);
     }
@@ -141,6 +142,86 @@ public class UserController {
                 "perfil", u.getPerfil(),
                 "ativo", u.getAtivo(),
                 "dataCadastro", u.getDataCadastro() != null ? u.getDataCadastro().toString() : null
+        ));
+    }
+
+    private void updateUser(HttpExchange exchange, Map<String, String> params) throws Exception {
+        Integer id = Integer.parseInt(params.get("p1"));
+        Map<String, String> payload = json.read(exchange.getRequestBody(), Map.class);
+
+        var userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            json.send(exchange, 404, Map.of("error", "Usuário não encontrado"));
+            return;
+        }
+
+        User user = userOpt.get();
+
+        String nome = payload.get("nome");
+        String email = payload.get("email");
+        String cpf = payload.get("cpf");
+        String senha = payload.get("senha");
+        String perfilStr = payload.get("perfil");
+
+        if (nome != null && !nome.isBlank()) {
+            user.setNome(nome.trim());
+        }
+
+        if (email != null && !email.isBlank()) {
+            if (!EMAIL_PATTERN.matcher(email).matches()) {
+                json.send(exchange, 400, Map.of("error", "E-mail inválido."));
+                return;
+            }
+            var existing = userRepository.findByEmail(email.trim());
+            if (existing.isPresent() && !existing.get().getId().equals(id)) {
+                json.send(exchange, 409, Map.of("error", "Email já cadastrado"));
+                return;
+            }
+            user.setEmail(email.trim());
+        }
+
+        if (cpf != null && !cpf.isBlank()) {
+            if (!CpfService.validarMatematicamente(cpf)) {
+                json.send(exchange, 400, Map.of("error", "CPF inválido. Verifique os dígitos."));
+                return;
+            }
+            var existing = userRepository.findByCpf(cpf);
+            if (existing.isPresent() && !existing.get().getId().equals(id)) {
+                json.send(exchange, 409, Map.of("error", "CPF já cadastrado"));
+                return;
+            }
+            user.setCpf(cpf);
+        }
+
+        if (senha != null && !senha.isEmpty()) {
+            user.setSenhaHash(BCrypt.hashpw(senha, BCrypt.gensalt()));
+        }
+
+        if (perfilStr != null && !perfilStr.isBlank()) {
+            UserRole novaRole;
+            try {
+                novaRole = UserRole.valueOf(perfilStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                json.send(exchange, 400, Map.of("error", "Perfil inválido. Use ADMIN ou USUARIO"));
+                return;
+            }
+
+            String perfilAtual = user.getRole() != null ? user.getRole().name() : null;
+            if ("ADMIN".equals(perfilAtual) && !"ADMIN".equals(novaRole.name())) {
+                long adminsAtivos = userRepository.countByPerfil("ADMIN");
+                if (adminsAtivos <= 1) {
+                    json.send(exchange, 400, Map.of("error", "Não é possível rebaixar o único administrador do sistema."));
+                    return;
+                }
+            }
+            user.setPerfil(novaRole);
+        }
+
+        userRepository.save(user);
+
+        json.send(exchange, 200, Map.of(
+                "message", "Usuário atualizado com sucesso",
+                "id", user.getId()
         ));
     }
 
