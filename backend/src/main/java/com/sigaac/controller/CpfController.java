@@ -1,7 +1,7 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.CpfResponseDTO;
-import com.sigaac.model.CpfService;
+import com.sigaac.config.CpfValidator;
+import com.sigaac.model.CpfResponse;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -9,11 +9,11 @@ import java.util.Map;
 
 public class CpfController {
 
-    private final CpfService cpfService;
+    private final CpfValidator cpfValidator;
     private final JsonView json;
 
-    public CpfController(CpfService cpfService, JsonView json) {
-        this.cpfService = cpfService;
+    public CpfController(CpfValidator cpfValidator, JsonView json) {
+        this.cpfValidator = cpfValidator;
         this.json = json;
     }
 
@@ -25,10 +25,10 @@ public class CpfController {
         String cpf = params.get("p1");
         String digitos = cpf.replaceAll("\\D", "");
         if (digitos.length() != 11) {
-            json.send(exchange, 400, CpfResponseDTO.invalido(digitos, "CPF deve conter 11 dígitos."));
+            json.send(exchange, 400, CpfResponse.invalido(digitos, "CPF deve conter 11 dígitos."));
             return;
         }
-        CpfResponseDTO response = cpfService.consultar(digitos);
+        CpfResponse response = cpfValidator.consultar(digitos);
         json.send(exchange, 200, response);
     }
 }

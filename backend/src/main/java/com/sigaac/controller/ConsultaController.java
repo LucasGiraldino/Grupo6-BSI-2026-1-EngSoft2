@@ -1,19 +1,18 @@
 package com.sigaac.controller;
 
+import com.sigaac.config.DatabaseHelper;
 import com.sigaac.model.Consulta;
-import com.sigaac.model.ConsultaService;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class ConsultaController {
 
-    private final ConsultaService consultaService;
     private final JsonView json;
 
-    public ConsultaController(ConsultaService consultaService, JsonView json) {
-        this.consultaService = consultaService;
+    public ConsultaController(JsonView json) {
         this.json = json;
     }
 
@@ -36,26 +35,26 @@ public class ConsultaController {
                 }
             }
         }
-        json.send(exchange, 200, consultaService.listar(status));
+        json.send(exchange, 200, Consulta.findAll(status));
     }
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
-        Consulta salva = consultaService.criar(consulta);
-        json.send(exchange, 201, salva);
+        consulta.save();
+        json.send(exchange, 201, consulta);
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        Consulta existente = consultaService.buscarPorId(id);
-        if (existente == null) {
+        var existente = Consulta.findById(id);
+        if (existente.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Consulta não encontrada."));
             return;
         }
         Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
         consulta.setId(id);
-        Consulta atualizada = consultaService.criar(consulta);
-        json.send(exchange, 200, atualizada);
+        consulta.save();
+        json.send(exchange, 200, consulta);
     }
 
     private void listarPorAgenda(HttpExchange exchange, Map<String, String> params) throws Exception {
@@ -74,14 +73,35 @@ public class ConsultaController {
                 }
             }
         }
-        json.send(exchange, 200, consultaService.listarPorAgenda(profissional, dataInicio, dataFim));
+        json.send(exchange, 200, Consulta.findByAgendaPeriodo(profissional, dataInicio, dataFim));
     }
 
     private void cancelar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
 
         try {
-            consultaService.cancelar(id);
+            var opt = Consulta.findById(id);
+            if (opt.isEmpty()) {
+                throw new IllegalArgumentException("Consulta não encontrada.");
+            }
+            if (!"AGENDADA".equals(opt.get().getStatus())) {
+                throw new IllegalStateException("A consulta não está no status AGENDADA e não pode ser cancelada.");
+            }
+
+            DatabaseHelper.getInstance().executeInTransaction(conn -> {
+                var db = DatabaseHelper.getInstance();
+                db.executeUpdate(
+                    "UPDATE consultas SET status = 'CANCELADA', data_cancelamento = ? WHERE id_consulta = ?",
+                    LocalDateTime.now(), id);
+
+                var idAgendaOpt = db.querySingle(
+                    "SELECT id_agenda FROM consultas WHERE id_consulta = ?",
+                    rs -> rs.getObject("id_agenda", Integer.class), id);
+
+                idAgendaOpt.ifPresent(agId ->
+                    db.executeUpdate("UPDATE agenda SET disponivel = TRUE WHERE id_agenda = ?", agId));
+            });
+
             json.send(exchange, 200, Map.of("message", "Consulta cancelada com sucesso."));
         } catch (IllegalArgumentException e) {
             json.send(exchange, 404, Map.of("error", e.getMessage()));

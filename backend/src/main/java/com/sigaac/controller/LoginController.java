@@ -1,8 +1,15 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.*;
-import com.sun.net.httpserver.HttpExchange;
+import com.sigaac.config.CpfValidator;
+import com.sigaac.config.JwtUtil;
+import com.sigaac.config.OtpUtil;
+import com.sigaac.config.RateLimiter;
+import com.sigaac.model.LoginRequest;
+import com.sigaac.model.User;
+import com.sigaac.model.UserRole;
+import com.sigaac.model.VerifyRequest;
 import com.sigaac.view.JsonView;
+import com.sun.net.httpserver.HttpExchange;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.Instant;
@@ -16,21 +23,17 @@ public class LoginController {
     private static final Pattern EMAIL_PATTERN =
         Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
-    private final UserRepository userRepository;
-    private final OtpService otpService;
-    private final TokenService tokenService;
-    private final RateLimiterService rateLimiterService;
+    private final JwtUtil jwtUtil;
+    private final OtpUtil otpUtil;
+    private final RateLimiter rateLimiter;
     private final JsonView json;
     private final ConcurrentHashMap<String, Instant> pendingVerifications = new ConcurrentHashMap<>();
     private static final long PENDING_TTL_MINUTES = 10;
 
-    public LoginController(UserRepository userRepository,
-                           OtpService otpService, TokenService tokenService,
-                           RateLimiterService rateLimiterService, JsonView json) {
-        this.userRepository = userRepository;
-        this.otpService = otpService;
-        this.tokenService = tokenService;
-        this.rateLimiterService = rateLimiterService;
+    public LoginController(JwtUtil jwtUtil, OtpUtil otpUtil, RateLimiter rateLimiter, JsonView json) {
+        this.jwtUtil = jwtUtil;
+        this.otpUtil = otpUtil;
+        this.rateLimiter = rateLimiter;
         this.json = json;
     }
 
@@ -45,15 +48,16 @@ public class LoginController {
     }
 
     private void login(HttpExchange exchange, Map<String, String> params) throws Exception {
-        LoginRequestDTO data = json.read(exchange.getRequestBody(), LoginRequestDTO.class);
-        String rateLimitKey = "login:" + data.email();
+        LoginRequest data = json.read(exchange.getRequestBody(), LoginRequest.class);
+        String email = data.getEmail();
+        String rateLimitKey = "login:" + email;
 
-        if (!rateLimiterService.isAllowed(rateLimitKey)) {
+        if (!rateLimiter.isAllowed(rateLimitKey)) {
             json.send(exchange, 429, Map.of("error", "Muitas tentativas. Aguarde 5 minutos."));
             return;
         }
 
-        var userOpt = userRepository.findByEmail(data.email());
+        var userOpt = User.findByEmail(email);
         if (userOpt.isEmpty()) {
             json.send(exchange, 401, Map.of("error", "Credenciais inválidas"));
             return;
@@ -71,15 +75,15 @@ public class LoginController {
             return;
         }
 
-        if (!BCrypt.checkpw(data.senha(), user.getSenhaHash())) {
+        if (!BCrypt.checkpw(data.getSenha(), user.getSenhaHash())) {
             user.incrementFailedAttempts();
-            userRepository.save(user);
+            user.save();
             json.send(exchange, 401, Map.of("error", "Credenciais inválidas"));
             return;
         }
 
         pendingVerifications.put(user.getEmail(), Instant.now().plusSeconds(PENDING_TTL_MINUTES * 60));
-        String codigo = otpService.generateOtp(user.getEmail());
+        String codigo = otpUtil.generateOtp(user.getEmail());
         json.send(exchange, 200, Map.of(
                 "message", "Código 2FA enviado.",
                 "otpSent", true,
@@ -109,22 +113,22 @@ public class LoginController {
             return;
         }
 
-        if (userRepository.count() > 0) {
+        if (User.count() > 0) {
             json.send(exchange, 403, Map.of("error", "Já existe um usuário cadastrado. Faça login."));
             return;
         }
 
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (User.findByEmail(email).isPresent()) {
             json.send(exchange, 409, Map.of("error", "Email já cadastrado"));
             return;
         }
 
-        if (userRepository.findByCpf(cpf).isPresent()) {
+        if (User.findByCpf(cpf).isPresent()) {
             json.send(exchange, 409, Map.of("error", "CPF já cadastrado"));
             return;
         }
 
-        if (!CpfService.validarMatematicamente(cpf)) {
+        if (!CpfValidator.validarMatematicamente(cpf)) {
             json.send(exchange, 400, Map.of("error", "CPF inválido. Verifique os dígitos."));
             return;
         }
@@ -138,10 +142,10 @@ public class LoginController {
         user.setDataCadastro(LocalDate.now());
         user.setAtivo(true);
 
-        userRepository.save(user);
+        user.save();
 
-        String token = tokenService.generateToken(user);
-        String refreshToken = tokenService.generateRefreshToken(user);
+        String token = jwtUtil.generateToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
 
         json.send(exchange, 201, Map.of(
                 "accessToken", token,
@@ -151,26 +155,27 @@ public class LoginController {
     }
 
     private void verify(HttpExchange exchange, Map<String, String> params) throws Exception {
-        VerifyRequestDTO data = json.read(exchange.getRequestBody(), VerifyRequestDTO.class);
-        String rateLimitKey = "verify:" + data.email();
+        VerifyRequest data = json.read(exchange.getRequestBody(), VerifyRequest.class);
+        String email = data.getEmail();
+        String rateLimitKey = "verify:" + email;
 
-        if (!rateLimiterService.isAllowed(rateLimitKey)) {
+        if (!rateLimiter.isAllowed(rateLimitKey)) {
             json.send(exchange, 429, Map.of("error", "Muitas tentativas. Aguarde 5 minutos."));
             return;
         }
 
-        Instant expiresAt = pendingVerifications.get(data.email());
+        Instant expiresAt = pendingVerifications.get(email);
         if (expiresAt == null || Instant.now().isAfter(expiresAt)) {
             json.send(exchange, 401, Map.of("error", "Credenciais inválidas."));
             return;
         }
 
-        if (!otpService.validateOtp(data.email(), data.codigo())) {
+        if (!otpUtil.validateOtp(email, data.getCodigo())) {
             json.send(exchange, 401, Map.of("error", "Código inválido ou expirado"));
             return;
         }
 
-        var userOpt = userRepository.findByEmail(data.email());
+        var userOpt = User.findByEmail(email);
         if (userOpt.isEmpty()) {
             json.send(exchange, 401, Map.of("error", "Credenciais inválidas."));
             return;
@@ -184,12 +189,12 @@ public class LoginController {
         }
 
         user.resetFailedAttempts();
-        userRepository.save(user);
+        user.save();
 
-        String token = tokenService.generateToken(user);
-        String refreshToken = tokenService.generateRefreshToken(user);
-        rateLimiterService.reset(rateLimitKey);
-        pendingVerifications.remove(data.email());
+        String token = jwtUtil.generateToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+        rateLimiter.reset(rateLimitKey);
+        pendingVerifications.remove(email);
 
         json.send(exchange, 200, Map.of(
                 "accessToken", token,
@@ -211,19 +216,19 @@ public class LoginController {
             return;
         }
 
-        String email = tokenService.validateRefreshToken(refreshToken);
+        String email = jwtUtil.validateRefreshToken(refreshToken);
         if (email.isEmpty()) {
             json.send(exchange, 401, Map.of("error", "Refresh token inválido ou expirado"));
             return;
         }
 
-        var user = userRepository.findByEmail(email).orElse(null);
+        var user = User.findByEmail(email).orElse(null);
         if (user == null) {
             json.send(exchange, 401, Map.of("error", "Usuário não encontrado"));
             return;
         }
 
-        String newToken = tokenService.generateToken(user);
+        String newToken = jwtUtil.generateToken(user);
         json.send(exchange, 200, Map.of("accessToken", newToken, "expiresIn", 7200));
     }
 
@@ -236,7 +241,7 @@ public class LoginController {
             return;
         }
 
-        var userOpt = userRepository.findByEmail(email);
+        var userOpt = User.findByEmail(email);
         if (userOpt.isEmpty()) {
             json.send(exchange, 200, Map.of("message", "Se o email existir, você receberá um código de recuperação."));
             return;
@@ -248,7 +253,7 @@ public class LoginController {
             return;
         }
 
-        String codigo = otpService.generateOtp(email);
+        String codigo = otpUtil.generateOtp(email);
         json.send(exchange, 200, Map.of(
                 "message", "Código de recuperação gerado.",
                 "codigo", codigo
@@ -271,12 +276,12 @@ public class LoginController {
             return;
         }
 
-        if (!otpService.validateOtp(email, codigo)) {
+        if (!otpUtil.validateOtp(email, codigo)) {
             json.send(exchange, 401, Map.of("error", "Código inválido ou expirado"));
             return;
         }
 
-        var userOpt = userRepository.findByEmail(email);
+        var userOpt = User.findByEmail(email);
         if (userOpt.isEmpty()) {
             json.send(exchange, 401, Map.of("error", "Usuário não encontrado"));
             return;
@@ -285,7 +290,7 @@ public class LoginController {
         var user = userOpt.get();
         user.setSenhaHash(BCrypt.hashpw(novaSenha, BCrypt.gensalt()));
         user.resetFailedAttempts();
-        userRepository.save(user);
+        user.save();
 
         json.send(exchange, 200, Map.of("message", "Senha redefinida com sucesso."));
     }

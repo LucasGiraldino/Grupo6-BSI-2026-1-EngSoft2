@@ -1,8 +1,6 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Alimento;
-import com.sigaac.model.AlimentoRepository;
-import com.sigaac.model.AlimentoService;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -10,13 +8,9 @@ import java.util.Map;
 
 public class AlimentoController {
 
-    private final AlimentoRepository alimentoRepository;
-    private final AlimentoService alimentoService;
     private final JsonView json;
 
-    public AlimentoController(AlimentoRepository alimentoRepository, AlimentoService alimentoService, JsonView json) {
-        this.alimentoRepository = alimentoRepository;
-        this.alimentoService = alimentoService;
+    public AlimentoController(JsonView json) {
         this.json = json;
     }
 
@@ -45,12 +39,12 @@ public class AlimentoController {
                 }
             }
         }
-        json.send(exchange, 200, alimentoRepository.findAll(nome, categoriaId));
+        json.send(exchange, 200, Alimento.findAll(nome, categoriaId));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = alimentoRepository.findById(id);
+        var opt = Alimento.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -60,28 +54,29 @@ public class AlimentoController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Alimento body = json.read(exchange.getRequestBody(), Alimento.class);
-        Alimento alimento = alimentoService.criar(body);
+        Alimento alimento = body.criarComEstoque();
         json.send(exchange, 201, alimento);
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (!alimentoRepository.existsById(id)) {
+        if (!Alimento.existsById(id)) {
             json.send(exchange, 404, Map.of("error", "Alimento não encontrado"));
             return;
         }
         Alimento alimento = json.read(exchange.getRequestBody(), Alimento.class);
         alimento.setId(id);
-        json.send(exchange, 200, alimentoRepository.save(alimento));
+        alimento.save();
+        json.send(exchange, 200, alimento);
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (!alimentoRepository.existsById(id)) {
+        if (!Alimento.existsById(id)) {
             json.send(exchange, 404, Map.of("error", "Alimento não encontrado"));
             return;
         }
-        alimentoRepository.deleteById(id);
+        Alimento.findById(id).ifPresent(Alimento::delete);
         json.send(exchange, 204, null);
     }
 }

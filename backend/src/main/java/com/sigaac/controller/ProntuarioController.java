@@ -1,7 +1,6 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Prontuario;
-import com.sigaac.model.ProntuarioRepository;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -9,11 +8,9 @@ import java.util.Map;
 
 public class ProntuarioController {
 
-    private final ProntuarioRepository repository;
     private final JsonView json;
 
-    public ProntuarioController(ProntuarioRepository repository, JsonView json) {
-        this.repository = repository;
+    public ProntuarioController(JsonView json) {
         this.json = json;
     }
 
@@ -35,15 +32,15 @@ public class ProntuarioController {
             }
         }
         if (q != null && !q.isBlank()) {
-            json.send(exchange, 200, repository.searchProntuarios(q));
+            json.send(exchange, 200, Prontuario.search(q));
         } else {
-            json.send(exchange, 200, repository.findAll());
+            json.send(exchange, 200, Prontuario.findAll());
         }
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = repository.findById(id);
+        var opt = Prontuario.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -53,14 +50,14 @@ public class ProntuarioController {
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = repository.findById(id);
+        var opt = Prontuario.findById(id);
         if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Prontuário não encontrado"));
             return;
         }
         Prontuario prontuario = json.read(exchange.getRequestBody(), Prontuario.class);
         prontuario.setId(id);
-        Prontuario atualizado = repository.save(prontuario);
-        json.send(exchange, 200, atualizado);
+        prontuario.save();
+        json.send(exchange, 200, prontuario);
     }
 }

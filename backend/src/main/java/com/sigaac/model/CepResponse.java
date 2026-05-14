@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-public class CepResponseDTO {
+public class CepResponse {
     private boolean valido;
     private String cep;
     private String logradouro;
@@ -27,17 +27,17 @@ public class CepResponseDTO {
     public String getMensagem() { return mensagem; }
     public void setMensagem(String mensagem) { this.mensagem = mensagem; }
 
-    public static CepResponseDTO invalido(String cep, String mensagem) {
-        CepResponseDTO dto = new CepResponseDTO();
+    public static CepResponse invalido(String cep, String mensagem) {
+        CepResponse dto = new CepResponse();
         dto.setValido(false);
         dto.setCep(cep);
         dto.setMensagem(mensagem);
         return dto;
     }
 
-    public static CepResponseDTO valido(String cep, String logradouro, String complemento,
-                                         String bairro, String localidade, String uf) {
-        CepResponseDTO dto = new CepResponseDTO();
+    public static CepResponse valido(String cep, String logradouro, String complemento,
+                                          String bairro, String localidade, String uf) {
+        CepResponse dto = new CepResponse();
         dto.setValido(true);
         dto.setCep(cep);
         dto.setLogradouro(logradouro);

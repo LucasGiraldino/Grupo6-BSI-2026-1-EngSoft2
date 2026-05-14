@@ -1,9 +1,9 @@
-package com.sigaac.model;
+package com.sigaac.config;
 
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RateLimiterService {
+public class RateLimiter {
 
     private final ConcurrentHashMap<String, RateLimitEntry> store = new ConcurrentHashMap<>();
     private final int maxRequests = 5;

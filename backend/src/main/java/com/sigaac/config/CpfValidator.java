@@ -1,23 +1,23 @@
-package com.sigaac.model;
+package com.sigaac.config;
 
-import java.util.Properties;
+import com.sigaac.model.CpfResponse;
 
-public class CpfService {
+public class CpfValidator {
 
     private final String apiToken;
 
-    public CpfService(Properties props) {
-        this.apiToken = props.getProperty("api.cpf.token", "");
+    public CpfValidator(String apiToken) {
+        this.apiToken = apiToken != null ? apiToken : "";
     }
 
-    public CpfResponseDTO consultar(String cpf) {
+    public CpfResponse consultar(String cpf) {
         boolean valido = validarMatematicamente(cpf);
         if (!valido) {
-            return CpfResponseDTO.invalido(cpf, "CPF inválido.");
+            return CpfResponse.invalido(cpf, "CPF inválido.");
         }
 
-        if (apiToken == null || apiToken.isEmpty()) {
-            return CpfResponseDTO.mock(cpf, "Cliente Exemplo", "01/01/1990", "MASCULINO");
+        if (apiToken.isEmpty()) {
+            return CpfResponse.mock(cpf, "Cliente Exemplo", "01/01/1990", "MASCULINO");
         }
 
         try {
@@ -26,10 +26,10 @@ public class CpfService {
             conn.setRequestProperty("Authorization", "Bearer " + apiToken);
             conn.setRequestMethod("GET");
 
-            String json = new String(conn.getInputStream().readAllBytes());
-            return CpfResponseDTO.mock(cpf, "Cliente API", "01/01/1990", "MASCULINO");
+            new String(conn.getInputStream().readAllBytes());
+            return CpfResponse.mock(cpf, "Cliente API", "01/01/1990", "MASCULINO");
         } catch (Exception e) {
-            return CpfResponseDTO.invalido(cpf, "Erro ao consultar CPF na API.");
+            return CpfResponse.invalido(cpf, "Erro ao consultar CPF na API.");
         }
     }
 

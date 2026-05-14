@@ -1,7 +1,7 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.CnpjResponseDTO;
-import com.sigaac.model.CnpjService;
+import com.sigaac.config.CnpjUtil;
+import com.sigaac.model.CnpjResponse;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -9,11 +9,11 @@ import java.util.Map;
 
 public class CnpjController {
 
-    private final CnpjService cnpjService;
+    private final CnpjUtil cnpjUtil;
     private final JsonView json;
 
-    public CnpjController(CnpjService cnpjService, JsonView json) {
-        this.cnpjService = cnpjService;
+    public CnpjController(CnpjUtil cnpjUtil, JsonView json) {
+        this.cnpjUtil = cnpjUtil;
         this.json = json;
     }
 
@@ -25,10 +25,10 @@ public class CnpjController {
         String cnpj = params.get("p1");
         String digitos = cnpj.replaceAll("\\D", "");
         if (digitos.length() != 14) {
-            json.send(exchange, 400, CnpjResponseDTO.invalido(digitos, "CNPJ deve conter 14 dígitos."));
+            json.send(exchange, 400, CnpjResponse.invalido(digitos, "CNPJ deve conter 14 dígitos."));
             return;
         }
-        CnpjResponseDTO response = cnpjService.consultar(digitos);
+        CnpjResponse response = cnpjUtil.consultar(digitos);
         json.send(exchange, 200, response);
     }
 }

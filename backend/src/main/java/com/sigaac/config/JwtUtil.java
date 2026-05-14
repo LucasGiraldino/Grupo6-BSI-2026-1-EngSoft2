@@ -1,22 +1,23 @@
-package com.sigaac.model;
+package com.sigaac.config;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.sigaac.model.User;
 
 import java.time.Instant;
 import java.util.Properties;
 
-public class TokenService {
+public class JwtUtil {
 
     private final String secret;
     private final String issuer;
     private final Integer expirationHours;
     private final Integer refreshExpirationHours;
 
-    public TokenService(Properties props) {
+    public JwtUtil(Properties props) {
         this.secret = props.getProperty("api.security.token.secret",
                 "dev-only-insecure-secret-mude-em-producao");
         this.issuer = props.getProperty("api.security.token.issuer", "sigaac");

@@ -2,21 +2,18 @@ package com.sigaac.model;
 
 import java.time.LocalDate;
 
-public class ParametrizacaoOngDTO {
-    private Integer id;
+public class ParametrizacaoOngRequest {
     private String razaoSocial;
     private String nomeFantasia;
     private String cnpj;
     private String telefone;
     private String email;
     private String site;
-    private EnderecoDTO endereco;
+    private Endereco endereco;
     private String logoUrl;
     private LocalDate dataFundacao;
     private String observacoes;
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
     public String getRazaoSocial() { return razaoSocial; }
     public void setRazaoSocial(String razaoSocial) { this.razaoSocial = razaoSocial; }
     public String getNomeFantasia() { return nomeFantasia; }
@@ -29,8 +26,8 @@ public class ParametrizacaoOngDTO {
     public void setEmail(String email) { this.email = email; }
     public String getSite() { return site; }
     public void setSite(String site) { this.site = site; }
-    public EnderecoDTO getEndereco() { return endereco; }
-    public void setEndereco(EnderecoDTO endereco) { this.endereco = endereco; }
+    public Endereco getEndereco() { return endereco; }
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
     public String getLogoUrl() { return logoUrl; }
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
     public LocalDate getDataFundacao() { return dataFundacao; }

@@ -1,7 +1,6 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.CategoriaAlimento;
-import com.sigaac.model.CategoriaAlimentoRepository;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -9,11 +8,9 @@ import java.util.Map;
 
 public class CategoriaAlimentoController {
 
-    private final CategoriaAlimentoRepository repository;
     private final JsonView json;
 
-    public CategoriaAlimentoController(CategoriaAlimentoRepository repository, JsonView json) {
-        this.repository = repository;
+    public CategoriaAlimentoController(JsonView json) {
         this.json = json;
     }
 
@@ -26,12 +23,12 @@ public class CategoriaAlimentoController {
     }
 
     private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, repository.findAll());
+        json.send(exchange, 200, CategoriaAlimento.findAll());
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = repository.findById(id);
+        var opt = CategoriaAlimento.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -41,27 +38,27 @@ public class CategoriaAlimentoController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         CategoriaAlimento body = json.read(exchange.getRequestBody(), CategoriaAlimento.class);
-        json.send(exchange, 201, repository.save(body));
+        json.send(exchange, 201, body.save());
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (!repository.existsById(id)) {
+        if (!CategoriaAlimento.existsById(id)) {
             json.send(exchange, 404, Map.of("error", "Categoria não encontrada"));
             return;
         }
         CategoriaAlimento cat = json.read(exchange.getRequestBody(), CategoriaAlimento.class);
         cat.setId(id);
-        json.send(exchange, 200, repository.save(cat));
+        json.send(exchange, 200, cat.save());
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (!repository.existsById(id)) {
+        if (!CategoriaAlimento.existsById(id)) {
             json.send(exchange, 404, Map.of("error", "Categoria não encontrada"));
             return;
         }
-        repository.deleteById(id);
+        CategoriaAlimento.findById(id).ifPresent(CategoriaAlimento::delete);
         json.send(exchange, 204, null);
     }
 }

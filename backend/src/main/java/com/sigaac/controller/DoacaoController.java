@@ -1,20 +1,18 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Doacao;
-import com.sigaac.model.DoacaoRequestDTO;
-import com.sigaac.model.DoacaoService;
+import com.sigaac.model.Paciente;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.util.List;
 import java.util.Map;
 
 public class DoacaoController {
 
-    private final DoacaoService doacaoService;
     private final JsonView json;
 
-    public DoacaoController(DoacaoService doacaoService, JsonView json) {
-        this.doacaoService = doacaoService;
+    public DoacaoController(JsonView json) {
         this.json = json;
     }
 
@@ -27,10 +25,27 @@ public class DoacaoController {
     }
 
     private void efetuarDoacao(HttpExchange exchange, Map<String, String> params) throws Exception {
-        DoacaoRequestDTO dto = json.read(exchange.getRequestBody(), DoacaoRequestDTO.class);
+        Map<String, Object> payload = json.read(exchange.getRequestBody(), Map.class);
         try {
-            Doacao novaDoacao = doacaoService.efetuarDoacao(dto);
-            json.send(exchange, 201, novaDoacao);
+            Integer idPaciente = payload.get("idPaciente") != null
+                ? ((Number) payload.get("idPaciente")).intValue() : null;
+            Integer idProfissional = payload.get("idProfissional") != null
+                ? ((Number) payload.get("idProfissional")).intValue() : null;
+            String observacoes = (String) payload.get("observacoes");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> itensPayload = (List<Map<String, Object>>) payload.get("itens");
+
+            List<Doacao.ItemDoacaoRequest> itens = new java.util.ArrayList<>();
+            if (itensPayload != null) {
+                for (Map<String, Object> item : itensPayload) {
+                    Integer idAlimento = ((Number) item.get("idAlimento")).intValue();
+                    java.math.BigDecimal quantidade = new java.math.BigDecimal(item.get("quantidade").toString());
+                    itens.add(new Doacao.ItemDoacaoRequest(idAlimento, quantidade));
+                }
+            }
+
+            Doacao doacao = Doacao.efetuar(idPaciente, idProfissional, observacoes, itens);
+            json.send(exchange, 201, doacao);
         } catch (IllegalArgumentException | IllegalStateException e) {
             json.send(exchange, 400, Map.of("error", e.getMessage()));
         } catch (Exception e) {
@@ -40,15 +55,25 @@ public class DoacaoController {
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var existente = doacaoService.buscarPorId(id);
+        var existente = Doacao.findById(id);
         if (existente.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Doação não encontrada."));
             return;
         }
-        DoacaoRequestDTO dto = json.read(exchange.getRequestBody(), DoacaoRequestDTO.class);
+        Map<String, Object> payload = json.read(exchange.getRequestBody(), Map.class);
         try {
-            Doacao atualizada = doacaoService.atualizar(id, dto);
-            json.send(exchange, 200, atualizada);
+            Doacao doacao = existente.get();
+            if (payload.containsKey("idPaciente") && payload.get("idPaciente") != null) {
+                Integer idPaciente = ((Number) payload.get("idPaciente")).intValue();
+                Paciente paciente = Paciente.findById(idPaciente)
+                    .orElseThrow(() -> new IllegalArgumentException("Paciente não cadastrado."));
+                doacao.setPaciente(paciente);
+            }
+            if (payload.containsKey("observacoes")) {
+                doacao.setObservacoes((String) payload.get("observacoes"));
+            }
+            doacao.save();
+            json.send(exchange, 200, doacao);
         } catch (IllegalArgumentException | IllegalStateException e) {
             json.send(exchange, 400, Map.of("error", e.getMessage()));
         } catch (Exception e) {
@@ -72,13 +97,12 @@ public class DoacaoController {
                 }
             }
         }
-        var doacoes = doacaoService.listarTodas(nomePaciente, dataInicio, dataFim);
-        json.send(exchange, 200, doacoes);
+        json.send(exchange, 200, Doacao.findAll(nomePaciente, dataInicio, dataFim));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var doacao = doacaoService.buscarPorId(id);
+        var doacao = Doacao.findById(id);
         if (doacao.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Doação não encontrada."));
             return;
@@ -88,7 +112,7 @@ public class DoacaoController {
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        doacaoService.deletar(id);
+        Doacao.findById(id).ifPresent(Doacao::delete);
         json.send(exchange, 204, null);
     }
 }

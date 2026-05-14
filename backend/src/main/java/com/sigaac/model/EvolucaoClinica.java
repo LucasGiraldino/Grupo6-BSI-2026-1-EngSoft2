@@ -1,6 +1,12 @@
 package com.sigaac.model;
 
+import com.sigaac.config.DatabaseHelper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 public class EvolucaoClinica {
 
@@ -24,6 +30,57 @@ public class EvolucaoClinica {
         this.setor = setor;
         this.descricao = descricao;
     }
+
+    // -- Persistence --
+
+    public static List<EvolucaoClinica> findAll() {
+        return DatabaseHelper.getInstance().queryList(
+            "SELECT * FROM evolucoes_clinicas ORDER BY id_evolucao",
+            EvolucaoClinica::mapRow);
+    }
+
+    public static Optional<EvolucaoClinica> findById(Integer id) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT * FROM evolucoes_clinicas WHERE id_evolucao = ?",
+            EvolucaoClinica::mapRow, id);
+    }
+
+    public EvolucaoClinica save() {
+        var db = DatabaseHelper.getInstance();
+        if (this.id == null) {
+            Number id = db.executeInsert(
+                "INSERT INTO evolucoes_clinicas (id_prontuario, id_usuario, id_profissional, data_registro, setor, descricao) VALUES (?, ?, ?, ?, ?, ?)",
+                this.prontuario != null ? this.prontuario.getId() : null,
+                this.usuario != null ? this.usuario.getId() : null,
+                this.profissional != null ? this.profissional.getId() : null,
+                this.dataRegistro, this.setor, this.descricao);
+            if (id != null) this.id = id.intValue();
+        } else {
+            db.executeUpdate(
+                "UPDATE evolucoes_clinicas SET id_prontuario = ?, id_usuario = ?, id_profissional = ?, data_registro = ?, setor = ?, descricao = ? WHERE id_evolucao = ?",
+                this.prontuario != null ? this.prontuario.getId() : null,
+                this.usuario != null ? this.usuario.getId() : null,
+                this.profissional != null ? this.profissional.getId() : null,
+                this.dataRegistro, this.setor, this.descricao, this.id);
+        }
+        return this;
+    }
+
+    public void delete() {
+        DatabaseHelper.getInstance().executeUpdate(
+            "DELETE FROM evolucoes_clinicas WHERE id_evolucao = ?", this.id);
+    }
+
+    private static EvolucaoClinica mapRow(ResultSet rs) throws SQLException {
+        EvolucaoClinica e = new EvolucaoClinica();
+        e.setId(rs.getInt("id_evolucao"));
+        e.setDataRegistro(rs.getObject("data_registro", LocalDateTime.class));
+        e.setSetor(rs.getString("setor"));
+        e.setDescricao(rs.getString("descricao"));
+        return e;
+    }
+
+    // -- Getters / Setters --
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

@@ -1,7 +1,8 @@
-package com.sigaac.model;
+package com.sigaac.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigaac.model.CnpjResponse;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,21 +10,21 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-public class CnpjService {
+public class CnpjUtil {
 
     private final HttpClient httpClient;
     private final ObjectMapper mapper;
 
-    public CnpjService() {
+    public CnpjUtil() {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
         this.mapper = new ObjectMapper();
     }
 
-    public CnpjResponseDTO consultar(String cnpj) {
+    public CnpjResponse consultar(String cnpj) {
         if (cnpj == null || cnpj.length() != 14) {
-            return CnpjResponseDTO.invalido(cnpj, "CNPJ deve conter 14 dígitos.");
+            return CnpjResponse.invalido(cnpj, "CNPJ deve conter 14 dígitos.");
         }
 
         try {
@@ -39,10 +40,10 @@ public class CnpjService {
             String status = root.has("status") ? root.get("status").asText() : "";
             if (!"OK".equals(status)) {
                 String msg = root.has("message") ? root.get("message").asText() : "CNPJ não encontrado.";
-                return CnpjResponseDTO.invalido(cnpj, msg);
+                return CnpjResponse.invalido(cnpj, msg);
             }
 
-            return CnpjResponseDTO.valido(
+            return CnpjResponse.valido(
                     cnpj,
                     valor(root, "nome"),
                     valor(root, "fantasia"),
@@ -57,7 +58,7 @@ public class CnpjService {
                     valor(root, "email")
             );
         } catch (Exception e) {
-            return CnpjResponseDTO.invalido(cnpj, "Erro ao consultar CNPJ na ReceitaWS.");
+            return CnpjResponse.invalido(cnpj, "Erro ao consultar CNPJ na ReceitaWS.");
         }
     }
 

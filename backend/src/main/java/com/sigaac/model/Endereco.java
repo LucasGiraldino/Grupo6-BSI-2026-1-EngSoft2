@@ -1,5 +1,11 @@
 package com.sigaac.model;
 
+import com.sigaac.config.DatabaseHelper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Optional;
+
 public class Endereco {
 
     private Integer id;
@@ -28,6 +34,51 @@ public class Endereco {
         this.pais = pais;
         this.descricao = descricao;
     }
+
+    // -- Persistence --
+
+    public static Optional<Endereco> findById(Integer id) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT * FROM enderecos WHERE id_endereco = ?",
+            Endereco::mapRow, id);
+    }
+
+    public Endereco save() {
+        var db = DatabaseHelper.getInstance();
+        if (this.id == null) {
+            Number id = db.executeInsert(
+                "INSERT INTO enderecos (cep, logradouro, numero, complemento, bairro, cidade, estado, pais, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                this.cep, this.logradouro, this.numero,
+                this.complemento, this.bairro, this.cidade,
+                this.estado, this.pais, this.descricao);
+            if (id != null) this.id = id.intValue();
+        } else {
+            db.executeUpdate(
+                "UPDATE enderecos SET cep = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, descricao = ? WHERE id_endereco = ?",
+                this.cep, this.logradouro, this.numero,
+                this.complemento, this.bairro, this.cidade,
+                this.estado, this.pais, this.descricao,
+                this.id);
+        }
+        return this;
+    }
+
+    private static Endereco mapRow(ResultSet rs) throws SQLException {
+        Endereco e = new Endereco();
+        e.setId(rs.getInt("id_endereco"));
+        e.setCep(rs.getString("cep"));
+        e.setLogradouro(rs.getString("logradouro"));
+        e.setNumero(rs.getString("numero"));
+        e.setComplemento(rs.getString("complemento"));
+        e.setBairro(rs.getString("bairro"));
+        e.setCidade(rs.getString("cidade"));
+        e.setEstado(rs.getString("estado"));
+        e.setPais(rs.getString("pais"));
+        e.setDescricao(rs.getString("descricao"));
+        return e;
+    }
+
+    // -- Getters / Setters --
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

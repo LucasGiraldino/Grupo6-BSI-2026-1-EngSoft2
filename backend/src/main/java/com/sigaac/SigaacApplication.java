@@ -1,9 +1,7 @@
 package com.sigaac;
 
-import com.sigaac.config.DatabaseConfig;
-import com.sigaac.config.DataInitializer;
+import com.sigaac.config.*;
 import com.sigaac.controller.*;
-import com.sigaac.model.*;
 import com.sigaac.view.JsonView;
 import com.sigaac.view.StaticFileHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -24,60 +22,33 @@ public class SigaacApplication {
         DatabaseConfig db = new DatabaseConfig(props);
         JsonView json = new JsonView();
 
-        UserRepository userRepo = new UserRepository(db.getDataSource());
-        PacienteRepository pacienteRepo = new PacienteRepository(db.getDataSource());
-        EnderecoRepository enderecoRepo = new EnderecoRepository(db.getDataSource());
-        ProfissionalRepository profissionalRepo = new ProfissionalRepository(db.getDataSource());
-        EstoqueRepository estoqueRepo = new EstoqueRepository(db.getDataSource());
-        DoacaoRepository doacaoRepo = new DoacaoRepository(db.getDataSource());
-        CompraRepository compraRepo = new CompraRepository(db.getDataSource());
-        AlimentoRepository alimentoRepo = new AlimentoRepository(db.getDataSource());
-        CategoriaAlimentoRepository catAlimentoRepo = new CategoriaAlimentoRepository(db.getDataSource());
-        ParametrizacaoOngRepository parametrizacaoRepo = new ParametrizacaoOngRepository(db.getDataSource());
-        TipoExameRepository tipoExameRepo = new TipoExameRepository(db.getDataSource());
-        ExameRepository exameRepo = new ExameRepository(db.getDataSource());
-        MedicoRepository medicoRepo = new MedicoRepository(db.getDataSource());
-        ProntuarioRepository prontuarioRepo = new ProntuarioRepository(db.getDataSource());
-        TriagemRepository triagemRepo = new TriagemRepository(db.getDataSource());
-        ConsultaRepository consultaRepo = new ConsultaRepository(db.getDataSource());
-        AgendaRepository agendaRepo = new AgendaRepository(db.getDataSource());
+        DatabaseHelper.init(db.getDataSource());
 
-        TokenService tokenService = new TokenService(props);
-        OtpService otpService = new OtpService();
-        CpfService cpfService = new CpfService(props);
-        CnpjService cnpjService = new CnpjService();
-        CepService cepService = new CepService();
-        RateLimiterService rateLimiterService = new RateLimiterService();
-        UserService userService = new UserService(userRepo);
-        PacienteService pacienteService = new PacienteService(pacienteRepo, enderecoRepo, prontuarioRepo);
-        DoacaoService doacaoService = new DoacaoService(doacaoRepo, pacienteRepo, profissionalRepo, estoqueRepo,
-                alimentoRepo, db.getDataSource());
-        CompraService compraService = new CompraService(compraRepo, alimentoRepo, db.getDataSource());
-        AlimentoService alimentoService = new AlimentoService(alimentoRepo, estoqueRepo);
-        ParametrizacaoOngService parametrizacaoService = new ParametrizacaoOngService(parametrizacaoRepo);
-        ExameService exameService = new ExameService(exameRepo);
-        ConsultaService consultaService = new ConsultaService(consultaRepo, db.getDataSource());
-        TriagemService triagemService = new TriagemService(triagemRepo, consultaService, prontuarioRepo);
+        JwtUtil jwtUtil = new JwtUtil(props);
+        OtpUtil otpUtil = new OtpUtil();
+        RateLimiter rateLimiter = new RateLimiter();
+        CpfValidator cpfValidator = new CpfValidator(props.getProperty("api.cpf.token", ""));
+        CnpjUtil cnpjUtil = new CnpjUtil();
+        CepUtil cepUtil = new CepUtil();
 
-        LoginController loginCtrl = new LoginController(userRepo, otpService, tokenService, rateLimiterService, json);
-        PacienteController pacienteCtrl = new PacienteController(pacienteService, json);
-        CpfController cpfCtrl = new CpfController(cpfService, json);
-        CnpjController cnpjCtrl = new CnpjController(cnpjService, json);
-        CepController cepCtrl = new CepController(cepService, json);
-        UserController userCtrl = new UserController(userRepo, json);
-        DoacaoController doacaoCtrl = new DoacaoController(doacaoService, json);
-        CompraController compraCtrl = new CompraController(compraService, json);
-        AlimentoController alimentoCtrl = new AlimentoController(alimentoRepo, alimentoService, json);
-        CategoriaAlimentoController catAlimentoCtrl = new CategoriaAlimentoController(catAlimentoRepo, json);
-        ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(parametrizacaoService,
-                userService, json);
-        TipoExameController tipoExameCtrl = new TipoExameController(tipoExameRepo, json);
-        ExameController exameCtrl = new ExameController(exameService, json);
-        TriagemController triagemCtrl = new TriagemController(triagemService, json);
-        ConsultaController consultaCtrl = new ConsultaController(consultaService, json);
-        ProntuarioController prontuarioCtrl = new ProntuarioController(prontuarioRepo, json);
-        ProfissionalController profissionalCtrl = new ProfissionalController(profissionalRepo, json);
-        AgendaController agendaCtrl = new AgendaController(agendaRepo, json);
+        LoginController loginCtrl = new LoginController(jwtUtil, otpUtil, rateLimiter, json);
+        PacienteController pacienteCtrl = new PacienteController(json);
+        CpfController cpfCtrl = new CpfController(cpfValidator, json);
+        CnpjController cnpjCtrl = new CnpjController(cnpjUtil, json);
+        CepController cepCtrl = new CepController(cepUtil, json);
+        UserController userCtrl = new UserController(json);
+        DoacaoController doacaoCtrl = new DoacaoController(json);
+        CompraController compraCtrl = new CompraController(json);
+        AlimentoController alimentoCtrl = new AlimentoController(json);
+        CategoriaAlimentoController catAlimentoCtrl = new CategoriaAlimentoController(json);
+        ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(json);
+        TipoExameController tipoExameCtrl = new TipoExameController(json);
+        ExameController exameCtrl = new ExameController(json);
+        TriagemController triagemCtrl = new TriagemController(json);
+        ConsultaController consultaCtrl = new ConsultaController(json);
+        ProntuarioController prontuarioCtrl = new ProntuarioController(json);
+        ProfissionalController profissionalCtrl = new ProfissionalController(json);
+        AgendaController agendaCtrl = new AgendaController(json);
 
         HttpRouter router = new HttpRouter();
         loginCtrl.registerRoutes(router);
@@ -101,13 +72,12 @@ public class SigaacApplication {
 
         String seedData = props.getProperty("app.seed-data", "false");
         if (Boolean.parseBoolean(seedData)) {
-            DataInitializer initializer = new DataInitializer(userRepo, tipoExameRepo, medicoRepo, pacienteRepo,
-                    enderecoRepo, prontuarioRepo, profissionalRepo, agendaRepo);
+            DataInitializer initializer = new DataInitializer();
             initializer.seed();
             System.out.println("Seed data loaded.");
         }
 
-        SecurityFilter securityFilter = new SecurityFilter(tokenService, userRepo, json);
+        SecurityFilter securityFilter = new SecurityFilter(jwtUtil, json);
         CorsFilter corsFilter = new CorsFilter();
         StaticFileHandler staticHandler = new StaticFileHandler(
                 "../frontend/dist");

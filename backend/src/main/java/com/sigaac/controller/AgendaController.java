@@ -1,8 +1,8 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Agenda;
-import com.sigaac.model.AgendaRepository;
 import com.sigaac.view.JsonView;
+import com.sun.net.httpserver.HttpExchange;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,11 +10,9 @@ import java.util.Map;
 
 public class AgendaController {
 
-    private final AgendaRepository repository;
     private final JsonView json;
 
-    public AgendaController(AgendaRepository repository, JsonView json) {
-        this.repository = repository;
+    public AgendaController(JsonView json) {
         this.json = json;
     }
 
@@ -23,7 +21,7 @@ public class AgendaController {
         router.get("/api/agenda/disponivel/mes", this::listarDisponiveisMes);
     }
 
-    private void listarDisponiveis(com.sun.net.httpserver.HttpExchange exchange, Map<String, String> pathParams) throws Exception {
+    private void listarDisponiveis(HttpExchange exchange, Map<String, String> pathParams) throws Exception {
         String query = exchange.getRequestURI().getQuery();
         Integer idProfissional = null;
         LocalDate data = null;
@@ -44,11 +42,11 @@ public class AgendaController {
             return;
         }
 
-        List<Agenda> agendas = repository.findDisponiveisByProfissionalAndData(idProfissional, data);
+        List<Agenda> agendas = Agenda.findDisponiveisByProfissionalAndData(idProfissional, data);
         json.send(exchange, 200, agendas);
     }
 
-    private void listarDisponiveisMes(com.sun.net.httpserver.HttpExchange exchange, Map<String, String> pathParams) throws Exception {
+    private void listarDisponiveisMes(HttpExchange exchange, Map<String, String> pathParams) throws Exception {
         String query = exchange.getRequestURI().getQuery();
         Integer idProfissional = null;
         Integer ano = null;
@@ -74,7 +72,7 @@ public class AgendaController {
         LocalDate inicio = LocalDate.of(ano, mes, 1);
         LocalDate fim = inicio.withDayOfMonth(inicio.lengthOfMonth());
 
-        List<Agenda> agendas = repository.findDisponiveisByProfissionalAndDataBetween(idProfissional, inicio, fim);
+        List<Agenda> agendas = Agenda.findDisponiveisByProfissionalAndDataBetween(idProfissional, inicio, fim);
         json.send(exchange, 200, agendas);
     }
 }

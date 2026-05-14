@@ -1,7 +1,15 @@
 package com.sigaac.model;
 
+import com.sigaac.config.DatabaseHelper;
+
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class Triagem {
 
@@ -35,6 +43,133 @@ public class Triagem {
         this.observacoes = observacoes;
         this.deletedAt = deletedAt;
     }
+
+    // -- Persistence --
+
+    private static final String BASE_SELECT =
+        "SELECT t.*, " +
+        "       m.id_medico, m.crm, m.especialidade_medica, " +
+        "       u.id_usuario, u.nome AS medico_nome, " +
+        "       p.id_prontuario, p.data_abertura AS p_data_abertura, " +
+        "       pac.id_paciente, pac.nome AS paciente_nome, pac.cpf AS paciente_cpf " +
+        "FROM triagens t " +
+        "LEFT JOIN medicos m ON t.id_medico = m.id_medico " +
+        "LEFT JOIN users u ON m.id_usuario = u.id_usuario " +
+        "LEFT JOIN prontuarios p ON t.id_prontuario = p.id_prontuario " +
+        "LEFT JOIN pacientes pac ON p.id_paciente = pac.id_paciente ";
+
+    public static List<Triagem> findAll() { return findAll(null, null); }
+
+    public static List<Triagem> findAll(String nomePaciente, Integer medicoId) {
+        var db = DatabaseHelper.getInstance();
+        String sql = BASE_SELECT + "WHERE t.deleted_at IS NULL";
+        List<Object> params = new ArrayList<>();
+        if (nomePaciente != null && !nomePaciente.isBlank()) {
+            sql += " AND pac.nome ILIKE ?";
+            params.add("%" + nomePaciente.trim() + "%");
+        }
+        if (medicoId != null) {
+            sql += " AND t.id_medico = ?";
+            params.add(medicoId);
+        }
+        sql += " ORDER BY t.data_triagem DESC";
+        return db.queryList(sql, Triagem::mapRow, params.toArray());
+    }
+
+    public static Optional<Triagem> findById(Integer id) {
+        return DatabaseHelper.getInstance().querySingle(
+            BASE_SELECT + "WHERE t.id_triagem = ? AND t.deleted_at IS NULL", Triagem::mapRow, id);
+    }
+
+    public Triagem save() {
+        var db = DatabaseHelper.getInstance();
+        if (this.id == null) {
+            if (this.dataTriagem == null) {
+                this.dataTriagem = LocalDateTime.now();
+            }
+            Number id = db.executeInsert(
+                "INSERT INTO triagens (id_prontuario, id_medico, data_triagem, pressao_arterial, febre, condicao_clinica, condicao_nutricional, condicao_social, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                this.prontuario != null ? this.prontuario.getId() : null,
+                this.medico != null ? this.medico.getId() : null,
+                this.dataTriagem,
+                this.pressaoArterial,
+                this.febre,
+                this.condicaoClinica,
+                this.condicaoNutricional,
+                this.condicaoSocial,
+                this.observacoes);
+            if (id != null) this.id = id.intValue();
+        } else {
+            db.executeUpdate(
+                "UPDATE triagens SET id_prontuario = ?, id_medico = ?, data_triagem = ?, pressao_arterial = ?, febre = ?, condicao_clinica = ?, condicao_nutricional = ?, condicao_social = ?, observacoes = ? WHERE id_triagem = ?",
+                this.prontuario != null ? this.prontuario.getId() : null,
+                this.medico != null ? this.medico.getId() : null,
+                this.dataTriagem,
+                this.pressaoArterial,
+                this.febre,
+                this.condicaoClinica,
+                this.condicaoNutricional,
+                this.condicaoSocial,
+                this.observacoes,
+                this.id);
+        }
+        return this;
+    }
+
+    public Triagem merge(Triagem request) {
+        if (request.getProntuario() != null) this.prontuario = request.getProntuario();
+        if (request.getMedico() != null) this.medico = request.getMedico();
+        if (request.getDataTriagem() != null) this.dataTriagem = request.getDataTriagem();
+        if (request.getPressaoArterial() != null) this.pressaoArterial = request.getPressaoArterial();
+        if (request.getFebre() != null) this.febre = request.getFebre();
+        if (request.getCondicaoClinica() != null) this.condicaoClinica = request.getCondicaoClinica();
+        if (request.getCondicaoNutricional() != null) this.condicaoNutricional = request.getCondicaoNutricional();
+        if (request.getCondicaoSocial() != null) this.condicaoSocial = request.getCondicaoSocial();
+        if (request.getObservacoes() != null) this.observacoes = request.getObservacoes();
+        return this;
+    }
+
+    public void delete() {
+        DatabaseHelper.getInstance().executeUpdate(
+            "UPDATE triagens SET deleted_at = NOW() WHERE id_triagem = ?", this.id);
+    }
+
+    private static Triagem mapRow(ResultSet rs) throws SQLException {
+        Triagem t = new Triagem();
+        t.setId(rs.getInt("id_triagem"));
+        t.setDataTriagem(rs.getObject("data_triagem", LocalDateTime.class));
+        t.setPressaoArterial(rs.getString("pressao_arterial"));
+        t.setFebre(rs.getBigDecimal("febre"));
+        t.setCondicaoClinica(rs.getString("condicao_clinica"));
+        t.setCondicaoNutricional(rs.getString("condicao_nutricional"));
+        t.setCondicaoSocial(rs.getString("condicao_social"));
+        t.setObservacoes(rs.getString("observacoes"));
+        t.setDeletedAt(rs.getObject("deleted_at", LocalDateTime.class));
+
+        Medico m = new Medico();
+        m.setId(rs.getInt("id_medico"));
+        m.setCrm(rs.getString("crm"));
+        m.setEspecialidadeMedica(rs.getString("especialidade_medica"));
+        User u = new User();
+        u.setId(rs.getObject("id_usuario", Integer.class));
+        u.setNome(rs.getString("medico_nome"));
+        m.setUsuario(u);
+        t.setMedico(m);
+
+        Prontuario p = new Prontuario();
+        p.setId(rs.getInt("id_prontuario"));
+        p.setDataAbertura(rs.getObject("p_data_abertura", LocalDate.class));
+        Paciente pac = new Paciente();
+        pac.setId(rs.getObject("id_paciente", Integer.class));
+        pac.setNome(rs.getString("paciente_nome"));
+        pac.setCpf(rs.getString("paciente_cpf"));
+        p.setPaciente(pac);
+        t.setProntuario(p);
+
+        return t;
+    }
+
+    // -- Getters / Setters --
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

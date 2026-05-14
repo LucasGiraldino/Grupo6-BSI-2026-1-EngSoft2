@@ -1,24 +1,25 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.*;
+import com.sigaac.config.CnpjUtil;
+import com.sigaac.model.Endereco;
+import com.sigaac.model.ParametrizacaoOng;
+import com.sigaac.model.ParametrizacaoOngResponse;
+import com.sigaac.model.ConfiguracaoSistema;
+import com.sigaac.model.User;
 import com.sigaac.view.JsonView;
-import java.util.regex.Pattern;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ParametrizacaoOngController {
 
-    private final ParametrizacaoOngService service;
-    private final UserService userService;
     private final JsonView json;
 
-    public ParametrizacaoOngController(ParametrizacaoOngService service, UserService userService, JsonView json) {
-        this.service = service;
-        this.userService = userService;
+    public ParametrizacaoOngController(JsonView json) {
         this.json = json;
     }
 
@@ -32,8 +33,11 @@ public class ParametrizacaoOngController {
         router.delete("/api/parametrizacao/{id}", this::delete);
     }
 
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+
     private void findAll(HttpExchange exchange, Map<String, String> params) throws Exception {
-        List<ParametrizacaoOngDTO> result = service.findAll().stream()
+        List<ParametrizacaoOngResponse> result = ParametrizacaoOng.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
         json.send(exchange, 200, result);
@@ -41,7 +45,7 @@ public class ParametrizacaoOngController {
 
     private void findById(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = service.findById(id).map(this::toDTO);
+        var opt = ParametrizacaoOng.findById(id).map(this::toDTO);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -51,12 +55,12 @@ public class ParametrizacaoOngController {
 
     private void findFirst(HttpExchange exchange, Map<String, String> params) throws Exception {
         User currentUser = AuthContext.get();
-        Optional<ParametrizacaoOngDTO> opt;
+        Optional<ParametrizacaoOngResponse> opt;
 
         if (currentUser != null && currentUser.getParametrizacaoId() != null) {
-            opt = service.findById(currentUser.getParametrizacaoId()).map(this::toDTO);
+            opt = ParametrizacaoOng.findById(currentUser.getParametrizacaoId()).map(this::toDTO);
         } else {
-            opt = service.findFirst().map(this::toDTO);
+            opt = ParametrizacaoOng.findFirst().map(this::toDTO);
         }
 
         if (opt.isPresent()) {
@@ -73,16 +77,18 @@ public class ParametrizacaoOngController {
             email = query.substring(6);
         }
 
-        ConfiguracaoSistemaDTO config = new ConfiguracaoSistemaDTO();
-        boolean isAdmin = email != null && userService.isAdministrador(email);
+        ConfiguracaoSistema config = new ConfiguracaoSistema();
+        boolean isAdmin = email != null && User.findByEmail(email)
+            .map(u -> "ADMINISTRADOR".equals(u.getPerfil()))
+            .orElse(false);
         config.setUsuarioEhAdministrador(isAdmin);
 
         User currentUser = AuthContext.get();
         Optional<ParametrizacaoOng> opt;
         if (currentUser != null && currentUser.getParametrizacaoId() != null) {
-            opt = service.findById(currentUser.getParametrizacaoId());
+            opt = ParametrizacaoOng.findById(currentUser.getParametrizacaoId());
         } else {
-            opt = service.findFirst();
+            opt = ParametrizacaoOng.findFirst();
         }
 
         config.setParametrizacaoExiste(opt.isPresent());
@@ -90,43 +96,41 @@ public class ParametrizacaoOngController {
         json.send(exchange, 200, config);
     }
 
-    private static final Pattern EMAIL_PATTERN =
-        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
-
-    private String validateRequest(ParametrizacaoOngRequestDTO request) {
-        String cnpj = request.getCnpj() != null ? request.getCnpj().replaceAll("\\D", "") : null;
-        if (cnpj == null || !CnpjService.validarMatematicamente(cnpj)) {
+    private String validateRequest(Map<String, Object> request) {
+        String cnpj = request.get("cnpj") != null ? ((String) request.get("cnpj")).replaceAll("\\D", "") : null;
+        if (cnpj == null || !CnpjUtil.validarMatematicamente(cnpj)) {
             return "CNPJ inválido. Verifique os dígitos.";
         }
-        String telefone = request.getTelefone() != null ? request.getTelefone().replaceAll("\\D", "") : null;
+        String telefone = request.get("telefone") != null ? ((String) request.get("telefone")).replaceAll("\\D", "") : null;
         if (telefone != null && telefone.length() != 10 && telefone.length() != 11) {
             return "Telefone inválido. Deve ter 10 ou 11 dígitos.";
         }
-        if (request.getEmail() != null && !request.getEmail().isEmpty()
-                && !EMAIL_PATTERN.matcher(request.getEmail()).matches()) {
+        String emailVal = (String) request.get("email");
+        if (emailVal != null && !emailVal.isEmpty()
+                && !EMAIL_PATTERN.matcher(emailVal).matches()) {
             return "E-mail inválido.";
         }
         return null;
     }
 
     private void create(HttpExchange exchange, Map<String, String> params) throws Exception {
-        if (service.findFirst().isPresent()) {
+        if (ParametrizacaoOng.findFirst().isPresent()) {
             json.send(exchange, 400, Map.of("error", "Já existe uma parametrização cadastrada. Utilize o método de alteração para modificar."));
             return;
         }
-        ParametrizacaoOngRequestDTO request = json.read(exchange.getRequestBody(), ParametrizacaoOngRequestDTO.class);
+        Map<String, Object> request = json.read(exchange.getRequestBody(), Map.class);
         String error = validateRequest(request);
         if (error != null) {
             json.send(exchange, 400, Map.of("error", error));
             return;
         }
         ParametrizacaoOng param = toEntity(request);
-        ParametrizacaoOng saved = service.save(param);
+        ParametrizacaoOng saved = param.save();
 
         User currentUser = AuthContext.get();
         if (currentUser != null && currentUser.getParametrizacaoId() == null) {
             currentUser.setParametrizacaoId(saved.getId());
-            userService.save(currentUser);
+            currentUser.save();
         }
 
         json.send(exchange, 201, toDTO(saved));
@@ -134,25 +138,26 @@ public class ParametrizacaoOngController {
 
     private void update(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        ParametrizacaoOngRequestDTO request = json.read(exchange.getRequestBody(), ParametrizacaoOngRequestDTO.class);
+        Map<String, Object> request = json.read(exchange.getRequestBody(), Map.class);
         String error = validateRequest(request);
         if (error != null) {
             json.send(exchange, 400, Map.of("error", error));
             return;
         }
         ParametrizacaoOng param = toEntity(request);
-        ParametrizacaoOng updated = service.update(id, param);
+        param.setId(id);
+        ParametrizacaoOng updated = param.save();
         json.send(exchange, 200, toDTO(updated));
     }
 
     private void delete(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        service.delete(id);
+        ParametrizacaoOng.findById(id).ifPresent(ParametrizacaoOng::delete);
         json.send(exchange, 204, null);
     }
 
-    private ParametrizacaoOngDTO toDTO(ParametrizacaoOng param) {
-        ParametrizacaoOngDTO dto = new ParametrizacaoOngDTO();
+    private ParametrizacaoOngResponse toDTO(ParametrizacaoOng param) {
+        ParametrizacaoOngResponse dto = new ParametrizacaoOngResponse();
         dto.setId(param.getId());
         dto.setRazaoSocial(param.getRazaoSocial());
         dto.setNomeFantasia(param.getNomeFantasia());
@@ -164,7 +169,7 @@ public class ParametrizacaoOngController {
         dto.setDataFundacao(param.getDataFundacao());
         dto.setObservacoes(param.getObservacoes());
         if (param.getEndereco() != null) {
-            EnderecoDTO endDTO = new EnderecoDTO();
+            Endereco endDTO = new Endereco();
             endDTO.setId(param.getEndereco().getId());
             endDTO.setLogradouro(param.getEndereco().getLogradouro());
             endDTO.setNumero(param.getEndereco().getNumero());
@@ -178,26 +183,34 @@ public class ParametrizacaoOngController {
         return dto;
     }
 
-    private ParametrizacaoOng toEntity(ParametrizacaoOngRequestDTO request) {
+    @SuppressWarnings("unchecked")
+    private ParametrizacaoOng toEntity(Map<String, Object> request) {
         ParametrizacaoOng param = new ParametrizacaoOng();
-        param.setRazaoSocial(request.getRazaoSocial());
-        param.setNomeFantasia(request.getNomeFantasia());
-        param.setCnpj(request.getCnpj() != null ? request.getCnpj().replaceAll("\\D", "") : null);
-        param.setTelefone(request.getTelefone() != null ? request.getTelefone().replaceAll("\\D", "") : null);
-        param.setEmail(request.getEmail());
-        param.setSite(request.getSite());
-        param.setLogoUrl(request.getLogoUrl());
-        param.setDataFundacao(request.getDataFundacao());
-        param.setObservacoes(request.getObservacoes());
-        if (request.getEndereco() != null) {
+        param.setRazaoSocial((String) request.get("razaoSocial"));
+        param.setNomeFantasia((String) request.get("nomeFantasia"));
+        String cnpj = (String) request.get("cnpj");
+        param.setCnpj(cnpj != null ? cnpj.replaceAll("\\D", "") : null);
+        String telefone = (String) request.get("telefone");
+        param.setTelefone(telefone != null ? telefone.replaceAll("\\D", "") : null);
+        param.setEmail((String) request.get("email"));
+        param.setSite((String) request.get("site"));
+        param.setLogoUrl((String) request.get("logoUrl"));
+        Object dataFundacao = request.get("dataFundacao");
+        if (dataFundacao instanceof String) {
+            param.setDataFundacao(java.time.LocalDate.parse((String) dataFundacao));
+        }
+        param.setObservacoes((String) request.get("observacoes"));
+        Map<String, Object> endMap = (Map<String, Object>) request.get("endereco");
+        if (endMap != null) {
             Endereco end = new Endereco();
-            end.setLogradouro(request.getEndereco().getLogradouro());
-            end.setNumero(request.getEndereco().getNumero());
-            end.setComplemento(request.getEndereco().getComplemento());
-            end.setBairro(request.getEndereco().getBairro());
-            end.setCidade(request.getEndereco().getCidade());
-            end.setEstado(request.getEndereco().getEstado());
-            end.setCep(request.getEndereco().getCep() != null ? request.getEndereco().getCep().replaceAll("\\D", "") : null);
+            end.setLogradouro((String) endMap.get("logradouro"));
+            end.setNumero((String) endMap.get("numero"));
+            end.setComplemento((String) endMap.get("complemento"));
+            end.setBairro((String) endMap.get("bairro"));
+            end.setCidade((String) endMap.get("cidade"));
+            end.setEstado((String) endMap.get("estado"));
+            String cepEnd = (String) endMap.get("cep");
+            end.setCep(cepEnd != null ? cepEnd.replaceAll("\\D", "") : null);
             param.setEndereco(end);
         }
         return param;

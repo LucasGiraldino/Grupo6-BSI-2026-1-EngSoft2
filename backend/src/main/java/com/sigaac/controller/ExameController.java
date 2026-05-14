@@ -1,7 +1,8 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Exame;
-import com.sigaac.model.ExameService;
+import com.sigaac.model.Medico;
+import com.sigaac.model.Prontuario;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -10,11 +11,9 @@ import java.util.Map;
 
 public class ExameController {
 
-    private final ExameService service;
     private final JsonView json;
 
-    public ExameController(ExameService service, JsonView json) {
-        this.service = service;
+    public ExameController(JsonView json) {
         this.json = json;
     }
 
@@ -45,12 +44,12 @@ public class ExameController {
                 }
             }
         }
-        json.send(exchange, 200, service.listar(status, tipoExameId));
+        json.send(exchange, 200, Exame.findAll(status, tipoExameId));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = service.buscarPorId(id);
+        var opt = Exame.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -60,33 +59,36 @@ public class ExameController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Exame exame = json.read(exchange.getRequestBody(), Exame.class);
-        Exame salvo = service.criar(exame);
-        json.send(exchange, 201, salvo);
+        exame.save();
+        json.send(exchange, 201, exame);
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (service.buscarPorId(id).isEmpty()) {
+        var opt = Exame.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Exame não encontrado"));
             return;
         }
-        Exame exame = json.read(exchange.getRequestBody(), Exame.class);
-        Exame atualizado = service.atualizar(id, exame);
+        Exame request = json.read(exchange.getRequestBody(), Exame.class);
+        Exame atualizado = opt.get().merge(request);
+        atualizado.save();
         json.send(exchange, 200, atualizado);
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (service.buscarPorId(id).isEmpty()) {
+        var opt = Exame.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Exame não encontrado"));
             return;
         }
-        service.deletar(id);
+        opt.get().delete();
         json.send(exchange, 204, null);
     }
 
     private void listarMedicos(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, service.listarMedicos());
+        json.send(exchange, 200, Medico.findAll());
     }
 
     private void listarProntuarios(HttpExchange exchange, Map<String, String> params) throws Exception {
@@ -104,8 +106,8 @@ public class ExameController {
             }
         }
         List<?> result = (q != null && !q.isBlank())
-            ? service.buscarProntuarios(q)
-            : service.listarProntuarios();
+            ? Prontuario.search(q)
+            : Prontuario.findAll();
         json.send(exchange, 200, result);
     }
 }

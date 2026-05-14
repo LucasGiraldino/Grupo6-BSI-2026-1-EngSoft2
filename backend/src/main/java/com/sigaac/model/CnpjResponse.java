@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-public class CnpjResponseDTO {
+public class CnpjResponse {
     private boolean valido;
     private String cnpj;
     private String razaoSocial;
@@ -45,19 +45,19 @@ public class CnpjResponseDTO {
     public String getMensagem() { return mensagem; }
     public void setMensagem(String mensagem) { this.mensagem = mensagem; }
 
-    public static CnpjResponseDTO invalido(String cnpj, String mensagem) {
-        CnpjResponseDTO dto = new CnpjResponseDTO();
+    public static CnpjResponse invalido(String cnpj, String mensagem) {
+        CnpjResponse dto = new CnpjResponse();
         dto.setValido(false);
         dto.setCnpj(cnpj);
         dto.setMensagem(mensagem);
         return dto;
     }
 
-    public static CnpjResponseDTO valido(String cnpj, String razaoSocial, String nomeFantasia,
+    public static CnpjResponse valido(String cnpj, String razaoSocial, String nomeFantasia,
                                           String logradouro, String numero, String complemento,
                                           String bairro, String municipio, String uf,
                                           String cep, String telefone, String email) {
-        CnpjResponseDTO dto = new CnpjResponseDTO();
+        CnpjResponse dto = new CnpjResponse();
         dto.setValido(true);
         dto.setCnpj(cnpj);
         dto.setRazaoSocial(razaoSocial);

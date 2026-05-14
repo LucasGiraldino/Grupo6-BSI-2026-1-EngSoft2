@@ -1,6 +1,12 @@
 package com.sigaac.model;
 
+import com.sigaac.config.DatabaseHelper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 public class ItemProntuario {
 
@@ -22,6 +28,55 @@ public class ItemProntuario {
         this.dataRegistro = dataRegistro;
         this.usuario = usuario;
     }
+
+    // -- Persistence --
+
+    public static List<ItemProntuario> findAll() {
+        return DatabaseHelper.getInstance().queryList(
+            "SELECT * FROM itens_prontuario ORDER BY id_item_prontuario",
+            ItemProntuario::mapRow);
+    }
+
+    public static Optional<ItemProntuario> findById(Integer id) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT * FROM itens_prontuario WHERE id_item_prontuario = ?",
+            ItemProntuario::mapRow, id);
+    }
+
+    public ItemProntuario save() {
+        var db = DatabaseHelper.getInstance();
+        if (this.id == null) {
+            Number id = db.executeInsert(
+                "INSERT INTO itens_prontuario (id_prontuario, tipo_item, descricao, data_registro, id_usuario) VALUES (?, ?, ?, ?, ?)",
+                this.prontuario != null ? this.prontuario.getId() : null,
+                this.tipoItem, this.descricao, this.dataRegistro,
+                this.usuario != null ? this.usuario.getId() : null);
+            if (id != null) this.id = id.intValue();
+        } else {
+            db.executeUpdate(
+                "UPDATE itens_prontuario SET id_prontuario = ?, tipo_item = ?, descricao = ?, data_registro = ?, id_usuario = ? WHERE id_item_prontuario = ?",
+                this.prontuario != null ? this.prontuario.getId() : null,
+                this.tipoItem, this.descricao, this.dataRegistro,
+                this.usuario != null ? this.usuario.getId() : null, this.id);
+        }
+        return this;
+    }
+
+    public void delete() {
+        DatabaseHelper.getInstance().executeUpdate(
+            "DELETE FROM itens_prontuario WHERE id_item_prontuario = ?", this.id);
+    }
+
+    private static ItemProntuario mapRow(ResultSet rs) throws SQLException {
+        ItemProntuario item = new ItemProntuario();
+        item.setId(rs.getInt("id_item_prontuario"));
+        item.setTipoItem(rs.getString("tipo_item"));
+        item.setDescricao(rs.getString("descricao"));
+        item.setDataRegistro(rs.getObject("data_registro", LocalDateTime.class));
+        return item;
+    }
+
+    // -- Getters / Setters --
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

@@ -1,8 +1,7 @@
 package com.sigaac.controller;
 
+import com.sigaac.config.JwtUtil;
 import com.sigaac.model.User;
-import com.sigaac.model.UserRepository;
-import com.sigaac.model.TokenService;
 import com.sigaac.model.UserRole;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.Filter;
@@ -14,13 +13,11 @@ import java.util.Set;
 
 public class SecurityFilter extends Filter {
 
-    private final TokenService tokenService;
-    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
     private final JsonView json;
 
-    public SecurityFilter(TokenService tokenService, UserRepository userRepository, JsonView json) {
-        this.tokenService = tokenService;
-        this.userRepository = userRepository;
+    public SecurityFilter(JwtUtil jwtUtil, JsonView json) {
+        this.jwtUtil = jwtUtil;
         this.json = json;
     }
 
@@ -31,9 +28,9 @@ public class SecurityFilter extends Filter {
 
         var token = recoverToken(exchange);
         if (token != null) {
-            var email = tokenService.validateToken(token);
+            var email = jwtUtil.validateToken(token);
             if (!email.isEmpty()) {
-                var user = userRepository.findByEmail(email).orElse(null);
+                var user = User.findByEmail(email).orElse(null);
                 if (user != null) {
                     AuthContext.set(user);
                 }

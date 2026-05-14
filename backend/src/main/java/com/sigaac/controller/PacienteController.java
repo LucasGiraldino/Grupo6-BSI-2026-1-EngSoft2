@@ -1,19 +1,19 @@
 package com.sigaac.controller;
 
+import com.sigaac.model.Endereco;
 import com.sigaac.model.Paciente;
-import com.sigaac.model.PacienteService;
+import com.sigaac.model.Prontuario;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 public class PacienteController {
 
-    private final PacienteService pacienteService;
     private final JsonView json;
 
-    public PacienteController(PacienteService pacienteService, JsonView json) {
-        this.pacienteService = pacienteService;
+    public PacienteController(JsonView json) {
         this.json = json;
     }
 
@@ -40,12 +40,12 @@ public class PacienteController {
                 }
             }
         }
-        json.send(exchange, 200, pacienteService.listar(nome, cpf));
+        json.send(exchange, 200, Paciente.findAll(nome, cpf));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = pacienteService.buscarPorId(id);
+        var opt = Paciente.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -56,8 +56,16 @@ public class PacienteController {
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Paciente paciente = json.read(exchange.getRequestBody(), Paciente.class);
         try {
-            Paciente salvo = pacienteService.criar(paciente);
-            json.send(exchange, 201, salvo);
+            paciente.validar();
+            if (paciente.getDataCadastro() == null) {
+                paciente.setDataCadastro(LocalDate.now());
+            }
+            if (paciente.getEndereco() != null && paciente.getEndereco().getId() == null) {
+                paciente.setEndereco(paciente.getEndereco().save());
+            }
+            paciente.save();
+            new Prontuario(paciente).save();
+            json.send(exchange, 201, paciente);
         } catch (IllegalArgumentException e) {
             json.send(exchange, 400, Map.of("error", e.getMessage()));
         }
@@ -65,22 +73,28 @@ public class PacienteController {
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (pacienteService.buscarPorId(id).isEmpty()) {
+        var opt = Paciente.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Paciente não encontrado"));
             return;
         }
         Paciente paciente = json.read(exchange.getRequestBody(), Paciente.class);
-        Paciente atualizado = pacienteService.atualizar(id, paciente);
-        json.send(exchange, 200, atualizado);
+        paciente.setId(id);
+        if (paciente.getEndereco() != null && paciente.getEndereco().getId() == null) {
+            paciente.setEndereco(paciente.getEndereco().save());
+        }
+        paciente.save();
+        json.send(exchange, 200, paciente);
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (pacienteService.buscarPorId(id).isEmpty()) {
+        var opt = Paciente.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Paciente não encontrado"));
             return;
         }
-        pacienteService.deletar(id);
+        opt.get().delete();
         json.send(exchange, 204, null);
     }
 }

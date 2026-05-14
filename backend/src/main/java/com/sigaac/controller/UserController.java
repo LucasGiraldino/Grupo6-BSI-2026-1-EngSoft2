@@ -1,8 +1,7 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.CpfService;
+import com.sigaac.config.CpfValidator;
 import com.sigaac.model.User;
-import com.sigaac.model.UserRepository;
 import com.sigaac.model.UserRole;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
@@ -18,11 +17,9 @@ public class UserController {
     private static final Pattern EMAIL_PATTERN =
         Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
-    private final UserRepository userRepository;
     private final JsonView json;
 
-    public UserController(UserRepository userRepository, JsonView json) {
-        this.userRepository = userRepository;
+    public UserController(JsonView json) {
         this.json = json;
     }
 
@@ -53,23 +50,23 @@ public class UserController {
             return;
         }
 
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (User.findByEmail(email).isPresent()) {
             json.send(exchange, 409, Map.of("error", "Email já cadastrado"));
             return;
         }
 
-        if (userRepository.findByCpf(cpf).isPresent()) {
+        if (User.findByCpf(cpf).isPresent()) {
             json.send(exchange, 409, Map.of("error", "CPF já cadastrado"));
             return;
         }
 
-        if (!CpfService.validarMatematicamente(cpf)) {
+        if (!CpfValidator.validarMatematicamente(cpf)) {
             json.send(exchange, 400, Map.of("error", "CPF inválido. Verifique os dígitos."));
             return;
         }
 
         UserRole role;
-        if (userRepository.count() == 0) {
+        if (User.count() == 0) {
             role = UserRole.ADMIN;
         } else {
             try {
@@ -89,7 +86,7 @@ public class UserController {
         user.setDataCadastro(LocalDate.now());
         user.setAtivo(true);
 
-        userRepository.save(user);
+        user.save();
 
         json.send(exchange, 201, Map.of(
                 "message", "Usuário criado com sucesso",
@@ -112,7 +109,7 @@ public class UserController {
                 }
             }
         }
-        List<Map<String, Object>> safeUsers = userRepository.findAll(nome, perfil).stream()
+        List<Map<String, Object>> safeUsers = User.findAll(nome, perfil).stream()
                 .map(u -> Map.<String, Object>of(
                         "id", u.getId(),
                         "nome", u.getNome(),
@@ -128,7 +125,7 @@ public class UserController {
 
     private void getUser(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var userOpt = userRepository.findById(id);
+        var userOpt = User.findById(id);
         if (userOpt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Usuário não encontrado"));
             return;
@@ -149,7 +146,7 @@ public class UserController {
         Integer id = Integer.parseInt(params.get("p1"));
         Map<String, String> payload = json.read(exchange.getRequestBody(), Map.class);
 
-        var userOpt = userRepository.findById(id);
+        var userOpt = User.findById(id);
         if (userOpt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Usuário não encontrado"));
             return;
@@ -172,7 +169,7 @@ public class UserController {
                 json.send(exchange, 400, Map.of("error", "E-mail inválido."));
                 return;
             }
-            var existing = userRepository.findByEmail(email.trim());
+            var existing = User.findByEmail(email.trim());
             if (existing.isPresent() && !existing.get().getId().equals(id)) {
                 json.send(exchange, 409, Map.of("error", "Email já cadastrado"));
                 return;
@@ -181,11 +178,11 @@ public class UserController {
         }
 
         if (cpf != null && !cpf.isBlank()) {
-            if (!CpfService.validarMatematicamente(cpf)) {
+            if (!CpfValidator.validarMatematicamente(cpf)) {
                 json.send(exchange, 400, Map.of("error", "CPF inválido. Verifique os dígitos."));
                 return;
             }
-            var existing = userRepository.findByCpf(cpf);
+            var existing = User.findByCpf(cpf);
             if (existing.isPresent() && !existing.get().getId().equals(id)) {
                 json.send(exchange, 409, Map.of("error", "CPF já cadastrado"));
                 return;
@@ -208,7 +205,7 @@ public class UserController {
 
             String perfilAtual = user.getRole() != null ? user.getRole().name() : null;
             if ("ADMIN".equals(perfilAtual) && !"ADMIN".equals(novaRole.name())) {
-                long adminsAtivos = userRepository.countByPerfil("ADMIN");
+                long adminsAtivos = User.countByPerfil("ADMIN");
                 if (adminsAtivos <= 1) {
                     json.send(exchange, 400, Map.of("error", "Não é possível rebaixar o único administrador do sistema."));
                     return;
@@ -217,7 +214,7 @@ public class UserController {
             user.setPerfil(novaRole);
         }
 
-        userRepository.save(user);
+        user.save();
 
         json.send(exchange, 200, Map.of(
                 "message", "Usuário atualizado com sucesso",
@@ -235,7 +232,7 @@ public class UserController {
             return;
         }
 
-        var userOpt = userRepository.findById(id);
+        var userOpt = User.findById(id);
         if (userOpt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Usuário não encontrado"));
             return;
@@ -245,7 +242,7 @@ public class UserController {
         String perfilAtual = user.getRole() != null ? user.getRole().name() : null;
 
         if ("ADMIN".equals(perfilAtual) && !"ADMIN".equals(novoPerfil.toUpperCase())) {
-            long adminsAtivos = userRepository.countByPerfil("ADMIN");
+            long adminsAtivos = User.countByPerfil("ADMIN");
             if (adminsAtivos <= 1) {
                 json.send(exchange, 400, Map.of("error", "Não é possível rebaixar o único administrador do sistema."));
                 return;
@@ -253,13 +250,13 @@ public class UserController {
         }
 
         user.setPerfil(UserRole.valueOf(novoPerfil.toUpperCase()));
-        userRepository.save(user);
+        user.save();
         json.send(exchange, 200, Map.of("message", "Perfil atualizado com sucesso para: " + novoPerfil));
     }
 
     private void deleteUser(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var userOpt = userRepository.findById(id);
+        var userOpt = User.findById(id);
         if (userOpt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Usuário não encontrado"));
             return;
@@ -269,14 +266,14 @@ public class UserController {
         String perfilAtual = user.getRole() != null ? user.getRole().name() : null;
 
         if ("ADMIN".equals(perfilAtual)) {
-            long adminsAtivos = userRepository.countByPerfil("ADMIN");
+            long adminsAtivos = User.countByPerfil("ADMIN");
             if (adminsAtivos <= 1) {
                 json.send(exchange, 400, Map.of("error", "Não é possível desativar o único administrador do sistema."));
                 return;
             }
         }
 
-        userRepository.deleteById(id);
+        user.delete();
         json.send(exchange, 200, Map.of("message", "Usuário desativado com sucesso"));
     }
 }

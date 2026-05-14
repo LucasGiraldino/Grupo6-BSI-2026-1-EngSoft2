@@ -1,20 +1,21 @@
 package com.sigaac.controller;
 
+import com.sigaac.model.Consulta;
+import com.sigaac.model.Medico;
+import com.sigaac.model.Prontuario;
 import com.sigaac.model.Triagem;
-import com.sigaac.model.TriagemService;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 public class TriagemController {
 
-    private final TriagemService service;
     private final JsonView json;
 
-    public TriagemController(TriagemService service, JsonView json) {
-        this.service = service;
+    public TriagemController(JsonView json) {
         this.json = json;
     }
 
@@ -45,12 +46,12 @@ public class TriagemController {
                 }
             }
         }
-        json.send(exchange, 200, service.listar(nomePaciente, medicoId));
+        json.send(exchange, 200, Triagem.findAll(nomePaciente, medicoId));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = service.buscarPorId(id);
+        var opt = Triagem.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -60,37 +61,51 @@ public class TriagemController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Triagem triagem = json.read(exchange.getRequestBody(), Triagem.class);
-        if (triagem.getProntuario() == null || !service.prontuarioExiste(triagem.getProntuario().getId())) {
+        if (triagem.getProntuario() == null || Prontuario.findById(triagem.getProntuario().getId()).isEmpty()) {
             json.send(exchange, 400, Map.of("error", "Prontuário não encontrado. Cadastre o paciente primeiro."));
             return;
         }
-        Triagem salvo = service.criar(triagem);
-        json.send(exchange, 201, salvo);
+        triagem.save();
+        var prontuarioOpt = Prontuario.findById(triagem.getProntuario().getId());
+        prontuarioOpt.ifPresent(prontuario -> {
+            Consulta consulta = new Consulta();
+            consulta.setPaciente(prontuario.getPaciente());
+            consulta.setTriagem(triagem);
+            consulta.setTipoConsulta("Triagem");
+            consulta.setStatus("ESPERANDO");
+            consulta.setDataAgendamento(LocalDateTime.now());
+            consulta.setObservacoes("Aguardando agendamento");
+            consulta.save();
+        });
+        json.send(exchange, 201, triagem);
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (service.buscarPorId(id).isEmpty()) {
+        var opt = Triagem.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Triagem não encontrada"));
             return;
         }
-        Triagem triagem = json.read(exchange.getRequestBody(), Triagem.class);
-        Triagem atualizado = service.atualizar(id, triagem);
+        Triagem request = json.read(exchange.getRequestBody(), Triagem.class);
+        Triagem atualizado = opt.get().merge(request);
+        atualizado.save();
         json.send(exchange, 200, atualizado);
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (service.buscarPorId(id).isEmpty()) {
+        var opt = Triagem.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Triagem não encontrada"));
             return;
         }
-        service.deletar(id);
+        opt.get().delete();
         json.send(exchange, 204, null);
     }
 
     private void listarMedicos(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, service.listarMedicos());
+        json.send(exchange, 200, Medico.findAll());
     }
 
     private void listarProntuarios(HttpExchange exchange, Map<String, String> params) throws Exception {
@@ -108,8 +123,8 @@ public class TriagemController {
             }
         }
         List<?> result = (q != null && !q.isBlank())
-            ? service.buscarProntuarios(q)
-            : service.listarProntuarios();
+            ? Prontuario.search(q)
+            : Prontuario.findAll();
         json.send(exchange, 200, result);
     }
 }

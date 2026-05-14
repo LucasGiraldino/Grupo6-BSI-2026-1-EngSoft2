@@ -1,20 +1,17 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Compra;
-import com.sigaac.model.CompraDTO;
-import com.sigaac.model.CompraService;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.util.List;
 import java.util.Map;
 
 public class CompraController {
 
-    private final CompraService compraService;
     private final JsonView json;
 
-    public CompraController(CompraService compraService, JsonView json) {
-        this.compraService = compraService;
+    public CompraController(JsonView json) {
         this.json = json;
     }
 
@@ -43,14 +40,17 @@ public class CompraController {
                 }
             }
         }
-        json.send(exchange, 200, compraService.listarTodas(dataInicio, dataFim, observacoes));
+        List<Map<String, Object>> result = Compra.findAll(dataInicio, dataFim, observacoes).stream()
+            .map(Compra::toResponseMap)
+            .collect(java.util.stream.Collectors.toList());
+        json.send(exchange, 200, result);
     }
 
     private void buscar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = compraService.buscarPorId(id);
+        var opt = Compra.findById(id);
         if (opt.isPresent()) {
-            json.send(exchange, 200, opt.get());
+            json.send(exchange, 200, opt.get().toResponseMap());
         } else {
             json.send(exchange, 404, Map.of("error", "Compra não encontrada"));
         }
@@ -58,31 +58,31 @@ public class CompraController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Compra compra = json.read(exchange.getRequestBody(), Compra.class);
-        CompraDTO salva = compraService.salvar(compra);
-        json.send(exchange, 201, salva);
+        compra.save();
+        json.send(exchange, 201, compra.toResponseMap());
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = compraService.buscarPorId(id);
+        var opt = Compra.findById(id);
         if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Compra não encontrada"));
             return;
         }
         Compra compra = json.read(exchange.getRequestBody(), Compra.class);
         compra.setId(id);
-        CompraDTO atualizada = compraService.salvar(compra);
-        json.send(exchange, 200, atualizada);
+        compra.save();
+        json.send(exchange, 200, compra.toResponseMap());
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = compraService.buscarPorId(id);
+        var opt = Compra.findById(id);
         if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Compra não encontrada"));
             return;
         }
-        compraService.deletar(id);
+        opt.get().delete();
         json.send(exchange, 204, null);
     }
 }

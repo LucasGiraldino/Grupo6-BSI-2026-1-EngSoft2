@@ -3,14 +3,14 @@ package com.sigaac.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class DoacaoRequestDTO {
+public class DoacaoRequest {
     private Integer idPaciente;
     private Integer idProfissional;
     private String observacoes;
-    private List<ItemDoacaoRequestDTO> itens;
+    private List<ItemDoacaoRequest> itens;
 
-    public DoacaoRequestDTO() {}
-    public DoacaoRequestDTO(Integer idPaciente, Integer idProfissional, String observacoes, List<ItemDoacaoRequestDTO> itens) {
+    public DoacaoRequest() {}
+    public DoacaoRequest(Integer idPaciente, Integer idProfissional, String observacoes, List<ItemDoacaoRequest> itens) {
         this.idPaciente = idPaciente;
         this.idProfissional = idProfissional;
         this.observacoes = observacoes;
@@ -22,14 +22,14 @@ public class DoacaoRequestDTO {
     public void setIdProfissional(Integer idProfissional) { this.idProfissional = idProfissional; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
-    public List<ItemDoacaoRequestDTO> getItens() { return itens; }
-    public void setItens(List<ItemDoacaoRequestDTO> itens) { this.itens = itens; }
+    public List<ItemDoacaoRequest> getItens() { return itens; }
+    public void setItens(List<ItemDoacaoRequest> itens) { this.itens = itens; }
 
-    public static class ItemDoacaoRequestDTO {
+    public static class ItemDoacaoRequest {
         private Integer idAlimento;
         private BigDecimal quantidade;
-        public ItemDoacaoRequestDTO() {}
-        public ItemDoacaoRequestDTO(Integer idAlimento, BigDecimal quantidade) {
+        public ItemDoacaoRequest() {}
+        public ItemDoacaoRequest(Integer idAlimento, BigDecimal quantidade) {
             this.idAlimento = idAlimento;
             this.quantidade = quantidade;
         }

@@ -1,4 +1,4 @@
-package com.sigaac.model;
+package com.sigaac.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,13 +7,11 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class OtpService {
+public class OtpUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(OtpService.class);
+    private static final Logger logger = LoggerFactory.getLogger(OtpUtil.class);
     private final SecureRandom secureRandom = new SecureRandom();
     private final ConcurrentHashMap<String, OtpEntry> otpStore = new ConcurrentHashMap<>();
-
-    public OtpService() {}
 
     public String generateOtp(String email) {
         String code = String.format("%06d", secureRandom.nextInt(1000000));

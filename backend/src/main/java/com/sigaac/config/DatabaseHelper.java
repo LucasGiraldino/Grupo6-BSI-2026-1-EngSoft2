@@ -1,4 +1,4 @@
-package com.sigaac.model;
+package com.sigaac.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.*;
@@ -6,19 +6,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BaseRepository {
+public class DatabaseHelper {
 
-    protected final HikariDataSource ds;
+    private static DatabaseHelper instance;
+    private final HikariDataSource ds;
 
-    public BaseRepository(HikariDataSource ds) {
+    public DatabaseHelper(HikariDataSource ds) {
         this.ds = ds;
     }
 
-    protected Connection getConnection() throws SQLException {
+    public static void init(HikariDataSource ds) {
+        instance = new DatabaseHelper(ds);
+    }
+
+    public static DatabaseHelper getInstance() {
+        if (instance == null) throw new IllegalStateException("DatabaseHelper not initialized");
+        return instance;
+    }
+
+    public Connection getConnection() throws SQLException {
         return ds.getConnection();
     }
 
-    protected <T> List<T> queryList(String sql, RowMapper<T> mapper, Object... params) {
+    public <T> List<T> queryList(String sql, RowMapper<T> mapper, Object... params) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = prepare(conn, sql, params);
              ResultSet rs = stmt.executeQuery()) {
@@ -32,7 +42,7 @@ public class BaseRepository {
         }
     }
 
-    protected <T> Optional<T> querySingle(String sql, RowMapper<T> mapper, Object... params) {
+    public <T> Optional<T> querySingle(String sql, RowMapper<T> mapper, Object... params) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = prepare(conn, sql, params);
              ResultSet rs = stmt.executeQuery()) {
@@ -45,7 +55,7 @@ public class BaseRepository {
         }
     }
 
-    protected int executeUpdate(String sql, Object... params) {
+    public int executeUpdate(String sql, Object... params) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = prepare(conn, sql, params)) {
             return stmt.executeUpdate();
@@ -54,7 +64,7 @@ public class BaseRepository {
         }
     }
 
-    protected Number executeInsert(String sql, Object... params) {
+    public Number executeInsert(String sql, Object... params) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = prepare(conn, sql, params)) {
             stmt.executeUpdate();
@@ -68,7 +78,7 @@ public class BaseRepository {
         }
     }
 
-    protected void executeInTransaction(TransactionCallback callback) {
+    public void executeInTransaction(TransactionCallback callback) {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
             try {

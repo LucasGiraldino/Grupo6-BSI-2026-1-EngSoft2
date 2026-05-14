@@ -1,20 +1,16 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Profissional;
-import com.sigaac.model.ProfissionalRepository;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.util.List;
 import java.util.Map;
 
 public class ProfissionalController {
 
-    private final ProfissionalRepository repository;
     private final JsonView json;
 
-    public ProfissionalController(ProfissionalRepository repository, JsonView json) {
-        this.repository = repository;
+    public ProfissionalController(JsonView json) {
         this.json = json;
     }
 
@@ -40,13 +36,12 @@ public class ProfissionalController {
                 }
             }
         }
-        List<Profissional> profissionais = repository.findAll(nome, especialidade);
-        json.send(exchange, 200, profissionais);
+        json.send(exchange, 200, Profissional.findAll(nome, especialidade));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = repository.findById(id);
+        var opt = Profissional.findById(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -56,29 +51,29 @@ public class ProfissionalController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Profissional profissional = json.read(exchange.getRequestBody(), Profissional.class);
-        Profissional salvo = repository.save(profissional);
-        json.send(exchange, 201, salvo);
+        profissional.save();
+        json.send(exchange, 201, profissional);
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (repository.findById(id).isEmpty()) {
+        if (Profissional.findById(id).isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Profissional não encontrado"));
             return;
         }
         Profissional profissional = json.read(exchange.getRequestBody(), Profissional.class);
         profissional.setId(id);
-        Profissional atualizado = repository.save(profissional);
-        json.send(exchange, 200, atualizado);
+        profissional.save();
+        json.send(exchange, 200, profissional);
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (repository.findById(id).isEmpty()) {
+        if (Profissional.findById(id).isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Profissional não encontrado"));
             return;
         }
-        repository.deleteById(id);
+        Profissional.findById(id).ifPresent(Profissional::delete);
         json.send(exchange, 204, null);
     }
 }

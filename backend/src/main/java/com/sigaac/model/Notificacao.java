@@ -1,6 +1,12 @@
 package com.sigaac.model;
 
+import com.sigaac.config.DatabaseHelper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 public class Notificacao {
 
@@ -22,6 +28,54 @@ public class Notificacao {
         this.dataEnvio = dataEnvio;
         this.statusEnvio = statusEnvio;
     }
+
+    // -- Persistence --
+
+    public static List<Notificacao> findAll() {
+        return DatabaseHelper.getInstance().queryList(
+            "SELECT * FROM notificacoes ORDER BY id_notificacao",
+            Notificacao::mapRow);
+    }
+
+    public static Optional<Notificacao> findById(Integer id) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT * FROM notificacoes WHERE id_notificacao = ?",
+            Notificacao::mapRow, id);
+    }
+
+    public Notificacao save() {
+        var db = DatabaseHelper.getInstance();
+        if (this.id == null) {
+            Number id = db.executeInsert(
+                "INSERT INTO notificacoes (id_paciente, tipo, mensagem, data_envio, status_envio) VALUES (?, ?, ?, ?, ?)",
+                this.paciente != null ? this.paciente.getId() : null,
+                this.tipo, this.mensagem, this.dataEnvio, this.statusEnvio);
+            if (id != null) this.id = id.intValue();
+        } else {
+            db.executeUpdate(
+                "UPDATE notificacoes SET id_paciente = ?, tipo = ?, mensagem = ?, data_envio = ?, status_envio = ? WHERE id_notificacao = ?",
+                this.paciente != null ? this.paciente.getId() : null,
+                this.tipo, this.mensagem, this.dataEnvio, this.statusEnvio, this.id);
+        }
+        return this;
+    }
+
+    public void delete() {
+        DatabaseHelper.getInstance().executeUpdate(
+            "DELETE FROM notificacoes WHERE id_notificacao = ?", this.id);
+    }
+
+    private static Notificacao mapRow(ResultSet rs) throws SQLException {
+        Notificacao n = new Notificacao();
+        n.setId(rs.getInt("id_notificacao"));
+        n.setTipo(rs.getString("tipo"));
+        n.setMensagem(rs.getString("mensagem"));
+        n.setDataEnvio(rs.getObject("data_envio", LocalDateTime.class));
+        n.setStatusEnvio(rs.getString("status_envio"));
+        return n;
+    }
+
+    // -- Getters / Setters --
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

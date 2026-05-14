@@ -1,7 +1,12 @@
 package com.sigaac.model;
 
+import com.sigaac.config.DatabaseHelper;
+
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class Estoque {
 
@@ -20,6 +25,49 @@ public class Estoque {
         this.quantidadeMinima = quantidadeMinima;
         this.dataUltimaAtualizacao = dataUltimaAtualizacao;
     }
+
+    // -- Persistence --
+
+    public static Optional<Estoque> findByAlimentoId(Integer idAlimento) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT * FROM estoque WHERE id_alimento = ?",
+            Estoque::mapRow, idAlimento);
+    }
+
+    public static Optional<Estoque> findById(Integer id) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT * FROM estoque WHERE id_estoque = ?",
+            Estoque::mapRow, id);
+    }
+
+    public Estoque save() {
+        var db = DatabaseHelper.getInstance();
+        if (this.id == null) {
+            Number id = db.executeInsert(
+                "INSERT INTO estoque (id_alimento, quantidade_atual, quantidade_minima, data_ultima_atualizacao) VALUES (?, ?, ?, ?)",
+                this.alimento != null ? this.alimento.getId() : null,
+                this.quantidadeAtual, this.quantidadeMinima,
+                this.dataUltimaAtualizacao);
+            if (id != null) this.id = id.intValue();
+        } else {
+            db.executeUpdate(
+                "UPDATE estoque SET quantidade_atual = ?, quantidade_minima = ?, data_ultima_atualizacao = ? WHERE id_estoque = ?",
+                this.quantidadeAtual, this.quantidadeMinima,
+                this.dataUltimaAtualizacao, this.id);
+        }
+        return this;
+    }
+
+    private static Estoque mapRow(ResultSet rs) throws SQLException {
+        Estoque e = new Estoque();
+        e.setId(rs.getInt("id_estoque"));
+        e.setQuantidadeAtual(rs.getBigDecimal("quantidade_atual"));
+        e.setQuantidadeMinima(rs.getBigDecimal("quantidade_minima"));
+        e.setDataUltimaAtualizacao(rs.getObject("data_ultima_atualizacao", LocalDateTime.class));
+        return e;
+    }
+
+    // -- Getters / Setters --
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
