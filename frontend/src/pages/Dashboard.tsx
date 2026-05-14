@@ -33,7 +33,7 @@ export default function Dashboard() {
       </div>
 
       <Card title="Ações Rápidas">
-        <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
           <button className="p-4 bg-[#030213] text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/pacientes')}>
             Novo Paciente
           </button>
@@ -45,6 +45,9 @@ export default function Dashboard() {
           </button>
           <button className="p-4 bg-yellow-600 text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/exames')}>
             Solicitar Exame
+          </button>
+          <button className="p-4 bg-purple-600 text-white font-medium rounded-lg hover:opacity-90" onClick={() => navigate('/verificar-horarios')}>
+            Verificar Horários
           </button>
         </div>
       </Card>

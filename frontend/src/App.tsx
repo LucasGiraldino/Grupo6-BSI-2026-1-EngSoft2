@@ -16,6 +16,7 @@ import Register from './pages/Register'
 import VerifyOTP from './pages/VerifyOTP'
 import EsqueciSenha from './pages/EsqueciSenha'
 import Doacoes from './pages/Doacoes'
+import VerificarHorarios from './pages/VerificarHorarios'
 import { useAuth } from './hooks/useAuth'
 import AppLayout from './components/AppLayout'
 import { SystemConfigProvider } from './contexts/SystemConfigContext'
@@ -109,6 +110,10 @@ function AppRoutes() {
       <Route
         path="/doacoes"
         element={isAuthenticated ? <AppLayout><Doacoes /></AppLayout> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/verificar-horarios"
+        element={isAuthenticated ? <AppLayout><VerificarHorarios /></AppLayout> : <Navigate to="/login" />}
       />
       <Route
         path="/configuracoes"
