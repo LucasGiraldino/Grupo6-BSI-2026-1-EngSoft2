@@ -40,6 +40,15 @@ public class Agenda {
             Agenda::mapRow, idProfissional, java.sql.Date.valueOf(data));
     }
 
+    public static List<Agenda> findByProfissionalId(Integer idProfissional) {
+        return DatabaseHelper.getInstance().queryList(
+            "SELECT a.* FROM agenda a " +
+            "JOIN profissionais p ON a.id_usuario = p.id_usuario " +
+            "WHERE p.id_profissional = ? " +
+            "ORDER BY a.data DESC, a.hora_inicio",
+            Agenda::mapRow, idProfissional);
+    }
+
     public static List<Agenda> findDisponiveisByProfissionalAndDataBetween(Integer idProfissional, LocalDate inicio, LocalDate fim) {
         return DatabaseHelper.getInstance().queryList(
             "SELECT a.* FROM agenda a " +

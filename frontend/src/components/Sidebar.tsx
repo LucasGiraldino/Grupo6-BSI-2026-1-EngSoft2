@@ -87,6 +87,17 @@ export default function Sidebar({ systemName = 'SIGAAC', systemSubtitle = 'Siste
                 <lucide.Users className="w-5 h-5" />
                 Usuários
               </NavLink>
+              <NavLink
+                to="/gerenciar-agenda"
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    isActive ? 'bg-[#030213] text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <lucide.Clock className="w-5 h-5" />
+                Gerenciar Agenda
+              </NavLink>
             </div>
           )
         } 

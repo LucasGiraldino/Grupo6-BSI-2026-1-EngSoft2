@@ -17,6 +17,7 @@ import VerifyOTP from './pages/VerifyOTP'
 import EsqueciSenha from './pages/EsqueciSenha'
 import Doacoes from './pages/Doacoes'
 import VerificarHorarios from './pages/VerificarHorarios'
+import GerenciarAgenda from './pages/GerenciarAgenda'
 import { useAuth } from './hooks/useAuth'
 import AppLayout from './components/AppLayout'
 import { SystemConfigProvider } from './contexts/SystemConfigContext'
@@ -130,6 +131,16 @@ function AppRoutes() {
         element={
           isAuthenticated && isAdmin ? (
             <AppLayout><GerenciarUsuarios /></AppLayout>
+          ) : (
+            <Navigate to="/dashboard" />
+          )
+        }
+      />
+      <Route
+        path="/gerenciar-agenda"
+        element={
+          isAuthenticated && isAdmin ? (
+            <AppLayout><GerenciarAgenda /></AppLayout>
           ) : (
             <Navigate to="/dashboard" />
           )
