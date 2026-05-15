@@ -73,8 +73,13 @@ public class ParametrizacaoOngController {
     private void getConfiguracaoSistema(HttpExchange exchange, Map<String, String> params) throws Exception {
         String query = exchange.getRequestURI().getQuery();
         String email = null;
-        if (query != null && query.startsWith("email=")) {
-            email = query.substring(6);
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=", 2);
+                if (pair.length == 2 && "email".equals(pair[0])) {
+                    email = java.net.URLDecoder.decode(pair[1], "UTF-8");
+                }
+            }
         }
 
         ConfiguracaoSistema config = new ConfiguracaoSistema();
@@ -97,6 +102,10 @@ public class ParametrizacaoOngController {
     }
 
     private String validateRequest(Map<String, Object> request) {
+        String razaoSocial = (String) request.get("razaoSocial");
+        if (razaoSocial == null || razaoSocial.isBlank()) {
+            return "Razão social é obrigatória.";
+        }
         String cnpj = request.get("cnpj") != null ? ((String) request.get("cnpj")).replaceAll("\\D", "") : null;
         if (cnpj == null || !CnpjUtil.validarMatematicamente(cnpj)) {
             return "CNPJ inválido. Verifique os dígitos.";
@@ -138,6 +147,11 @@ public class ParametrizacaoOngController {
 
     private void update(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
+        var opt = ParametrizacaoOng.findById(id);
+        if (opt.isEmpty()) {
+            json.send(exchange, 404, Map.of("error", "Não encontrado"));
+            return;
+        }
         Map<String, Object> request = json.read(exchange.getRequestBody(), Map.class);
         String error = validateRequest(request);
         if (error != null) {
@@ -146,6 +160,9 @@ public class ParametrizacaoOngController {
         }
         ParametrizacaoOng param = toEntity(request);
         param.setId(id);
+        if (param.getEndereco() == null) {
+            param.setEndereco(opt.get().getEndereco());
+        }
         ParametrizacaoOng updated = param.save();
         json.send(exchange, 200, toDTO(updated));
     }

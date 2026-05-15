@@ -100,21 +100,24 @@ public class Consulta {
         var db = DatabaseHelper.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
-                "INSERT INTO consultas (id_paciente, id_agenda, id_profissional, tipo_consulta, status, observacoes, data_agendamento) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO consultas (id_paciente, id_agenda, id_profissional, tipo_consulta, status, observacoes, data_agendamento, id_triagem) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 this.paciente != null ? this.paciente.getId() : null,
                 this.agenda != null ? this.agenda.getId() : null,
                 this.profissional != null ? this.profissional.getId() : null,
                 this.tipoConsulta, this.status,
-                this.observacoes, this.dataAgendamento);
+                this.observacoes, this.dataAgendamento,
+                this.triagem != null ? this.triagem.getId() : null);
             if (id != null) this.id = id.intValue();
         } else {
             db.executeUpdate(
-                "UPDATE consultas SET id_paciente = ?, id_agenda = ?, id_profissional = ?, tipo_consulta = ?, status = ?, observacoes = ? WHERE id_consulta = ?",
+                "UPDATE consultas SET id_paciente = ?, id_agenda = ?, id_profissional = ?, tipo_consulta = ?, status = ?, observacoes = ?, id_triagem = ? WHERE id_consulta = ?",
                 this.paciente != null ? this.paciente.getId() : null,
                 this.agenda != null ? this.agenda.getId() : null,
                 this.profissional != null ? this.profissional.getId() : null,
                 this.tipoConsulta, this.status,
-                this.observacoes, this.id);
+                this.observacoes,
+                this.triagem != null ? this.triagem.getId() : null,
+                this.id);
         }
         return this;
     }
@@ -193,6 +196,13 @@ public class Consulta {
             prof.setUsuario(u);
         }
         c.setProfissional(prof);
+
+        Integer idTriagem = rs.getObject("id_triagem", Integer.class);
+        if (idTriagem != null) {
+            Triagem t = new Triagem();
+            t.setId(idTriagem);
+            c.setTriagem(t);
+        }
 
         return c;
     }

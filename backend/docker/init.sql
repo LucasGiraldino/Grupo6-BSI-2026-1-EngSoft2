@@ -143,7 +143,7 @@ CREATE TABLE triagens (
     id_prontuario INTEGER NOT NULL REFERENCES prontuarios(id_prontuario),
     id_medico INTEGER NOT NULL REFERENCES medicos(id_medico),
     data_triagem TIMESTAMP NOT NULL,
-    pressao_arterial VARCHAR(10),
+    pressao_arterial VARCHAR(20),
     febre NUMERIC(4,1),
     condicao_clinica TEXT NOT NULL,
     condicao_nutricional TEXT,

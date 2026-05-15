@@ -65,6 +65,10 @@ public class TriagemController {
             json.send(exchange, 400, Map.of("error", "Prontuário não encontrado. Cadastre o paciente primeiro."));
             return;
         }
+        if (triagem.getMedico() == null || Medico.findById(triagem.getMedico().getId()).isEmpty()) {
+            json.send(exchange, 400, Map.of("error", "Médico não encontrado"));
+            return;
+        }
         triagem.save();
         var prontuarioOpt = Prontuario.findById(triagem.getProntuario().getId());
         prontuarioOpt.ifPresent(prontuario -> {

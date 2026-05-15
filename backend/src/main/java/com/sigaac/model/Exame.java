@@ -58,7 +58,7 @@ public class Exame {
 
     public static List<Exame> findAll() { return findAll(null, null); }
 
-    public static List<Exame> findAll(String status, Integer tipoExameId) {
+    public static List<Exame> findAll(String status, String tipoExameNome) {
         var db = DatabaseHelper.getInstance();
         String sql = BASE_SELECT + "WHERE e.deleted_at IS NULL";
         List<Object> params = new ArrayList<>();
@@ -66,9 +66,9 @@ public class Exame {
             sql += " AND e.status = ?";
             params.add(status);
         }
-        if (tipoExameId != null) {
-            sql += " AND e.id_tipo_exame = ?";
-            params.add(tipoExameId);
+        if (tipoExameNome != null && !tipoExameNome.isBlank()) {
+            sql += " AND te.nome ILIKE ?";
+            params.add("%" + tipoExameNome.trim() + "%");
         }
         sql += " ORDER BY e.id_exame";
         return db.queryList(sql, Exame::mapRow, params.toArray());
@@ -119,8 +119,8 @@ public class Exame {
         if (request.getJustificativaClinica() != null) this.justificativaClinica = request.getJustificativaClinica();
         if (request.getDataSolicitacao() != null) this.dataSolicitacao = request.getDataSolicitacao();
         if (request.getStatus() != null) this.status = request.getStatus();
-        if (request.getObservacoesMedico() != null) this.observacoesMedico = request.getObservacoesMedico();
-        if (request.getDataRealizacao() != null) this.dataRealizacao = request.getDataRealizacao();
+        this.observacoesMedico = request.getObservacoesMedico();
+        this.dataRealizacao = request.getDataRealizacao();
         return this;
     }
 
@@ -140,14 +140,14 @@ public class Exame {
         e.setDeletedAt(rs.getObject("deleted_at", LocalDateTime.class));
 
         TipoExame te = new TipoExame();
-        te.setId(rs.getInt("id_tipo_exame"));
+        te.setId(rs.getObject("id_tipo_exame", Integer.class));
         te.setNome(rs.getString("te_nome"));
         te.setDescricao(rs.getString("te_descricao"));
         te.setAtivo(rs.getObject("te_ativo", Boolean.class));
         e.setTipoExame(te);
 
         Medico m = new Medico();
-        m.setId(rs.getInt("id_medico"));
+        m.setId(rs.getObject("id_medico", Integer.class));
         m.setCrm(rs.getString("crm"));
         m.setEspecialidadeMedica(rs.getString("especialidade_medica"));
         User u = new User();
@@ -157,7 +157,7 @@ public class Exame {
         e.setMedico(m);
 
         Prontuario p = new Prontuario();
-        p.setId(rs.getInt("id_prontuario"));
+        p.setId(rs.getObject("id_prontuario", Integer.class));
         p.setDataAbertura(rs.getObject("p_data_abertura", LocalDate.class));
         p.setDataFechamento(rs.getObject("p_data_fechamento", LocalDate.class));
         Paciente pac = new Paciente();
