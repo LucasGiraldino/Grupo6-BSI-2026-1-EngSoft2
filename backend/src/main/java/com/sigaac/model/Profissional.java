@@ -54,6 +54,14 @@ public class Profissional {
         return db.queryList(sql, Profissional::mapRow, params.toArray());
     }
 
+    public static Optional<Profissional> findByUsuarioId(Integer usuarioId) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +
+            "JOIN users u ON p.id_usuario = u.id_usuario " +
+            "WHERE p.id_usuario = ?",
+            Profissional::mapRow, usuarioId);
+    }
+
     public static Optional<Profissional> findById(Integer id) {
         return DatabaseHelper.getInstance().querySingle(
             "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +

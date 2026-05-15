@@ -149,8 +149,12 @@ export default function Profissionais() {
       }
       setModalAberto(false)
       carregarProfissionais()
-    } catch {
-      setErroForm('Erro ao salvar profissional. Verifique os dados e tente novamente.')
+    } catch (err: any) {
+      if (err.response?.status === 409) {
+        setErroForm('Este usuário já possui um profissional vinculado.')
+      } else {
+        setErroForm('Erro ao salvar profissional. Verifique os dados e tente novamente.')
+      }
     }
   }
 

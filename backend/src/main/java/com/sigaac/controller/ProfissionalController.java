@@ -52,6 +52,14 @@ public class ProfissionalController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Profissional profissional = json.read(exchange.getRequestBody(), Profissional.class);
+        Integer usuarioId = profissional.getUsuario() != null ? profissional.getUsuario().getId() : null;
+        if (usuarioId != null) {
+            var existente = Profissional.findByUsuarioId(usuarioId);
+            if (existente.isPresent()) {
+                json.send(exchange, 409, Map.of("error", "Este usuário já possui um profissional vinculado"));
+                return;
+            }
+        }
         profissional.save();
         syncMedico(profissional);
         json.send(exchange, 201, profissional);

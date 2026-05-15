@@ -105,7 +105,8 @@ CREATE TABLE medicos (
     crm VARCHAR(20) NOT NULL UNIQUE,
     especialidade_medica VARCHAR(100) NOT NULL,
     data_admissao DATE NOT NULL,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE agenda (
@@ -134,6 +135,20 @@ CREATE TABLE prontuarios (
     data_abertura DATE NOT NULL,
     data_fechamento DATE,
     observacoes_gerais TEXT
+);
+
+CREATE TABLE triagens (
+    id_triagem INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_prontuario INTEGER NOT NULL REFERENCES prontuarios(id_prontuario),
+    id_medico INTEGER NOT NULL REFERENCES medicos(id_medico),
+    data_triagem TIMESTAMP NOT NULL,
+    pressao_arterial VARCHAR(10),
+    febre NUMERIC(4,1),
+    condicao_clinica TEXT NOT NULL,
+    condicao_nutricional TEXT,
+    condicao_social TEXT,
+    observacoes TEXT,
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE consultas (
@@ -201,20 +216,6 @@ CREATE TABLE receitas_medicas (
     data_emissao TIMESTAMP NOT NULL,
     descricao TEXT NOT NULL,
     data_validade DATE NOT NULL
-);
-
-CREATE TABLE triagens (
-    id_triagem INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_prontuario INTEGER NOT NULL REFERENCES prontuarios(id_prontuario),
-    id_medico INTEGER NOT NULL REFERENCES medicos(id_medico),
-    data_triagem TIMESTAMP NOT NULL,
-    pressao_arterial VARCHAR(10),
-    febre NUMERIC(4,1),
-    condicao_clinica TEXT NOT NULL,
-    condicao_nutricional TEXT,
-    condicao_social TEXT,
-    observacoes TEXT,
-    deleted_at TIMESTAMP
 );
 
 CREATE TABLE exames (
