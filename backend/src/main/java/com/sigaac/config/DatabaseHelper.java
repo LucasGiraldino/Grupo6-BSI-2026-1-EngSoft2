@@ -1,6 +1,6 @@
 package com.sigaac.config;
 
-import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariDataSource; // eu utilizei esse metodo para poder melhorar a conexão com o banco não tendo que criar sempre uma nova conexão 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

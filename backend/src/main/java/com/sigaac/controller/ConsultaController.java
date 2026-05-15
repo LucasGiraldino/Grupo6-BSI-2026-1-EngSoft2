@@ -1,11 +1,9 @@
 package com.sigaac.controller;
 
-import com.sigaac.config.DatabaseHelper;
 import com.sigaac.model.Consulta;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 public class ConsultaController {
@@ -84,24 +82,8 @@ public class ConsultaController {
             if (opt.isEmpty()) {
                 throw new IllegalArgumentException("Consulta não encontrada.");
             }
-            if (!"AGENDADA".equals(opt.get().getStatus())) {
-                throw new IllegalStateException("A consulta não está no status AGENDADA e não pode ser cancelada.");
-            }
-
-            DatabaseHelper.getInstance().executeInTransaction(conn -> {
-                var db = DatabaseHelper.getInstance();
-                db.executeUpdate(
-                    "UPDATE consultas SET status = 'CANCELADA', data_cancelamento = ? WHERE id_consulta = ?",
-                    LocalDateTime.now(), id);
-
-                var idAgendaOpt = db.querySingle(
-                    "SELECT id_agenda FROM consultas WHERE id_consulta = ?",
-                    rs -> rs.getObject("id_agenda", Integer.class), id);
-
-                idAgendaOpt.ifPresent(agId ->
-                    db.executeUpdate("UPDATE agenda SET disponivel = TRUE WHERE id_agenda = ?", agId));
-            });
-
+            Consulta consulta = opt.get();
+            consulta.cancelar();
             json.send(exchange, 200, Map.of("message", "Consulta cancelada com sucesso."));
         } catch (IllegalArgumentException e) {
             json.send(exchange, 404, Map.of("error", e.getMessage()));
