@@ -2,6 +2,7 @@ package com.sigaac.model;
 
 import com.sigaac.config.DatabaseHelper;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,7 +83,21 @@ public class Doacao {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate("DELETE FROM doacoes WHERE id_doacao = ?", this.id);
+        var db = DatabaseHelper.getInstance();
+        db.executeInTransaction(conn -> {
+            deleteItensDoacao(conn);
+            try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM doacoes WHERE id_doacao = ?")) {
+                stmt.setInt(1, this.id);
+                stmt.executeUpdate();
+            }
+        });
+    }
+
+    private void deleteItensDoacao(Connection conn) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM itens_doacao WHERE id_doacao = ?")) {
+            stmt.setInt(1, this.id);
+            stmt.executeUpdate();
+        }
     }
 
     public Doacao merge(Doacao request) {

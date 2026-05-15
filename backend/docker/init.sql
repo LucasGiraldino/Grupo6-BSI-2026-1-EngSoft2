@@ -176,7 +176,7 @@ CREATE TABLE doacoes (
     id_doacao INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_profissional INTEGER NOT NULL REFERENCES profissionais(id_profissional),
     id_paciente INTEGER NOT NULL REFERENCES pacientes(id_paciente),
-    id_estoque INTEGER NOT NULL REFERENCES estoque(id_estoque),
+    id_estoque INTEGER REFERENCES estoque(id_estoque),
     data_doacao TIMESTAMP NOT NULL,
     observacoes TEXT
 );
@@ -242,7 +242,7 @@ CREATE TABLE itens_compra (
 
 CREATE TABLE itens_doacao (
     id_item_doacao INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_doacao INTEGER NOT NULL REFERENCES doacoes(id_doacao),
+    id_doacao INTEGER NOT NULL REFERENCES doacoes(id_doacao) ON DELETE CASCADE,
     id_alimento INTEGER NOT NULL REFERENCES alimentos(id_alimento),
     quantidade NUMERIC(10,3) NOT NULL,
     peso NUMERIC(10,3)

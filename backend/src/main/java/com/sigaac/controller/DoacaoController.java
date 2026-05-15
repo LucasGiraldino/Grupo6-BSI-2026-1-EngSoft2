@@ -49,7 +49,7 @@ public class DoacaoController {
         } catch (IllegalArgumentException | IllegalStateException e) {
             json.send(exchange, 400, Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            json.send(exchange, 500, Map.of("error", "Erro ao processar e atualizar estoque para a doação."));
+            json.send(exchange, 500, Map.of("error", "Erro ao processar a doação."));
         }
     }
 
@@ -112,7 +112,16 @@ public class DoacaoController {
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        Doacao.findById(id).ifPresent(Doacao::delete);
-        json.send(exchange, 204, null);
+        try {
+            Doacao.findById(id).ifPresentOrElse(
+                Doacao::delete,
+                () -> { throw new IllegalArgumentException("Doacao nao encontrada."); }
+            );
+            json.send(exchange, 204, null);
+        } catch (IllegalArgumentException e) {
+            json.send(exchange, 404, Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            json.send(exchange, 500, Map.of("error", "Erro ao excluir doacao."));
+        }
     }
 }
