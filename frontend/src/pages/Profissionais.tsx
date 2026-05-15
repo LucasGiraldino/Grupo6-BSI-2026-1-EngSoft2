@@ -37,6 +37,7 @@ const FORM_VAZIO = {
   especialidade: '',
   registroProfissional: '',
   dataAdmissao: '',
+  ehMedico: false,
 }
 
 export default function Profissionais() {
@@ -105,6 +106,7 @@ export default function Profissionais() {
       especialidade: p.especialidade,
       registroProfissional: p.registroProfissional,
       dataAdmissao: p.dataAdmissao,
+      ehMedico: false,
     })
     setErroForm('')
     setModalAberto(true)
@@ -134,6 +136,7 @@ export default function Profissionais() {
       especialidade: form.especialidade.trim(),
       registroProfissional: form.registroProfissional.trim(),
       dataAdmissao: form.dataAdmissao,
+      ehMedico: form.ehMedico,
     }
 
     try {
@@ -334,6 +337,19 @@ export default function Profissionais() {
                     onChange={e => setForm(f => ({ ...f, registroProfissional: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
                   />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="ehMedico"
+                    checked={form.ehMedico}
+                    onChange={e => setForm(f => ({ ...f, ehMedico: e.target.checked }))}
+                    className="w-4 h-4 text-[#030213] border-gray-300 rounded focus:ring-[#030213]"
+                  />
+                  <label htmlFor="ehMedico" className="text-sm font-medium text-gray-700">
+                    É médico?
+                  </label>
                 </div>
 
                 <div>

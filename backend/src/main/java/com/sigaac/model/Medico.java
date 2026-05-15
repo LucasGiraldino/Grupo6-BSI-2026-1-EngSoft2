@@ -44,6 +44,14 @@ public class Medico {
             Medico::mapRow);
     }
 
+    public static Optional<Medico> findByUsuarioId(Integer usuarioId) {
+        return DatabaseHelper.getInstance().querySingle(
+            "SELECT m.*, u.nome AS usuario_nome, u.email AS usuario_email FROM medicos m " +
+            "JOIN users u ON m.id_usuario = u.id_usuario " +
+            "WHERE m.id_usuario = ? AND m.deleted_at IS NULL",
+            Medico::mapRow, usuarioId);
+    }
+
     public static Optional<Medico> findById(Integer id) {
         return DatabaseHelper.getInstance().querySingle(
             "SELECT m.*, u.nome AS usuario_nome, u.email AS usuario_email FROM medicos m " +

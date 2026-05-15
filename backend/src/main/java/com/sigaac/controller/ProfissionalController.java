@@ -1,5 +1,6 @@
 package com.sigaac.controller;
 
+import com.sigaac.model.Medico;
 import com.sigaac.model.Profissional;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
@@ -52,6 +53,7 @@ public class ProfissionalController {
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Profissional profissional = json.read(exchange.getRequestBody(), Profissional.class);
         profissional.save();
+        syncMedico(profissional);
         json.send(exchange, 201, profissional);
     }
 
@@ -64,16 +66,49 @@ public class ProfissionalController {
         Profissional profissional = json.read(exchange.getRequestBody(), Profissional.class);
         profissional.setId(id);
         profissional.save();
+        syncMedico(profissional);
         json.send(exchange, 200, profissional);
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        if (Profissional.findById(id).isEmpty()) {
+        var opt = Profissional.findById(id);
+        if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Profissional não encontrado"));
             return;
         }
-        Profissional.findById(id).ifPresent(Profissional::delete);
+        Profissional profissional = opt.get();
+        Integer usuarioId = profissional.getUsuario() != null ? profissional.getUsuario().getId() : null;
+        if (usuarioId != null) {
+            Medico.findByUsuarioId(usuarioId).ifPresent(Medico::delete);
+        }
+        profissional.delete();
         json.send(exchange, 204, null);
+    }
+
+    private void syncMedico(Profissional profissional) {
+        Integer usuarioId = profissional.getUsuario() != null ? profissional.getUsuario().getId() : null;
+        if (usuarioId == null) return;
+
+        var optMedico = Medico.findByUsuarioId(usuarioId);
+
+        if (Boolean.TRUE.equals(profissional.getEhMedico())) {
+            if (optMedico.isPresent()) {
+                Medico medico = optMedico.get();
+                medico.setCrm(profissional.getRegistroProfissional());
+                medico.setEspecialidadeMedica(profissional.getEspecialidade());
+                medico.setDataAdmissao(profissional.getDataAdmissao());
+                medico.save();
+            } else {
+                Medico medico = new Medico();
+                medico.setUsuario(profissional.getUsuario());
+                medico.setCrm(profissional.getRegistroProfissional());
+                medico.setEspecialidadeMedica(profissional.getEspecialidade());
+                medico.setDataAdmissao(profissional.getDataAdmissao());
+                medico.save();
+            }
+        } else {
+            optMedico.ifPresent(Medico::delete);
+        }
     }
 }

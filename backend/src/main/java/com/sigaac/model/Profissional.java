@@ -18,6 +18,7 @@ public class Profissional {
     private String registroProfissional;
     private LocalDate dataAdmissao;
     private LocalDate dataDemissao;
+    private Boolean ehMedico = false;
 
     public Profissional() {}
 
@@ -127,4 +128,6 @@ public class Profissional {
     public void setDataAdmissao(LocalDate dataAdmissao) { this.dataAdmissao = dataAdmissao; }
     public LocalDate getDataDemissao() { return dataDemissao; }
     public void setDataDemissao(LocalDate dataDemissao) { this.dataDemissao = dataDemissao; }
+    public Boolean getEhMedico() { return ehMedico; }
+    public void setEhMedico(Boolean ehMedico) { this.ehMedico = ehMedico; }
 }
