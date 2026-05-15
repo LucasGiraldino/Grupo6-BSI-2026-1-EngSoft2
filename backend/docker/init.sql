@@ -84,7 +84,8 @@ CREATE TABLE alimentos (
     descricao TEXT,
     unidade_medida VARCHAR(20) NOT NULL,
     data_vencimento DATE,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    deleted_at TIMESTAMP
 );
 
 -- Level 3: depende de users + enderecos
