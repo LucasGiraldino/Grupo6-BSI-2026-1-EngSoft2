@@ -2,12 +2,10 @@ package com.sigaac.model;
 
 import com.sigaac.config.DatabaseHelper;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,17 +121,6 @@ public class Doacao {
             for (ItemDoacaoRequest itemDto : itens) {
                 Alimento alimento = Alimento.findById(itemDto.getIdAlimento())
                     .orElseThrow(() -> new IllegalArgumentException("Alimento nao encontrado."));
-
-                Estoque estoque = Estoque.findByAlimentoId(itemDto.getIdAlimento())
-                    .orElseThrow(() -> new IllegalArgumentException("Estoque nao localizado para o alimento informado."));
-
-                if (estoque.getQuantidadeAtual().compareTo(itemDto.getQuantidade()) < 0) {
-                    throw new IllegalStateException("Estoque insuficiente para o alimento: " + alimento.getNome());
-                }
-
-                estoque.setQuantidadeAtual(estoque.getQuantidadeAtual().subtract(itemDto.getQuantidade()));
-                estoque.setDataUltimaAtualizacao(LocalDateTime.now());
-                estoque.save();
 
                 try (PreparedStatement stmt = conn.prepareStatement(
                         "INSERT INTO itens_doacao (id_doacao, id_alimento, quantidade, peso) VALUES (?, ?, ?, ?)",

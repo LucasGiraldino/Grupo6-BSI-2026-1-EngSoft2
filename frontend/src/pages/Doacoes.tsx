@@ -156,26 +156,13 @@ export default function Doacoes() {
       setMensagemErro('Selecione um mantimento antes de adicionar.')
       return
     }
-    const qtd = parseFloat(quantidadeInput)
-    if (isNaN(qtd) || qtd <= 0) {
-      setMensagemErro('Insira uma quantidade válida e superior a zero.')
-      return
-    }
+    const qtd = quantidadeInput ? parseFloat(quantidadeInput) : 1
     const itemEstoque = estoque.find(item => item.alimento.id === Number(alimentoSelecionadoId))
     if (!itemEstoque) return
-    if (qtd > itemEstoque.quantidadeAtual) {
-      setMensagemErro(`Estoque insuficiente. Disponível: ${itemEstoque.quantidadeAtual} ${itemEstoque.alimento.unidadeMedida}`)
-      return
-    }
     const itemExistenteIdx = cesta.findIndex(i => i.idAlimento === itemEstoque.alimento.id)
     if (itemExistenteIdx > -1) {
       const novaCesta = [...cesta]
-      const novaQtd = novaCesta[itemExistenteIdx].quantidade + qtd
-      if (novaQtd > itemEstoque.quantidadeAtual) {
-        setMensagemErro(`Quantidade total ultrapassa estoque disponível de ${itemEstoque.quantidadeAtual} ${itemEstoque.alimento.unidadeMedida}`)
-        return
-      }
-      novaCesta[itemExistenteIdx].quantidade = novaQtd
+      novaCesta[itemExistenteIdx].quantidade += qtd
       setCesta(novaCesta)
     } else {
       setCesta([...cesta, {
@@ -232,7 +219,8 @@ export default function Doacoes() {
       carregarDoacoes()
       carregarEstoque()
     } catch (err: any) {
-      setMensagemErro(err.response?.data || 'Erro ao registrar doação no servidor.')
+      const data = err.response?.data
+      setMensagemErro(typeof data === 'string' ? data : data?.error || 'Erro ao registrar doação no servidor.')
     }
   }
 
@@ -413,7 +401,7 @@ export default function Doacoes() {
                         <option value="">Selecione o Item</option>
                         {estoque.map(item => (
                           <option key={item.id} value={item.alimento.id}>
-                            {item.alimento.nome} ({item.quantidadeAtual} {item.alimento.unidadeMedida} disp.)
+                            {item.alimento.nome}
                           </option>
                         ))}
                       </select>

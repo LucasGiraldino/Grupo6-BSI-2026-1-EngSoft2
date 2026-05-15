@@ -11,6 +11,7 @@ import java.util.Optional;
 public class ItemDoacao {
 
     private Integer id;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Doacao doacao;
     private Alimento alimento;
     private BigDecimal quantidade;

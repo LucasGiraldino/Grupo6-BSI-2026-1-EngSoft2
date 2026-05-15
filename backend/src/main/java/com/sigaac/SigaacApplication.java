@@ -49,6 +49,7 @@ public class SigaacApplication {
         ProntuarioController prontuarioCtrl = new ProntuarioController(json);
         ProfissionalController profissionalCtrl = new ProfissionalController(json);
         AgendaController agendaCtrl = new AgendaController(json);
+        EstoqueController estoqueCtrl = new EstoqueController(json);
         ReceitaMedicaController receitaCtrl = new ReceitaMedicaController(json);
 
         HttpRouter router = new HttpRouter();
@@ -70,6 +71,7 @@ public class SigaacApplication {
         prontuarioCtrl.registerRoutes(router);
         profissionalCtrl.registerRoutes(router);
         agendaCtrl.registerRoutes(router);
+        estoqueCtrl.registerRoutes(router);
         receitaCtrl.registerRoutes(router);
 
         String seedData = props.getProperty("app.seed-data", "false");
