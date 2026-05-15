@@ -151,7 +151,7 @@ CREATE TABLE consultas (
 
 CREATE TABLE compras (
     id_compra INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_estoque INTEGER NOT NULL REFERENCES estoque(id_estoque),
+    id_estoque INTEGER REFERENCES estoque(id_estoque),
     data_compra TIMESTAMP NOT NULL,
     observacoes TEXT
 );

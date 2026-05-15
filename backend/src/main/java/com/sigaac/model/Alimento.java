@@ -71,19 +71,19 @@ public class Alimento {
         var db = DatabaseHelper.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
-                "INSERT INTO alimentos (id_categoria, nome, descricao, unidade_medida, data_vencimento) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO alimentos (id_categoria, nome, descricao, unidade_medida, data_vencimento, ativo) VALUES (?, ?, ?, ?, ?, ?)",
                 this.categoria != null ? this.categoria.getId() : null,
                 this.nome, this.descricao,
                 this.unidadeMedida != null ? this.unidadeMedida.name() : null,
-                this.dataVencimento);
+                this.dataVencimento, this.ativo);
             if (id != null) this.id = id.intValue();
         } else {
             db.executeUpdate(
-                "UPDATE alimentos SET id_categoria = ?, nome = ?, descricao = ?, unidade_medida = ?, data_vencimento = ? WHERE id_alimento = ?",
+                "UPDATE alimentos SET id_categoria = ?, nome = ?, descricao = ?, unidade_medida = ?, data_vencimento = ?, ativo = ? WHERE id_alimento = ?",
                 this.categoria != null ? this.categoria.getId() : null,
                 this.nome, this.descricao,
                 this.unidadeMedida != null ? this.unidadeMedida.name() : null,
-                this.dataVencimento, this.id);
+                this.dataVencimento, this.ativo, this.id);
         }
         return this;
     }

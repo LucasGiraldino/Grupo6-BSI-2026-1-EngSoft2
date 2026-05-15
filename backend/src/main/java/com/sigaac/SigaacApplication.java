@@ -59,8 +59,8 @@ public class SigaacApplication {
         userCtrl.registerRoutes(router);
         doacaoCtrl.registerRoutes(router);
         compraCtrl.registerRoutes(router);
-        alimentoCtrl.registerRoutes(router);
         catAlimentoCtrl.registerRoutes(router);
+        alimentoCtrl.registerRoutes(router);
         parametrizacaoCtrl.registerRoutes(router);
         tipoExameCtrl.registerRoutes(router);
         exameCtrl.registerRoutes(router);
