@@ -139,7 +139,7 @@ function AppRoutes() {
       <Route
         path="/gerenciar-agenda"
         element={
-          isAuthenticated && isAdmin ? (
+          isAuthenticated ? (
             <AppLayout><GerenciarAgenda /></AppLayout>
           ) : (
             <Navigate to="/dashboard" />
