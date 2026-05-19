@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,19 +32,19 @@ public class Notificacao {
     // -- Persistence --
 
     public static List<Notificacao> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM notificacoes ORDER BY id_notificacao",
             Notificacao::mapRow);
     }
 
     public static Optional<Notificacao> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM notificacoes WHERE id_notificacao = ?",
             Notificacao::mapRow, id);
     }
 
     public Notificacao save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO notificacoes (id_paciente, tipo, mensagem, data_envio, status_envio) VALUES (?, ?, ?, ?, ?)",
@@ -61,7 +61,7 @@ public class Notificacao {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM notificacoes WHERE id_notificacao = ?", this.id);
     }
 

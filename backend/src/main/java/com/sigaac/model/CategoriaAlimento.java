@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,25 +24,25 @@ public class CategoriaAlimento {
     // -- Persistence --
 
     public static List<CategoriaAlimento> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM categorias_alimentos ORDER BY id_categoria",
             CategoriaAlimento::mapRow);
     }
 
     public static Optional<CategoriaAlimento> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM categorias_alimentos WHERE id_categoria = ?",
             CategoriaAlimento::mapRow, id);
     }
 
     public static boolean existsById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT 1 FROM categorias_alimentos WHERE id_categoria = ?",
             rs -> true, id).orElse(false);
     }
 
     public CategoriaAlimento save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO categorias_alimentos (nome, descricao) VALUES (?, ?)",
@@ -57,7 +57,7 @@ public class CategoriaAlimento {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM categorias_alimentos WHERE id_categoria = ?", this.id);
     }
 

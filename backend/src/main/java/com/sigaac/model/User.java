@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,19 +41,19 @@ public class User {
     // -- Persistence --
 
     public static Optional<User> findByEmail(String email) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL",
             User::mapRow, email);
     }
 
     public static Optional<User> findByCpf(String cpf) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM users WHERE cpf = ? AND deleted_at IS NULL",
             User::mapRow, cpf);
     }
 
     public static Optional<User> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM users WHERE id_usuario = ? AND deleted_at IS NULL",
             User::mapRow, id);
     }
@@ -61,7 +61,7 @@ public class User {
     public static List<User> findAll() { return findAll(null, null); }
 
     public static List<User> findAll(String nome, String perfil) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT * FROM users WHERE deleted_at IS NULL";
         List<Object> params = new ArrayList<>();
         if (nome != null && !nome.isBlank()) {
@@ -79,19 +79,19 @@ public class User {
     }
 
     public static long count() {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT COUNT(*) FROM users WHERE deleted_at IS NULL",
             rs -> rs.getLong(1)).orElse(0L);
     }
 
     public static long countByPerfil(String perfil) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT COUNT(*) FROM users WHERE perfil = ? AND deleted_at IS NULL AND ativo = true",
             rs -> rs.getLong(1), perfil).orElse(0L);
     }
 
     public User save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, ativo, id_parametrizacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -113,7 +113,7 @@ public class User {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE users SET deleted_at = NOW(), ativo = false WHERE id_usuario = ?", id);
     }
 

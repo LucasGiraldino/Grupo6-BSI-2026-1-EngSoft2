@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ public class Agenda {
     // -- Persistence --
 
     public static List<Agenda> findDisponiveisByProfissionalAndData(Integer idProfissional, LocalDate data) {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT a.* FROM agenda a " +
             "JOIN profissionais p ON a.id_usuario = p.id_usuario " +
             "WHERE p.id_profissional = ? AND a.data = ? AND a.disponivel = true " +
@@ -41,7 +41,7 @@ public class Agenda {
     }
 
     public static List<Agenda> findByProfissionalId(Integer idProfissional) {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT a.* FROM agenda a " +
             "JOIN profissionais p ON a.id_usuario = p.id_usuario " +
             "WHERE p.id_profissional = ? " +
@@ -50,7 +50,7 @@ public class Agenda {
     }
 
     public static List<Agenda> findDisponiveisByProfissionalAndDataBetween(Integer idProfissional, LocalDate inicio, LocalDate fim) {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT a.* FROM agenda a " +
             "JOIN profissionais p ON a.id_usuario = p.id_usuario " +
             "WHERE p.id_profissional = ? AND a.data BETWEEN ? AND ? AND a.disponivel = true " +
@@ -59,7 +59,7 @@ public class Agenda {
     }
 
     public Agenda save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO agenda (id_usuario, data, hora_inicio, hora_fim, disponivel) VALUES (?, ?, ?, ?, ?)",

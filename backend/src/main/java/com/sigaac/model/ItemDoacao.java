@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -30,13 +30,13 @@ public class ItemDoacao {
     // -- Persistence --
 
     public static Optional<ItemDoacao> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM itens_doacao WHERE id_item_doacao = ?",
             ItemDoacao::mapRow, id);
     }
 
     public ItemDoacao save(Connection conn) throws SQLException {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO itens_doacao (id_doacao, id_alimento, quantidade, peso) VALUES (?, ?, ?, ?)",

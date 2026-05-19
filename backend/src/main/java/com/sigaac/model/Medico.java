@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ public class Medico {
     // -- Persistence --
 
     public static List<Medico> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT m.*, u.nome AS usuario_nome, u.email AS usuario_email FROM medicos m " +
             "JOIN users u ON m.id_usuario = u.id_usuario " +
             "WHERE m.deleted_at IS NULL ORDER BY u.nome",
@@ -45,7 +45,7 @@ public class Medico {
     }
 
     public static Optional<Medico> findByUsuarioId(Integer usuarioId) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT m.*, u.nome AS usuario_nome, u.email AS usuario_email FROM medicos m " +
             "JOIN users u ON m.id_usuario = u.id_usuario " +
             "WHERE m.id_usuario = ? AND m.deleted_at IS NULL",
@@ -53,7 +53,7 @@ public class Medico {
     }
 
     public static Optional<Medico> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT m.*, u.nome AS usuario_nome, u.email AS usuario_email FROM medicos m " +
             "JOIN users u ON m.id_usuario = u.id_usuario " +
             "WHERE m.id_medico = ? AND m.deleted_at IS NULL",
@@ -61,7 +61,7 @@ public class Medico {
     }
 
     public Medico save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO medicos (id_usuario, id_endereco, especialidade_medica, crm, data_admissao, ativo) VALUES (?, ?, ?, ?, ?, ?)",
@@ -81,7 +81,7 @@ public class Medico {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE medicos SET deleted_at = NOW() WHERE id_medico = ?", this.id);
     }
 

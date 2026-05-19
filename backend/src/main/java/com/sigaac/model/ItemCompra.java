@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -28,7 +28,7 @@ public class ItemCompra {
     // -- Persistence --
 
     public static Optional<ItemCompra> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM itens_compra WHERE id_item_compra = ?",
             ItemCompra::mapRow, id);
     }

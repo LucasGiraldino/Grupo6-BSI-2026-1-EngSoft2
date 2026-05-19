@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,13 +38,13 @@ public class Endereco {
     // -- Persistence --
 
     public static Optional<Endereco> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM enderecos WHERE id_endereco = ?",
             Endereco::mapRow, id);
     }
 
     public Endereco save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO enderecos (cep, logradouro, numero, complemento, bairro, cidade, estado, pais, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",

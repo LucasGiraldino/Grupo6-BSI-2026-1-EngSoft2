@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,19 +33,19 @@ public class ReceitaMedica {
     // -- Persistence --
 
     public static List<ReceitaMedica> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM receitas_medicas ORDER BY id_receita",
             ReceitaMedica::mapRow);
     }
 
     public static Optional<ReceitaMedica> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM receitas_medicas WHERE id_receita = ?",
             ReceitaMedica::mapRow, id);
     }
 
     public ReceitaMedica save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO receitas_medicas (id_prontuario, id_medico, data_emissao, descricao, data_validade) VALUES (?, ?, ?, ?, ?)",
@@ -64,7 +64,7 @@ public class ReceitaMedica {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM receitas_medicas WHERE id_receita = ?", this.id);
     }
 

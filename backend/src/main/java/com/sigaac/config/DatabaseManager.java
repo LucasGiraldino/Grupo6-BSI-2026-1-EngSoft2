@@ -1,31 +1,47 @@
 package com.sigaac.config;
 
-import com.zaxxer.hikari.HikariDataSource; // eu utilizei esse metodo para poder melhorar a conexão com o banco não tendo que criar sempre uma nova conexão 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
-public class DatabaseHelper {
+public class DatabaseManager {
 
-    private static DatabaseHelper instance;
-    private final HikariDataSource ds;
+    private final HikariDataSource dataSource;
 
-    public DatabaseHelper(HikariDataSource ds) {
-        this.ds = ds;
+    private DatabaseManager() {
+        Properties props = new Properties();
+        try (var is = DatabaseManager.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (is != null) props.load(is);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load application.properties", e);
+        }
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(props.getProperty("spring.datasource.url",
+                "jdbc:postgresql://localhost:5432/sigaac"));
+        config.setUsername(props.getProperty("spring.datasource.username", "postgres"));
+        config.setPassword(props.getProperty("spring.datasource.password", "postgres"));
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setDriverClassName("org.postgresql.Driver");
+        this.dataSource = new HikariDataSource(config);
     }
 
-    public static void init(HikariDataSource ds) {
-        instance = new DatabaseHelper(ds);
+    private static class Holder {
+        static final DatabaseManager INSTANCE = new DatabaseManager();
     }
 
-    public static DatabaseHelper getInstance() {
-        if (instance == null) throw new IllegalStateException("DatabaseHelper not initialized");
-        return instance;
+    public static DatabaseManager getInstance() {
+        return Holder.INSTANCE;
     }
 
     public Connection getConnection() throws SQLException {
-        return ds.getConnection();
+        return dataSource.getConnection();
     }
 
     public <T> List<T> queryList(String sql, RowMapper<T> mapper, Object... params) {

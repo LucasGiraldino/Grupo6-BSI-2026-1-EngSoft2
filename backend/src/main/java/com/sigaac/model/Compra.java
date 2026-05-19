@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ public class Compra {
     public static List<Compra> findAll() { return findAll(null, null, null); }
 
     public static List<Compra> findAll(String dataInicio, String dataFim, String observacoes) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT * FROM compras WHERE 1=1";
         List<Object> params = new ArrayList<>();
         if (dataInicio != null && !dataInicio.isBlank()) {
@@ -56,7 +56,7 @@ public class Compra {
     }
 
     public static Optional<Compra> findById(Integer id) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         Optional<Compra> opt = db.querySingle(
             "SELECT * FROM compras WHERE id_compra = ?",
             Compra::mapCompra, id);
@@ -65,13 +65,13 @@ public class Compra {
     }
 
     private static List<ItemCompra> findItensByCompraId(Integer compraId) {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM itens_compra WHERE id_compra = ?",
             Compra::mapItemCompra, compraId);
     }
 
     public Compra save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.dataCompra == null) {
             this.dataCompra = LocalDateTime.now();
         }
@@ -106,7 +106,7 @@ public class Compra {
     }
 
     public void delete() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         db.executeUpdate("DELETE FROM itens_compra WHERE id_compra = ?", this.id);
         db.executeUpdate("DELETE FROM compras WHERE id_compra = ?", this.id);
     }

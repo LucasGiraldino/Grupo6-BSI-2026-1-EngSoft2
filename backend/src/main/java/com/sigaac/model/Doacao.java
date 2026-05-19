@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,7 +38,7 @@ public class Doacao {
     public static List<Doacao> findAll() { return findAll(null, null, null); }
 
     public static List<Doacao> findAll(String nomePaciente, String dataInicio, String dataFim) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT d.* FROM doacoes d " +
             "LEFT JOIN pacientes p ON d.id_paciente = p.id_paciente WHERE 1=1";
         List<Object> params = new ArrayList<>();
@@ -59,12 +59,12 @@ public class Doacao {
     }
 
     public static Optional<Doacao> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM doacoes WHERE id_doacao = ?", Doacao::mapRow, id);
     }
 
     public Doacao save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO doacoes (id_profissional, id_paciente, data_doacao, observacoes) VALUES (?, ?, ?, ?)",
@@ -83,7 +83,7 @@ public class Doacao {
     }
 
     public void delete() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         db.executeInTransaction(conn -> {
             deleteItensDoacao(conn);
             try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM doacoes WHERE id_doacao = ?")) {
@@ -111,7 +111,7 @@ public class Doacao {
      */
     public static Doacao efetuar(Integer idPaciente, Integer idProfissional,
                                   String observacoes, List<ItemDoacaoRequest> itens) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
 
         Paciente paciente = Paciente.findById(idPaciente)
             .orElseThrow(() -> new IllegalArgumentException("Paciente nao cadastrado."));

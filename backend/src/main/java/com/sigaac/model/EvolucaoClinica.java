@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,19 +34,19 @@ public class EvolucaoClinica {
     // -- Persistence --
 
     public static List<EvolucaoClinica> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM evolucoes_clinicas ORDER BY id_evolucao",
             EvolucaoClinica::mapRow);
     }
 
     public static Optional<EvolucaoClinica> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM evolucoes_clinicas WHERE id_evolucao = ?",
             EvolucaoClinica::mapRow, id);
     }
 
     public EvolucaoClinica save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO evolucoes_clinicas (id_prontuario, id_usuario, id_profissional, data_registro, setor, descricao) VALUES (?, ?, ?, ?, ?, ?)",
@@ -67,7 +67,7 @@ public class EvolucaoClinica {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM evolucoes_clinicas WHERE id_evolucao = ?", this.id);
     }
 

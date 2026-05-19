@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -30,7 +30,7 @@ public class Estoque {
     // -- Persistence --
 
     public static List<Estoque> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT e.*, a.nome AS al_nome, a.unidade_medida AS al_unidade_medida " +
             "FROM estoque e " +
             "JOIN alimentos a ON e.id_alimento = a.id_alimento " +
@@ -40,19 +40,19 @@ public class Estoque {
     }
 
     public static Optional<Estoque> findByAlimentoId(Integer idAlimento) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM estoque WHERE id_alimento = ?",
             Estoque::mapRow, idAlimento);
     }
 
     public static Optional<Estoque> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM estoque WHERE id_estoque = ?",
             Estoque::mapRow, id);
     }
 
     public Estoque save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO estoque (id_alimento, quantidade_atual, quantidade_minima, data_ultima_atualizacao) VALUES (?, ?, ?, ?)",

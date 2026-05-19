@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ public class Profissional {
     public static List<Profissional> findAll() { return findAll(null, null); }
 
     public static List<Profissional> findAll(String nome, String especialidade) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +
             "JOIN users u ON p.id_usuario = u.id_usuario WHERE 1=1";
         List<Object> params = new ArrayList<>();
@@ -55,7 +55,7 @@ public class Profissional {
     }
 
     public static Optional<Profissional> findByUsuarioId(Integer usuarioId) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +
             "JOIN users u ON p.id_usuario = u.id_usuario " +
             "WHERE p.id_usuario = ?",
@@ -63,7 +63,7 @@ public class Profissional {
     }
 
     public static Optional<Profissional> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT p.*, u.nome AS usuario_nome FROM profissionais p " +
             "JOIN users u ON p.id_usuario = u.id_usuario " +
             "WHERE p.id_profissional = ?",
@@ -71,7 +71,7 @@ public class Profissional {
     }
 
     public Profissional save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO profissionais (id_usuario, id_endereco, especialidade, registro_profissional, data_admissao) VALUES (?, ?, ?, ?, ?)",
@@ -91,7 +91,7 @@ public class Profissional {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE profissionais SET data_demissao = NOW() WHERE id_profissional = ?", this.id);
     }
 

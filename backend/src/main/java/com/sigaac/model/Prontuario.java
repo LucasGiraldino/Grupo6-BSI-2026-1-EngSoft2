@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,7 +39,7 @@ public class Prontuario {
     // -- Persistence --
 
     public static List<Prontuario> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT p.*, pac.nome AS paciente_nome, pac.cpf AS paciente_cpf FROM prontuarios p " +
             "JOIN pacientes pac ON p.id_paciente = pac.id_paciente " +
             "WHERE p.data_fechamento IS NULL " +
@@ -48,7 +48,7 @@ public class Prontuario {
     }
 
     public static Optional<Prontuario> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT p.*, pac.nome AS paciente_nome, pac.cpf AS paciente_cpf FROM prontuarios p " +
             "JOIN pacientes pac ON p.id_paciente = pac.id_paciente " +
             "WHERE p.id_prontuario = ?",
@@ -56,7 +56,7 @@ public class Prontuario {
     }
 
     public static List<Prontuario> search(String query) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT p.*, pac.id_paciente, pac.nome AS paciente_nome, pac.cpf AS paciente_cpf FROM prontuarios p " +
             "JOIN pacientes pac ON p.id_paciente = pac.id_paciente WHERE p.data_fechamento IS NULL";
         if (query != null && !query.isBlank()) {
@@ -68,7 +68,7 @@ public class Prontuario {
     }
 
     public Prontuario save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO prontuarios (id_medico, id_usuario, id_paciente, data_abertura, observacoes_gerais) VALUES (?, ?, ?, ?, ?)",
@@ -90,7 +90,7 @@ public class Prontuario {
     }
 
     public static Optional<Prontuario> findByPacienteId(Integer pacienteId) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT p.*, pac.nome AS paciente_nome, pac.cpf AS paciente_cpf FROM prontuarios p " +
             "JOIN pacientes pac ON p.id_paciente = pac.id_paciente " +
             "WHERE p.id_paciente = ? AND p.data_fechamento IS NULL",

@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,25 +48,25 @@ public class ParametrizacaoOng {
     // -- Persistence --
 
     public static List<ParametrizacaoOng> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM parametrizacao_ong ORDER BY id_parametrizacao",
             ParametrizacaoOng::mapRow);
     }
 
     public static Optional<ParametrizacaoOng> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM parametrizacao_ong WHERE id_parametrizacao = ?",
             ParametrizacaoOng::mapRow, id);
     }
 
     public static Optional<ParametrizacaoOng> findFirst() {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM parametrizacao_ong ORDER BY id_parametrizacao LIMIT 1",
             ParametrizacaoOng::mapRow);
     }
 
     public ParametrizacaoOng save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.endereco != null) {
             Endereco saved = this.endereco.save();
             this.endereco = saved;
@@ -94,7 +94,7 @@ public class ParametrizacaoOng {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM parametrizacao_ong WHERE id_parametrizacao = ?", this.id);
     }
 

@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,19 +32,19 @@ public class ItemProntuario {
     // -- Persistence --
 
     public static List<ItemProntuario> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM itens_prontuario ORDER BY id_item_prontuario",
             ItemProntuario::mapRow);
     }
 
     public static Optional<ItemProntuario> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM itens_prontuario WHERE id_item_prontuario = ?",
             ItemProntuario::mapRow, id);
     }
 
     public ItemProntuario save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO itens_prontuario (id_prontuario, tipo_item, descricao, data_registro, id_usuario) VALUES (?, ?, ?, ?, ?)",
@@ -63,7 +63,7 @@ public class ItemProntuario {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM itens_prontuario WHERE id_item_prontuario = ?", this.id);
     }
 

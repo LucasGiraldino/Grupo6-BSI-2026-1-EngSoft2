@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -63,7 +63,7 @@ public class Consulta {
     public static List<Consulta> findAll() { return findAll(null); }
 
     public static List<Consulta> findAll(String status) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (status != null && !status.isBlank()) {
             return db.queryList(BASE_SELECT + " WHERE c.status = ? ORDER BY c.data_agendamento DESC",
                 Consulta::mapRow, status);
@@ -72,7 +72,7 @@ public class Consulta {
     }
 
     public static List<Consulta> findByAgendaPeriodo(Integer profissional, String dataInicio, String dataFim) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = BASE_SELECT + " WHERE 1=1";
         List<Object> params = new ArrayList<>();
         if (profissional != null) {
@@ -92,12 +92,12 @@ public class Consulta {
     }
 
     public static Optional<Consulta> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             BASE_SELECT + " WHERE c.id_consulta = ?", Consulta::mapRow, id);
     }
 
     public Consulta save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO consultas (id_paciente, id_agenda, id_profissional, tipo_consulta, status, observacoes, data_agendamento, id_triagem) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -123,12 +123,12 @@ public class Consulta {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM consultas WHERE id_consulta = ?", this.id);
     }
 
     public void cancelar() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (!"AGENDADA".equals(this.status)) {
             throw new IllegalStateException("A consulta nao esta no status AGENDADA e nao pode ser cancelada.");
         }

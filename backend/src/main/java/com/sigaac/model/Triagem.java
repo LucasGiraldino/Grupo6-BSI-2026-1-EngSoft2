@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -61,7 +61,7 @@ public class Triagem {
     public static List<Triagem> findAll() { return findAll(null, null); }
 
     public static List<Triagem> findAll(String nomePaciente, Integer medicoId) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = BASE_SELECT + "WHERE t.deleted_at IS NULL";
         List<Object> params = new ArrayList<>();
         if (nomePaciente != null && !nomePaciente.isBlank()) {
@@ -77,12 +77,12 @@ public class Triagem {
     }
 
     public static Optional<Triagem> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             BASE_SELECT + "WHERE t.id_triagem = ? AND t.deleted_at IS NULL", Triagem::mapRow, id);
     }
 
     public Triagem save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             if (this.dataTriagem == null) {
                 this.dataTriagem = LocalDateTime.now();
@@ -130,7 +130,7 @@ public class Triagem {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE triagens SET deleted_at = NOW() WHERE id_triagem = ?", this.id);
     }
 

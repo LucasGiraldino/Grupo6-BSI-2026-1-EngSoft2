@@ -2,7 +2,7 @@ package com.sigaac.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sigaac.config.CpfValidator;
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,7 +60,7 @@ public class Paciente {
     public static List<Paciente> findAll() { return findAll(null, null); }
 
     public static List<Paciente> findAll(String nome, String cpf) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT * FROM pacientes WHERE deleted_at IS NULL";
         List<Object> params = new ArrayList<>();
         if (nome != null && !nome.isBlank()) {
@@ -76,19 +76,19 @@ public class Paciente {
     }
 
     public static Optional<Paciente> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM pacientes WHERE id_paciente = ? AND deleted_at IS NULL",
             Paciente::mapRow, id);
     }
 
     public static Optional<Paciente> findByCpf(String cpf) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM pacientes WHERE cpf = ? AND deleted_at IS NULL",
             Paciente::mapRow, cpf);
     }
 
     public Paciente save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO pacientes (id_endereco, nome, cpf, data_nascimento, sexo, telefone, email, restricoes_alimentares, data_cadastro, ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -109,7 +109,7 @@ public class Paciente {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE pacientes SET deleted_at = NOW() WHERE id_paciente = ?", this.id);
     }
 

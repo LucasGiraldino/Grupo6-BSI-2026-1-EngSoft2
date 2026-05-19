@@ -19,10 +19,8 @@ public class SigaacApplication {
                 props.load(is);
         }
 
-        DatabaseConfig db = new DatabaseConfig(props);
+        DatabaseManager.getInstance();
         JsonView json = new JsonView();
-
-        DatabaseHelper.init(db.getDataSource());
 
         JwtUtil jwtUtil = new JwtUtil(props);
         OtpUtil otpUtil = new OtpUtil();

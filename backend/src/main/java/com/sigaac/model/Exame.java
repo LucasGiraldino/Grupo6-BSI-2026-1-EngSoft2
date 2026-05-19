@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +59,7 @@ public class Exame {
     public static List<Exame> findAll() { return findAll(null, null); }
 
     public static List<Exame> findAll(String status, String tipoExameNome) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = BASE_SELECT + "WHERE e.deleted_at IS NULL";
         List<Object> params = new ArrayList<>();
         if (status != null && !status.isBlank()) {
@@ -75,12 +75,12 @@ public class Exame {
     }
 
     public static Optional<Exame> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             BASE_SELECT + "WHERE e.id_exame = ? AND e.deleted_at IS NULL", Exame::mapRow, id);
     }
 
     public Exame save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             if (this.dataSolicitacao == null) {
                 this.dataSolicitacao = LocalDateTime.now();
@@ -125,7 +125,7 @@ public class Exame {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE exames SET deleted_at = NOW() WHERE id_exame = ?", this.id);
     }
 

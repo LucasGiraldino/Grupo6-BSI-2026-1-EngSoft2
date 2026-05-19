@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,19 +26,19 @@ public class TipoExame {
     // -- Persistence --
 
     public static List<TipoExame> findAll() {
-        return DatabaseHelper.getInstance().queryList(
+        return DatabaseManager.getInstance().queryList(
             "SELECT * FROM tipos_exame ORDER BY id_tipo_exame",
             TipoExame::mapRow);
     }
 
     public static Optional<TipoExame> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM tipos_exame WHERE id_tipo_exame = ?",
             TipoExame::mapRow, id);
     }
 
     public TipoExame save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO tipos_exame (nome, descricao, ativo) VALUES (?, ?, ?)",
@@ -53,7 +53,7 @@ public class TipoExame {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "DELETE FROM tipos_exame WHERE id_tipo_exame = ?", this.id);
     }
 

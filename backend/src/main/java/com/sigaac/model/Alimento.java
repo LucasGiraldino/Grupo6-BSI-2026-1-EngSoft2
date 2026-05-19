@@ -1,6 +1,6 @@
 package com.sigaac.model;
 
-import com.sigaac.config.DatabaseHelper;
+import com.sigaac.config.DatabaseManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +40,7 @@ public class Alimento {
     public static List<Alimento> findAll() { return findAll(null, null); }
 
     public static List<Alimento> findAll(String nome, Integer categoriaId) {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         String sql = "SELECT * FROM alimentos WHERE deleted_at IS NULL";
         List<Object> params = new ArrayList<>();
         if (nome != null && !nome.isBlank()) {
@@ -56,19 +56,19 @@ public class Alimento {
     }
 
     public static Optional<Alimento> findById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT * FROM alimentos WHERE id_alimento = ? AND deleted_at IS NULL",
             Alimento::mapRow, id);
     }
 
     public static boolean existsById(Integer id) {
-        return DatabaseHelper.getInstance().querySingle(
+        return DatabaseManager.getInstance().querySingle(
             "SELECT 1 FROM alimentos WHERE id_alimento = ? AND deleted_at IS NULL",
             rs -> true, id).orElse(false);
     }
 
     public Alimento save() {
-        var db = DatabaseHelper.getInstance();
+        var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO alimentos (id_categoria, nome, descricao, unidade_medida, data_vencimento, ativo) VALUES (?, ?, ?, ?, ?, ?)",
@@ -89,7 +89,7 @@ public class Alimento {
     }
 
     public void delete() {
-        DatabaseHelper.getInstance().executeUpdate(
+        DatabaseManager.getInstance().executeUpdate(
             "UPDATE alimentos SET deleted_at = NOW() WHERE id_alimento = ?", this.id);
     }
 
