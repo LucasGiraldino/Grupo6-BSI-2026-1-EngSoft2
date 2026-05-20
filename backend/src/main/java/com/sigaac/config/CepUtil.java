@@ -29,28 +29,29 @@ public class CepUtil {
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://viacep.com.br/ws/" + cep + "/json/"))
+                    .uri(URI.create("https://brasilapi.com.br/api/cep/v1/" + cep))
                     .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            JsonNode root = mapper.readTree(response.body());
 
-            if (root.has("erro") && root.get("erro").asBoolean()) {
+            if (response.statusCode() != 200) {
                 return CepResponse.invalido(cep, "CEP não encontrado.");
             }
 
+            JsonNode root = mapper.readTree(response.body());
+
             return CepResponse.valido(
                     cep,
-                    valor(root, "logradouro"),
-                    valor(root, "complemento"),
-                    valor(root, "bairro"),
-                    valor(root, "localidade"),
-                    valor(root, "uf")
+                    valor(root, "street"),
+                    null,
+                    valor(root, "neighborhood"),
+                    valor(root, "city"),
+                    valor(root, "state")
             );
         } catch (Exception e) {
-            return CepResponse.invalido(cep, "Erro ao consultar CEP no ViaCEP.");
+            return CepResponse.invalido(cep, "Erro ao consultar CEP na BrasilAPI.");
         }
     }
 

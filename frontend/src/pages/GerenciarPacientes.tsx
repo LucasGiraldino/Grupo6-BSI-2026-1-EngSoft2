@@ -72,6 +72,7 @@ export default function GerenciarPacientes() {
   const [toastMensagem, setToastMensagem] = useState('')
   const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('erro')
   const [buscandoCpf, setBuscandoCpf] = useState(false)
+  const [buscandoCep, setBuscandoCep] = useState(false)
   const [filtroNome, setFiltroNome] = useState('')
   const [filtroCpf, setFiltroCpf] = useState('')
 
@@ -118,6 +119,35 @@ export default function GerenciarPacientes() {
       mostrarToast('Erro ao consultar CPF. Verifique se o servidor est\u00e1 rodando.', 'erro')
     } finally {
       setBuscandoCpf(false)
+    }
+  }
+
+  async function buscarDadosPorCep(cep: string) {
+    if (cep.length !== 8) return
+    setBuscandoCep(true)
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000)
+      const res = await api.get(`/api/consulta-cep/${cep}`, { signal: controller.signal })
+      clearTimeout(timeout)
+      const data = res.data
+      if (data.valido) {
+        setForm(f => ({
+          ...f,
+          enderecoLogradouro: data.logradouro ?? f.enderecoLogradouro,
+          enderecoBairro: data.bairro ?? f.enderecoBairro,
+          enderecoCidade: data.localidade ?? f.enderecoCidade,
+          enderecoEstado: data.uf ?? f.enderecoEstado,
+          enderecoComplemento: data.complemento ?? f.enderecoComplemento,
+        }))
+        mostrarToast('Endereço encontrado para o CEP informado!', 'sucesso')
+      } else {
+        mostrarToast(data.mensagem || 'CEP não encontrado.', 'erro')
+      }
+    } catch {
+      mostrarToast('Erro ao consultar CEP.', 'erro')
+    } finally {
+      setBuscandoCep(false)
     }
   }
 
@@ -431,15 +461,24 @@ export default function GerenciarPacientes() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="00000-000"
-                        value={formatarCep(form.enderecoCep)}
-                        onChange={e => setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) }))}
-
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          placeholder="00000-000"
+                          value={formatarCep(form.enderecoCep)}
+                          onChange={e => setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) }))}
+                          onBlur={() => buscarDadosPorCep(limparCep(form.enderecoCep))}
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        />
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          {buscandoCep ? (
+                            <Loader className="w-4 h-4 text-gray-400 animate-spin" />
+                          ) : (
+                            <Search className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
