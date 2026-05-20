@@ -65,6 +65,7 @@ export default function GerenciarPacientes() {
   const [modalAberto, setModalAberto] = useState(false)
   const [form, setForm] = useState(FORM_VAZIO)
   const [erroForm, setErroForm] = useState('')
+  const [errosCampos, setErrosCampos] = useState<Record<string, string>>({})
 
   const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null)
 
@@ -80,6 +81,10 @@ export default function GerenciarPacientes() {
     setToastMensagem(mensagem)
     setToastTipo(tipo)
     setToastAberto(true)
+  }
+
+  function temErro(campo: string): string {
+    return errosCampos[campo] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#030213]'
   }
 
   useEffect(() => {
@@ -167,6 +172,7 @@ export default function GerenciarPacientes() {
   function abrirModalNovo() {
     setForm(FORM_VAZIO)
     setErroForm('')
+    setErrosCampos({})
     setModalAberto(true)
   }
 
@@ -190,19 +196,56 @@ export default function GerenciarPacientes() {
       enderecoPais: p.endereco?.pais ?? 'Brasil',
     })
     setErroForm('')
+    setErrosCampos({})
     setModalAberto(true)
+  }
+
+  function limparErro(campo: string) {
+    setErrosCampos(e => { const n = { ...e }; delete n[campo]; return n })
   }
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault()
-    if (!validarCpf(form.cpf)) {
-      setErroForm('CPF inválido. Verifique os dígitos.')
-      return
+
+    const campos: Record<string, string> = {
+      nome: 'Nome',
+      cpf: 'CPF',
+      dataNascimento: 'Data de Nascimento',
+      sexo: 'Sexo',
+      telefone: 'Telefone',
+      email: 'E-mail',
+      restricoesAlimentares: 'Restrições Alimentares',
+      enderecoCep: 'CEP',
+      enderecoLogradouro: 'Logradouro',
+      enderecoNumero: 'Número',
+      enderecoBairro: 'Bairro',
+      enderecoCidade: 'Cidade',
+      enderecoEstado: 'Estado',
+      enderecoPais: 'País',
     }
+
+    const erros: Record<string, string> = {}
+    for (const [chave, rotulo] of Object.entries(campos)) {
+      const valor = form[chave as keyof typeof form]
+      if (!valor || (typeof valor === 'string' && valor.trim() === '')) {
+        erros[chave] = `${rotulo} é obrigatório.`
+      }
+    }
+
+    if (form.cpf && !validarCpf(form.cpf)) {
+      erros.cpf = 'CPF inválido. Verifique os dígitos.'
+    }
+
     if (form.telefone && !validarTelefone(form.telefone)) {
-      setErroForm('Telefone inválido. Deve ter 10 ou 11 dígitos.')
+      erros.telefone = 'Telefone inválido. Deve ter 10 ou 11 dígitos.'
+    }
+
+    if (Object.keys(erros).length > 0) {
+      setErrosCampos(erros)
+      setErroForm('Preencha todos os campos obrigatórios corretamente.')
       return
     }
+    setErrosCampos({})
     const body = {
       nome: form.nome,
       cpf: limparCpf(form.cpf),
@@ -383,8 +426,8 @@ export default function GerenciarPacientes() {
                         required
                         placeholder="Nome completo"
                         value={form.nome}
-                        onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, nome: e.target.value })); limparErro('nome') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('nome')}`}
                       />
                     </div>
                     <div>
@@ -395,9 +438,9 @@ export default function GerenciarPacientes() {
                           required
                           placeholder="000.000.000-00"
                           value={formatarCpf(form.cpf)}
-                          onChange={e => setForm(f => ({ ...f, cpf: limparCpf(e.target.value) }))}
+                          onChange={e => { setForm(f => ({ ...f, cpf: limparCpf(e.target.value) })); limparErro('cpf') }}
                           onBlur={() => !form.id && buscarDadosPorCpf(limparCpf(form.cpf))}
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                          className={`w-full px-3 py-2 pr-10 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('cpf')}`}
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                           {buscandoCpf ? (
@@ -414,8 +457,8 @@ export default function GerenciarPacientes() {
                         type="date"
                         required
                         value={form.dataNascimento}
-                        onChange={e => setForm(f => ({ ...f, dataNascimento: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, dataNascimento: e.target.value })); limparErro('dataNascimento') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('dataNascimento')}`}
                       />
                     </div>
                     <div>
@@ -423,8 +466,8 @@ export default function GerenciarPacientes() {
                       <select
                         required
                         value={form.sexo}
-                        onChange={e => setForm(f => ({ ...f, sexo: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, sexo: e.target.value })); limparErro('sexo') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('sexo')}`}
                       >
                         <option value="">Selecione...</option>
                         {SEXOS.map(s => (
@@ -438,8 +481,8 @@ export default function GerenciarPacientes() {
                         type="text"
                         placeholder="(11) 99999-9999"
                         value={formatarTelefone(form.telefone)}
-                        onChange={e => setForm(f => ({ ...f, telefone: e.target.value.replace(/\D/g, '') }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, telefone: e.target.value.replace(/\D/g, '') })); limparErro('telefone') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('telefone')}`}
                       />
                     </div>
                     <div>
@@ -448,8 +491,8 @@ export default function GerenciarPacientes() {
                         type="email"
                         placeholder="paciente@email.com"
                         value={form.email}
-                        onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, email: e.target.value })); limparErro('email') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('email')}`}
                       />
                     </div>
                   </div>
@@ -467,9 +510,9 @@ export default function GerenciarPacientes() {
                           required
                           placeholder="00000-000"
                           value={formatarCep(form.enderecoCep)}
-                          onChange={e => setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) }))}
+                          onChange={e => { setForm(f => ({ ...f, enderecoCep: limparCep(e.target.value) })); limparErro('enderecoCep') }}
                           onBlur={() => buscarDadosPorCep(limparCep(form.enderecoCep))}
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                          className={`w-full px-3 py-2 pr-10 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoCep')}`}
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                           {buscandoCep ? (
@@ -486,8 +529,8 @@ export default function GerenciarPacientes() {
                         type="text"
                         required
                         value={form.enderecoPais}
-                        onChange={e => setForm(f => ({ ...f, enderecoPais: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, enderecoPais: e.target.value })); limparErro('enderecoPais') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoPais')}`}
                       />
                     </div>
                     <div className="col-span-2">
@@ -497,8 +540,8 @@ export default function GerenciarPacientes() {
                         required
                         placeholder="Rua, Avenida..."
                         value={form.enderecoLogradouro}
-                        onChange={e => setForm(f => ({ ...f, enderecoLogradouro: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, enderecoLogradouro: e.target.value })); limparErro('enderecoLogradouro') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoLogradouro')}`}
                       />
                     </div>
                     <div>
@@ -508,8 +551,8 @@ export default function GerenciarPacientes() {
                         required
                         placeholder="123"
                         value={form.enderecoNumero}
-                        onChange={e => setForm(f => ({ ...f, enderecoNumero: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, enderecoNumero: e.target.value })); limparErro('enderecoNumero') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoNumero')}`}
                       />
                     </div>
                     <div>
@@ -529,8 +572,8 @@ export default function GerenciarPacientes() {
                         required
                         placeholder="Centro"
                         value={form.enderecoBairro}
-                        onChange={e => setForm(f => ({ ...f, enderecoBairro: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, enderecoBairro: e.target.value })); limparErro('enderecoBairro') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoBairro')}`}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -541,8 +584,8 @@ export default function GerenciarPacientes() {
                           required
                           placeholder="São Paulo"
                           value={form.enderecoCidade}
-                          onChange={e => setForm(f => ({ ...f, enderecoCidade: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                        onChange={e => { setForm(f => ({ ...f, enderecoCidade: e.target.value })); limparErro('enderecoCidade') }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoCidade')}`}
                         />
                       </div>
                       <div>
@@ -550,8 +593,8 @@ export default function GerenciarPacientes() {
                         <select
                           required
                           value={form.enderecoEstado}
-                          onChange={e => setForm(f => ({ ...f, enderecoEstado: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                          onChange={e => { setForm(f => ({ ...f, enderecoEstado: e.target.value })); limparErro('enderecoEstado') }}
+                          className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('enderecoEstado')}`}
                         >
                           <option value="">UF</option>
                           {ESTADOS.map(uf => (
@@ -572,8 +615,8 @@ export default function GerenciarPacientes() {
                       rows={3}
                       placeholder="Descreva as restrições alimentares do paciente..."
                       value={form.restricoesAlimentares}
-                      onChange={e => setForm(f => ({ ...f, restricoesAlimentares: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
+                      onChange={e => { setForm(f => ({ ...f, restricoesAlimentares: e.target.value })); limparErro('restricoesAlimentares') }}
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 ${temErro('restricoesAlimentares')}`}
                     />
                   </div>
                 </div>
