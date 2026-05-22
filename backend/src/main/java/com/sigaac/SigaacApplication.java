@@ -24,12 +24,13 @@ public class SigaacApplication {
 
         JwtUtil jwtUtil = new JwtUtil(props);
         OtpUtil otpUtil = new OtpUtil();
+        TotpUtil totpUtil = new TotpUtil();
         RateLimiter rateLimiter = new RateLimiter();
         CpfValidator cpfValidator = new CpfValidator(props.getProperty("api.cpf.token", ""));
         CnpjUtil cnpjUtil = new CnpjUtil();
         CepUtil cepUtil = new CepUtil();
 
-        LoginController loginCtrl = new LoginController(jwtUtil, otpUtil, rateLimiter, json);
+        LoginController loginCtrl = new LoginController(jwtUtil, otpUtil, totpUtil, rateLimiter, json);
         PacienteController pacienteCtrl = new PacienteController(json);
         CpfController cpfCtrl = new CpfController(cpfValidator, json);
         CnpjController cnpjCtrl = new CnpjController(cnpjUtil, json);

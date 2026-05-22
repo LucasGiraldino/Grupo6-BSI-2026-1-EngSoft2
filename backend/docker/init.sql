@@ -58,6 +58,8 @@ CREATE TABLE users (
     failed_attempts INTEGER DEFAULT 0,
     locked_until TIMESTAMP,
     id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao),
+    totp_secret VARCHAR(255),
+    totp_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMP
 );
 

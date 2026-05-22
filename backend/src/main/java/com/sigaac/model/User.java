@@ -24,6 +24,8 @@ public class User {
     private Integer failedAttempts = 0;
     private Boolean ativo = true;
     private Integer parametrizacaoId;
+    private String totpSecret;
+    private Boolean totpEnabled = false;
 
     public User() {}
 
@@ -94,19 +96,20 @@ public class User {
         var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
-                "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, ativo, id_parametrizacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, ativo, id_parametrizacao, totp_secret, totp_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 this.nome, this.cpf, this.email, this.senhaHash,
                 this.role != null ? this.role.name() : null,
                 this.dataCadastro, this.ativo != null ? this.ativo : true,
-                this.parametrizacaoId);
+                this.parametrizacaoId, this.totpSecret, this.totpEnabled);
             if (id != null) this.id = id.intValue();
         } else {
             db.executeUpdate(
-                "UPDATE users SET nome = ?, cpf = ?, email = ?, senha_hash = ?, perfil = ?, failed_attempts = ?, locked_until = ?, ativo = ?, id_parametrizacao = ? WHERE id_usuario = ?",
+                "UPDATE users SET nome = ?, cpf = ?, email = ?, senha_hash = ?, perfil = ?, failed_attempts = ?, locked_until = ?, ativo = ?, id_parametrizacao = ?, totp_secret = ?, totp_enabled = ? WHERE id_usuario = ?",
                 this.nome, this.cpf, this.email, this.senhaHash,
                 this.role != null ? this.role.name() : null,
                 this.failedAttempts, this.lockedUntil,
                 this.ativo, this.parametrizacaoId,
+                this.totpSecret, this.totpEnabled,
                 this.id);
         }
         return this;
@@ -134,6 +137,8 @@ public class User {
         user.setFailedAttempts(rs.getObject("failed_attempts", Integer.class));
         user.setAtivo(rs.getObject("ativo", Boolean.class));
         user.setParametrizacaoId(rs.getObject("id_parametrizacao", Integer.class));
+        user.setTotpSecret(rs.getString("totp_secret"));
+        user.setTotpEnabled(rs.getObject("totp_enabled", Boolean.class));
         return user;
     }
 
@@ -182,4 +187,8 @@ public class User {
     public void setFailedAttempts(Integer failedAttempts) { this.failedAttempts = failedAttempts; }
     public Integer getParametrizacaoId() { return parametrizacaoId; }
     public void setParametrizacaoId(Integer parametrizacaoId) { this.parametrizacaoId = parametrizacaoId; }
+    public String getTotpSecret() { return totpSecret; }
+    public void setTotpSecret(String totpSecret) { this.totpSecret = totpSecret; }
+    public Boolean getTotpEnabled() { return totpEnabled; }
+    public void setTotpEnabled(Boolean totpEnabled) { this.totpEnabled = totpEnabled != null && totpEnabled; }
 }
