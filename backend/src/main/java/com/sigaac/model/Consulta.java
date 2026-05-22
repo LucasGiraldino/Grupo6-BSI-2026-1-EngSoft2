@@ -199,9 +199,7 @@ public class Consulta {
 
         Integer idTriagem = rs.getObject("id_triagem", Integer.class);
         if (idTriagem != null) {
-            Triagem t = new Triagem();
-            t.setId(idTriagem);
-            c.setTriagem(t);
+            Triagem.findById(idTriagem).ifPresent(c::setTriagem);
         }
 
         return c;

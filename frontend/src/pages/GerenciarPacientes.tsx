@@ -101,24 +101,9 @@ export default function GerenciarPacientes() {
       clearTimeout(timeout)
       const data = res.data
       if (data.valido) {
-        if (data.nome) {
-          setForm(f => ({ ...f, nome: data.nome }))
-          mostrarToast('Dados encontrados para o CPF informado!', 'sucesso')
-        }
-        if (data.dataNascimento) {
-          const partes = data.dataNascimento.split('/')
-          if (partes.length === 3) {
-            setForm(f => ({ ...f, dataNascimento: `${partes[2]}-${partes[1]}-${partes[0]}` }))
-          }
-        }
-        if (data.sexo) {
-          setForm(f => ({ ...f, sexo: data.sexo }))
-        }
-        if (!data.nome) {
-          mostrarToast('CPF v\u00e1lido!', 'sucesso')
-        }
+        mostrarToast('CPF válido!', 'sucesso')
       } else {
-        mostrarToast(data.mensagem || 'CPF inv\u00e1lido. Verifique os d\u00edgitos e tente novamente.', 'erro')
+        mostrarToast(data.mensagem || 'CPF inválido. Verifique os dígitos.', 'erro')
       }
     } catch {
       mostrarToast('Erro ao consultar CPF. Verifique se o servidor est\u00e1 rodando.', 'erro')

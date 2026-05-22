@@ -21,7 +21,7 @@ public class CpfValidator {
         }
 
         if (apiToken.isEmpty()) {
-            return mockDinamico(cpf);
+            return CpfResponse.valido(cpf);
         }
 
         try {
@@ -38,36 +38,10 @@ public class CpfValidator {
             String sexo = root.has("sexo") && !root.get("sexo").isNull()
                 ? root.get("sexo").asText() : null;
 
-            return CpfResponse.api(cpf, nome, dataNascimento, sexo);
+            return CpfResponse.comDados(cpf, nome, dataNascimento, sexo);
         } catch (Exception e) {
             return CpfResponse.invalido(cpf, "Erro ao consultar CPF na API.");
         }
-    }
-
-    private CpfResponse mockDinamico(String cpf) {
-        long hash = Long.parseLong(cpf.substring(3, 9));
-        String[] nomes = {
-            "João", "Pedro", "Carlos", "Antônio", "Francisco", "José", "Paulo",
-            "Lucas", "Gabriel", "Rafael", "Marcos", "Felipe", "André", "Bruno",
-            "Eduardo", "Diego", "Maria", "Ana", "Carla", "Joana", "Fernanda",
-            "Patrícia", "Juliana", "Amanda", "Camila", "Bruna", "Larissa",
-            "Letícia", "Vanessa", "Marina", "Beatriz", "Rafaela"
-        };
-        String[] sobrenomes = {
-            "Silva", "Santos", "Oliveira", "Souza", "Lima", "Pereira",
-            "Costa", "Almeida", "Nascimento", "Araújo", "Carvalho",
-            "Gomes", "Martins", "Barbosa", "Rocha", "Dias"
-        };
-        boolean masculino = (cpf.charAt(9) - '0') % 2 == 0;
-        String nome = masculino
-            ? nomes[(int)(hash % 16)] + " " + sobrenomes[(int)(hash / 16 % 16)]
-            : nomes[16 + (int)(hash % 16)] + " " + sobrenomes[(int)(hash / 16 % 16)];
-        int ano = 1950 + (int)(hash % 51);
-        int mes = 1 + (int)((hash / 51) % 12);
-        int dia = 1 + (int)((hash / (51 * 12)) % 28);
-        String dataNascimento = String.format("%02d/%02d/%04d", dia, mes, ano);
-        String sexo = masculino ? "MASCULINO" : "FEMININO";
-        return CpfResponse.mock(cpf, nome, dataNascimento, sexo);
     }
 
     public static boolean validarMatematicamente(String cpf) {
