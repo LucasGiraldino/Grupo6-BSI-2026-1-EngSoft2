@@ -19,6 +19,9 @@ public class User {
     private String senhaHash;
     private UserRole role;
     private LocalDate dataCadastro;
+    private LocalDate dataNascimento;
+    private String telefone;
+    private Endereco endereco;
     private LocalDateTime deletedAt;
     private LocalDateTime lockedUntil;
     private Integer failedAttempts = 0;
@@ -96,17 +99,21 @@ public class User {
         var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(
-                "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, ativo, id_parametrizacao, totp_secret, totp_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO users (nome, cpf, email, senha_hash, perfil, data_cadastro, data_nascimento, telefone, id_endereco, ativo, id_parametrizacao, totp_secret, totp_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 this.nome, this.cpf, this.email, this.senhaHash,
                 this.role != null ? this.role.name() : null,
-                this.dataCadastro, this.ativo != null ? this.ativo : true,
+                this.dataCadastro, this.dataNascimento, this.telefone,
+                this.endereco != null ? this.endereco.getId() : null,
+                this.ativo != null ? this.ativo : true,
                 this.parametrizacaoId, this.totpSecret, this.totpEnabled);
             if (id != null) this.id = id.intValue();
         } else {
             db.executeUpdate(
-                "UPDATE users SET nome = ?, cpf = ?, email = ?, senha_hash = ?, perfil = ?, failed_attempts = ?, locked_until = ?, ativo = ?, id_parametrizacao = ?, totp_secret = ?, totp_enabled = ? WHERE id_usuario = ?",
+                "UPDATE users SET nome = ?, cpf = ?, email = ?, senha_hash = ?, perfil = ?, data_nascimento = ?, telefone = ?, id_endereco = ?, failed_attempts = ?, locked_until = ?, ativo = ?, id_parametrizacao = ?, totp_secret = ?, totp_enabled = ? WHERE id_usuario = ?",
                 this.nome, this.cpf, this.email, this.senhaHash,
                 this.role != null ? this.role.name() : null,
+                this.dataNascimento, this.telefone,
+                this.endereco != null ? this.endereco.getId() : null,
                 this.failedAttempts, this.lockedUntil,
                 this.ativo, this.parametrizacaoId,
                 this.totpSecret, this.totpEnabled,
@@ -132,6 +139,12 @@ public class User {
             try { user.setPerfil(UserRole.valueOf(role)); } catch (IllegalArgumentException e) {}
         }
         user.setDataCadastro(rs.getObject("data_cadastro", LocalDate.class));
+        user.setDataNascimento(rs.getObject("data_nascimento", LocalDate.class));
+        user.setTelefone(rs.getString("telefone"));
+        Integer idEndereco = rs.getObject("id_endereco", Integer.class);
+        if (idEndereco != null) {
+            user.setEndereco(Endereco.findById(idEndereco).orElse(null));
+        }
         user.setDeletedAt(rs.getObject("deleted_at", LocalDateTime.class));
         user.setLockedUntil(rs.getObject("locked_until", LocalDateTime.class));
         user.setFailedAttempts(rs.getObject("failed_attempts", Integer.class));
@@ -177,6 +190,12 @@ public class User {
     public UserRole getRole() { return role; }
     public LocalDate getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDate dataCadastro) { this.dataCadastro = dataCadastro; }
+    public LocalDate getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public Endereco getEndereco() { return endereco; }
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
     public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
     public Boolean getAtivo() { return ativo; }

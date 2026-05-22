@@ -1,6 +1,7 @@
 package com.sigaac.controller;
 
 import com.sigaac.config.CpfValidator;
+import com.sigaac.model.Endereco;
 import com.sigaac.model.User;
 import com.sigaac.model.UserRole;
 import com.sigaac.view.JsonView;
@@ -8,6 +9,7 @@ import com.sun.net.httpserver.HttpExchange;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -86,6 +88,21 @@ public class UserController {
         user.setDataCadastro(LocalDate.now());
         user.setAtivo(true);
 
+        String dataNascimento = payload.get("dataNascimento");
+        if (dataNascimento != null && !dataNascimento.isBlank()) {
+            user.setDataNascimento(LocalDate.parse(dataNascimento));
+        }
+
+        String telefone = payload.get("telefone");
+        if (telefone != null && !telefone.isBlank()) {
+            user.setTelefone(telefone);
+        }
+
+        Endereco endereco = extractEnderecoFromPayload(payload);
+        if (endereco != null) {
+            user.setEndereco(endereco.save());
+        }
+
         user.save();
 
         json.send(exchange, 201, Map.of(
@@ -110,15 +127,20 @@ public class UserController {
             }
         }
         List<Map<String, Object>> safeUsers = User.findAll(nome, perfil).stream()
-                .map(u -> Map.<String, Object>of(
-                        "id", u.getId(),
-                        "nome", u.getNome(),
-                        "email", u.getEmail(),
-                        "cpf", u.getCpf(),
-                        "perfil", u.getPerfil(),
-                        "ativo", u.getAtivo(),
-                        "dataCadastro", u.getDataCadastro() != null ? u.getDataCadastro().toString() : null
-                ))
+                .map(u -> {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("id", u.getId());
+                    map.put("nome", u.getNome());
+                    map.put("email", u.getEmail());
+                    map.put("cpf", u.getCpf());
+                    map.put("perfil", u.getPerfil());
+                    map.put("ativo", u.getAtivo());
+                    map.put("dataCadastro", u.getDataCadastro() != null ? u.getDataCadastro().toString() : null);
+                    map.put("dataNascimento", u.getDataNascimento() != null ? u.getDataNascimento().toString() : null);
+                    map.put("telefone", u.getTelefone());
+                    map.put("endereco", u.getEndereco());
+                    return map;
+                })
                 .toList();
         json.send(exchange, 200, safeUsers);
     }
@@ -131,15 +153,18 @@ public class UserController {
             return;
         }
         User u = userOpt.get();
-        json.send(exchange, 200, Map.of(
-                "id", u.getId(),
-                "nome", u.getNome(),
-                "email", u.getEmail(),
-                "cpf", u.getCpf(),
-                "perfil", u.getPerfil(),
-                "ativo", u.getAtivo(),
-                "dataCadastro", u.getDataCadastro() != null ? u.getDataCadastro().toString() : null
-        ));
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", u.getId());
+        response.put("nome", u.getNome());
+        response.put("email", u.getEmail());
+        response.put("cpf", u.getCpf());
+        response.put("perfil", u.getPerfil());
+        response.put("ativo", u.getAtivo());
+        response.put("dataCadastro", u.getDataCadastro() != null ? u.getDataCadastro().toString() : null);
+        response.put("dataNascimento", u.getDataNascimento() != null ? u.getDataNascimento().toString() : null);
+        response.put("telefone", u.getTelefone());
+        response.put("endereco", u.getEndereco());
+        json.send(exchange, 200, response);
     }
 
     private void updateUser(HttpExchange exchange, Map<String, String> params) throws Exception {
@@ -214,12 +239,55 @@ public class UserController {
             user.setPerfil(novaRole);
         }
 
+        String dataNascimento = payload.get("dataNascimento");
+        if (dataNascimento != null && !dataNascimento.isBlank()) {
+            user.setDataNascimento(LocalDate.parse(dataNascimento));
+        }
+
+        String telefone = payload.get("telefone");
+        if (telefone != null) {
+            user.setTelefone(telefone.isBlank() ? null : telefone);
+        }
+
+        Endereco endereco = extractEnderecoFromPayload(payload);
+        if (endereco != null) {
+            if (user.getEndereco() != null) {
+                endereco.setId(user.getEndereco().getId());
+            }
+            user.setEndereco(endereco.save());
+        }
+
         user.save();
 
         json.send(exchange, 200, Map.of(
                 "message", "Usuário atualizado com sucesso",
                 "id", user.getId()
         ));
+    }
+
+    private Endereco extractEnderecoFromPayload(Map<String, String> payload) {
+        String enderecoCep = payload.get("enderecoCep");
+        String enderecoLogradouro = payload.get("enderecoLogradouro");
+        String enderecoNumero = payload.get("enderecoNumero");
+        String enderecoComplemento = payload.get("enderecoComplemento");
+        String enderecoBairro = payload.get("enderecoBairro");
+        String enderecoCidade = payload.get("enderecoCidade");
+        String enderecoEstado = payload.get("enderecoEstado");
+        String enderecoPais = payload.get("enderecoPais");
+
+        boolean hasAddress = enderecoCep != null && !enderecoCep.isBlank();
+        if (!hasAddress) return null;
+
+        Endereco e = new Endereco();
+        e.setCep(enderecoCep);
+        e.setLogradouro(enderecoLogradouro != null ? enderecoLogradouro : "");
+        e.setNumero(enderecoNumero != null ? enderecoNumero : "");
+        e.setComplemento(enderecoComplemento);
+        e.setBairro(enderecoBairro != null ? enderecoBairro : "");
+        e.setCidade(enderecoCidade != null ? enderecoCidade : "");
+        e.setEstado(enderecoEstado != null ? enderecoEstado : "");
+        e.setPais(enderecoPais != null ? enderecoPais : "Brasil");
+        return e;
     }
 
     private void changeUserProfile(HttpExchange exchange, Map<String, String> params) throws Exception {

@@ -159,6 +159,16 @@ public class LoginController {
         user.setDataCadastro(LocalDate.now());
         user.setAtivo(true);
 
+        String dataNascimento = payload.get("dataNascimento");
+        if (dataNascimento != null && !dataNascimento.isBlank()) {
+            user.setDataNascimento(LocalDate.parse(dataNascimento));
+        }
+
+        String telefone = payload.get("telefone");
+        if (telefone != null && !telefone.isBlank()) {
+            user.setTelefone(telefone);
+        }
+
         user.save();
 
         String token = jwtUtil.generateToken(user);

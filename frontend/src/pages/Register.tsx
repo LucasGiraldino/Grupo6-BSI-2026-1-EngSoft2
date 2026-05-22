@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { validarCpf, limparCpf, formatarCpf } from '../utils/cpf';
-import { validarEmail } from '../utils/validators';
+import { validarEmail, formatarTelefone, limparTelefone } from '../utils/validators';
 
 export default function Register() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
+  const [dataNascimento, setDataNascimento] = useState('');
+  const [telefone, setTelefone] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +32,8 @@ export default function Register() {
         email: email.trim(),
         cpf: limparCpf(cpf),
         senha,
+        dataNascimento,
+        telefone: limparTelefone(telefone),
       });
       localStorage.setItem('token', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
@@ -84,6 +88,25 @@ export default function Register() {
                 className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] focus:border-transparent transition-colors font-mono"
                 placeholder="000.000.000-00"
                 required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+              <input
+                type="date"
+                value={dataNascimento}
+                onChange={e => setDataNascimento(e.target.value)}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] focus:border-transparent transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Telefone</label>
+              <input
+                type="text"
+                value={formatarTelefone(telefone)}
+                onChange={e => setTelefone(limparTelefone(e.target.value))}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213] focus:border-transparent transition-colors"
+                placeholder="(11) 99999-9999"
               />
             </div>
             <div>
