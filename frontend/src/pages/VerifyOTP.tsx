@@ -6,25 +6,23 @@ export default function VerifyOTP() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = (location.state as any)?.email || '';
-  const senha = (location.state as any)?.senha || '';
-  const codigoRevelado = (location.state as any)?.codigo || '';
 
   const [codigo, setCodigo] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!email || !senha) {
+    if (!email) {
       navigate('/login', { replace: true });
     }
-  }, [email, senha, navigate]);
+  }, [email, navigate]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
     setLoading(true);
     try {
-      const res = await axios.post('/auth/verify', { email, senha, codigo });
+      const res = await axios.post('/auth/verify', { email, codigo });
       const accessToken = res.data?.accessToken;
       const refreshToken = res.data?.refreshToken;
       if (!accessToken) {
@@ -44,7 +42,7 @@ export default function VerifyOTP() {
     }
   };
 
-  if (!email || !senha) {
+  if (!email) {
     return null;
   }
 
@@ -59,21 +57,11 @@ export default function VerifyOTP() {
           </div>
           <h2 className="text-lg font-medium text-gray-900 mb-1">Verificação em Duas Etapas</h2>
           <p className="text-sm text-gray-500">
-            Insira o código de verificação para <strong>{email}</strong>
+            Insira o código do Google Authenticator para <strong>{email}</strong>
           </p>
         </div>
 
         <form onSubmit={handleVerify} className="mt-8 space-y-6">
-          {codigoRevelado && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-              <p className="text-xs text-green-600 font-medium uppercase tracking-wider mb-2">
-                Código de verificação (demonstração)
-              </p>
-              <p className="text-3xl font-mono font-bold text-green-800 tracking-[0.2em]">
-                {codigoRevelado}
-              </p>
-            </div>
-          )}
           <div>
             <label className="sr-only">Código de Verificação</label>
             <input

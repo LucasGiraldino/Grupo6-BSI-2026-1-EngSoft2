@@ -16,6 +16,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import VerifyOTP from './pages/VerifyOTP'
 import EsqueciSenha from './pages/EsqueciSenha'
+import Setup2FA from './pages/Setup2FA'
 import Doacoes from './pages/Doacoes'
 import VerificarHorarios from './pages/VerificarHorarios'
 import GerenciarAgenda from './pages/GerenciarAgenda'
@@ -73,6 +74,7 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/verificar" element={<VerifyOTP />} />
       <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+      <Route path="/configurar-2fa" element={<Setup2FA />} />
       <Route
         path="/dashboard"
         element={isAuthenticated ? <AppLayout><Dashboard /></AppLayout> : <Navigate to="/login" />}

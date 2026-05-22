@@ -16,8 +16,14 @@ export default function Login() {
     try {
       if (email && senha) {
         const res = await axios.post('/auth/login', { email, senha });
-        if (res.data.otpSent) {
-          navigate('/verificar', { state: { email, senha, codigo: res.data.codigo }, replace: true });
+        if (res.data.totpRequired) {
+          navigate('/verificar', { state: { email, senha }, replace: true });
+        } else if (res.data.accessToken) {
+          localStorage.setItem('token', res.data.accessToken);
+          if (res.data.refreshToken) {
+            localStorage.setItem('refreshToken', res.data.refreshToken);
+          }
+          window.location.href = '/dashboard';
         }
       }
     } catch (err: any) {

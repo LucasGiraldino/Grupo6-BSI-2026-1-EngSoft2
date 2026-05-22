@@ -164,12 +164,12 @@ export default function GerenciarUsuarios() {
     if (idParaExcluir === null) return
     try {
       await api.delete(`/apis/user/${idParaExcluir}`)
+      setUsuarios(prev => prev.map(u => u.id === idParaExcluir ? { ...u, ativo: false } : u))
       mostrarToast('Usuário desativado com sucesso', 'sucesso')
     } catch {
       mostrarToast('Erro ao desativar usuário', 'erro')
     }
     setIdParaExcluir(null)
-    carregarUsuarios()
   }
 
   return (

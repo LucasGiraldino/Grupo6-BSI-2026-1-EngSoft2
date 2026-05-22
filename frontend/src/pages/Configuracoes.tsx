@@ -416,6 +416,26 @@ export default function Configuracoes() {
                   />
                 </div>
 
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+                    Segurança
+                  </h4>
+                  <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Autenticação de Dois Fatores</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Adicione uma camada extra de segurança usando o Google Authenticator
+                      </p>
+                    </div>
+                    <a
+                      href="/configurar-2fa"
+                      className="px-4 py-2 bg-[#030213] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors"
+                    >
+                      Configurar
+                    </a>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
                   <button
                     type="button"
