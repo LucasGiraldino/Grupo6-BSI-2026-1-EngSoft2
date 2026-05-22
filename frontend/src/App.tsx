@@ -7,6 +7,7 @@ import Consultas from './pages/Consultas'
 import Prontuarios from './pages/Prontuarios'
 import Alimentos from './pages/Alimentos'
 import Compras from './pages/Compras'
+import Receitas from './pages/Receitas'
 import Exames from './pages/Exames'
 import TriagemPage from './pages/Triagem'
 import Configuracoes from './pages/Configuracoes'
@@ -99,6 +100,10 @@ function AppRoutes() {
       <Route
         path="/compras"
         element={isAuthenticated ? <AppLayout><Compras /></AppLayout> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/receitas"
+        element={isAuthenticated ? <AppLayout><Receitas /></AppLayout> : <Navigate to="/login" />}
       />
       <Route
         path="/exames"
