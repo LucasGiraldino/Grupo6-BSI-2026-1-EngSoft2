@@ -60,6 +60,9 @@ CREATE TABLE users (
     id_parametrizacao INTEGER REFERENCES parametrizacao_ong(id_parametrizacao),
     totp_secret VARCHAR(255),
     totp_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    data_nascimento DATE,
+    telefone VARCHAR(20),
+    id_endereco INTEGER REFERENCES enderecos(id_endereco),
     deleted_at TIMESTAMP
 );
 
