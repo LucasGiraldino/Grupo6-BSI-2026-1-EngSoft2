@@ -147,6 +147,8 @@ export default function TriagemFormModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">Febre (°C)</label>
               <input
                 type="number"
+                min="34"
+                max="45"
                 step="0.1"
                 placeholder="Ex: 37.5"
                 value={form.febre}

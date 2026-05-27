@@ -120,6 +120,19 @@ export function useTriagemForm(
       return
     }
 
+    if (form.febre) {
+      const valor = parseFloat(form.febre)
+      if (isNaN(valor) || valor < 34 || valor > 45) {
+        setErroForm('Febre deve estar entre 34°C e 45°C.')
+        return
+      }
+    }
+
+    if (form.pressaoArterial && !/^\d{2,3}x\d{2,3}$/.test(form.pressaoArterial)) {
+      setErroForm('Pressão arterial deve estar no formato "120x80" (sistólica x diastólica).')
+      return
+    }
+
     const body = {
       prontuario: { id: parseInt(form.prontuarioId) },
       medico: { id: parseInt(form.medicoId) },
