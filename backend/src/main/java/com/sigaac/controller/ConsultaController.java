@@ -56,8 +56,12 @@ public class ConsultaController {
                 json.send(exchange, 404, Map.of("error", "Consulta não encontrada."));
                 return;
             }
-            Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
-            consulta.setId(id);
+            Consulta dados = json.read(exchange.getRequestBody(), Consulta.class);
+            Consulta consulta = existente.get();
+            if (dados.getPaciente() != null) consulta.setPaciente(dados.getPaciente());
+            if (dados.getTipoConsulta() != null) consulta.setTipoConsulta(dados.getTipoConsulta());
+            if (dados.getObservacoes() != null) consulta.setObservacoes(dados.getObservacoes());
+            if (dados.getStatus() != null) consulta.setStatus(dados.getStatus());
             consulta.save();
             json.send(exchange, 200, consulta);
         } catch (IllegalArgumentException e) {

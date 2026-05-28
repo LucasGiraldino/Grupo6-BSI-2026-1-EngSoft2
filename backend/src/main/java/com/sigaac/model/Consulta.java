@@ -118,6 +118,9 @@ public class Consulta {
                 this.observacoes, this.dataAgendamento,
                 this.triagem != null ? this.triagem.getId() : null);
             if (id != null) this.id = id.intValue();
+            if (this.agenda != null && this.agenda.getId() != null) {
+                db.executeUpdate("UPDATE agenda SET disponivel = FALSE WHERE id_agenda = ?", this.agenda.getId());
+            }
         } else {
             db.executeUpdate(
                 "UPDATE consultas SET id_paciente = ?, id_agenda = ?, id_profissional = ?, tipo_consulta = ?, status = ?, observacoes = ?, id_triagem = ? WHERE id_consulta = ?",
