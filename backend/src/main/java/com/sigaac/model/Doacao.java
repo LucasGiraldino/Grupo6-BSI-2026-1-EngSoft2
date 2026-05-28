@@ -85,6 +85,15 @@ public class Doacao {
     public void delete() {
         var db = DatabaseManager.getInstance();
         db.executeInTransaction(conn -> {
+            for (ItemDoacao item : this.itens) {
+                if (item.getAlimento() == null) continue;
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE estoque SET quantidade_atual = quantidade_atual + ? WHERE id_alimento = ?")) {
+                    stmt.setBigDecimal(1, item.getQuantidade());
+                    stmt.setInt(2, item.getAlimento().getId());
+                    stmt.executeUpdate();
+                }
+            }
             deleteItensDoacao(conn);
             try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM doacoes WHERE id_doacao = ?")) {
                 stmt.setInt(1, this.id);
@@ -131,20 +140,115 @@ public class Doacao {
         doacao.setItens(new ArrayList<>());
 
         db.executeInTransaction(conn -> {
-            doacao.save();
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO doacoes (id_profissional, id_paciente, data_doacao, observacoes) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setInt(1, doacao.getProfissional().getId());
+                stmt.setInt(2, doacao.getPaciente().getId());
+                stmt.setObject(3, doacao.getDataDoacao());
+                stmt.setString(4, doacao.getObservacoes());
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) doacao.setId(rs.getInt(1));
+                }
+            }
 
             for (ItemDoacaoRequest itemDto : itens) {
                 Alimento alimento = Alimento.findById(itemDto.getIdAlimento())
                     .orElseThrow(() -> new IllegalArgumentException("Alimento nao encontrado."));
 
                 try (PreparedStatement stmt = conn.prepareStatement(
-                        "INSERT INTO itens_doacao (id_doacao, id_alimento, quantidade, peso) VALUES (?, ?, ?, ?)",
-                        Statement.RETURN_GENERATED_KEYS)) {
+                        "INSERT INTO itens_doacao (id_doacao, id_alimento, quantidade, peso) VALUES (?, ?, ?, ?)")) {
                     stmt.setInt(1, doacao.getId());
                     stmt.setInt(2, alimento.getId());
                     stmt.setBigDecimal(3, itemDto.getQuantidade());
                     stmt.setNull(4, java.sql.Types.DECIMAL);
                     stmt.executeUpdate();
+                }
+
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE estoque SET quantidade_atual = quantidade_atual - ? WHERE id_alimento = ?")) {
+                    stmt.setBigDecimal(1, itemDto.getQuantidade());
+                    stmt.setInt(2, alimento.getId());
+                    if (stmt.executeUpdate() == 0) {
+                        throw new IllegalStateException("Estoque nao encontrado para o alimento: " + alimento.getNome());
+                    }
+                }
+
+                ItemDoacao itemDoacao = new ItemDoacao();
+                itemDoacao.setDoacao(doacao);
+                itemDoacao.setAlimento(alimento);
+                itemDoacao.setQuantidade(itemDto.getQuantidade());
+                doacao.getItens().add(itemDoacao);
+            }
+        });
+
+        return doacao;
+    }
+
+    public static Doacao atualizar(Integer id, Integer idPaciente, String observacoes,
+                                    List<ItemDoacaoRequest> novosItens) {
+        var db = DatabaseManager.getInstance();
+
+        Doacao doacao = Doacao.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Doacao nao encontrada."));
+
+        if (novosItens == null || novosItens.isEmpty()) {
+            throw new IllegalArgumentException("A doacao precisa conter pelo menos um alimento.");
+        }
+
+        Paciente paciente = Paciente.findById(idPaciente)
+            .orElseThrow(() -> new IllegalArgumentException("Paciente nao cadastrado."));
+
+        db.executeInTransaction(conn -> {
+            for (ItemDoacao oldItem : doacao.getItens()) {
+                if (oldItem.getAlimento() == null) continue;
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE estoque SET quantidade_atual = quantidade_atual + ? WHERE id_alimento = ?")) {
+                    stmt.setBigDecimal(1, oldItem.getQuantidade());
+                    stmt.setInt(2, oldItem.getAlimento().getId());
+                    stmt.executeUpdate();
+                }
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM itens_doacao WHERE id_doacao = ?")) {
+                stmt.setInt(1, doacao.getId());
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "UPDATE doacoes SET id_paciente = ?, observacoes = ? WHERE id_doacao = ?")) {
+                stmt.setInt(1, paciente.getId());
+                stmt.setString(2, observacoes);
+                stmt.setInt(3, doacao.getId());
+                stmt.executeUpdate();
+            }
+
+            doacao.setPaciente(paciente);
+            doacao.setObservacoes(observacoes);
+            doacao.setItens(new ArrayList<>());
+
+            for (ItemDoacaoRequest itemDto : novosItens) {
+                Alimento alimento = Alimento.findById(itemDto.getIdAlimento())
+                    .orElseThrow(() -> new IllegalArgumentException("Alimento nao encontrado."));
+
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO itens_doacao (id_doacao, id_alimento, quantidade, peso) VALUES (?, ?, ?, ?)")) {
+                    stmt.setInt(1, doacao.getId());
+                    stmt.setInt(2, alimento.getId());
+                    stmt.setBigDecimal(3, itemDto.getQuantidade());
+                    stmt.setNull(4, java.sql.Types.DECIMAL);
+                    stmt.executeUpdate();
+                }
+
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE estoque SET quantidade_atual = quantidade_atual - ? WHERE id_alimento = ?")) {
+                    stmt.setBigDecimal(1, itemDto.getQuantidade());
+                    stmt.setInt(2, alimento.getId());
+                    if (stmt.executeUpdate() == 0) {
+                        throw new IllegalStateException("Estoque nao encontrado para o alimento: " + alimento.getNome());
+                    }
                 }
 
                 ItemDoacao itemDoacao = new ItemDoacao();
@@ -167,6 +271,13 @@ public class Doacao {
         if (idPac != null) d.setPaciente(Paciente.findById(idPac).orElse(null));
         d.setDataDoacao(rs.getObject("data_doacao", LocalDateTime.class));
         d.setObservacoes(rs.getString("observacoes"));
+        List<ItemDoacao> itens = DatabaseManager.getInstance().queryList(
+            "SELECT * FROM itens_doacao WHERE id_doacao = ?",
+            ItemDoacao::mapRow, d.getId());
+        for (ItemDoacao item : itens) {
+            item.setDoacao(d);
+        }
+        d.setItens(itens);
         return d;
     }
 

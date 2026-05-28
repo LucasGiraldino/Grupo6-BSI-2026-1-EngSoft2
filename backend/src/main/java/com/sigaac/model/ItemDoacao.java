@@ -55,11 +55,15 @@ public class ItemDoacao {
         return this.alimento;
     }
 
-    private static ItemDoacao mapRow(ResultSet rs) throws SQLException {
+    static ItemDoacao mapRow(ResultSet rs) throws SQLException {
         ItemDoacao item = new ItemDoacao();
         item.setId(rs.getInt("id_item_doacao"));
         item.setQuantidade(rs.getBigDecimal("quantidade"));
         item.setPeso(rs.getBigDecimal("peso"));
+        Integer idAlimento = rs.getObject("id_alimento", Integer.class);
+        if (idAlimento != null) {
+            item.setAlimento(Alimento.findById(idAlimento).orElse(null));
+        }
         return item;
     }
 

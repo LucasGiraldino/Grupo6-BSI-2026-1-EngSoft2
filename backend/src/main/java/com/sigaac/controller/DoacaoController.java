@@ -1,7 +1,6 @@
 package com.sigaac.controller;
 
 import com.sigaac.model.Doacao;
-import com.sigaac.model.Paciente;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -55,24 +54,24 @@ public class DoacaoController {
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var existente = Doacao.findById(id);
-        if (existente.isEmpty()) {
-            json.send(exchange, 404, Map.of("error", "Doação não encontrada."));
-            return;
-        }
         Map<String, Object> payload = json.read(exchange.getRequestBody(), Map.class);
         try {
-            Doacao doacao = existente.get();
-            if (payload.containsKey("idPaciente") && payload.get("idPaciente") != null) {
-                Integer idPaciente = ((Number) payload.get("idPaciente")).intValue();
-                Paciente paciente = Paciente.findById(idPaciente)
-                    .orElseThrow(() -> new IllegalArgumentException("Paciente não cadastrado."));
-                doacao.setPaciente(paciente);
+            Integer idPaciente = payload.get("idPaciente") != null
+                ? ((Number) payload.get("idPaciente")).intValue() : null;
+            String observacoes = (String) payload.get("observacoes");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> itensPayload = (List<Map<String, Object>>) payload.get("itens");
+
+            List<Doacao.ItemDoacaoRequest> itens = new java.util.ArrayList<>();
+            if (itensPayload != null) {
+                for (Map<String, Object> item : itensPayload) {
+                    Integer idAlimento = ((Number) item.get("idAlimento")).intValue();
+                    java.math.BigDecimal quantidade = new java.math.BigDecimal(item.get("quantidade").toString());
+                    itens.add(new Doacao.ItemDoacaoRequest(idAlimento, quantidade));
+                }
             }
-            if (payload.containsKey("observacoes")) {
-                doacao.setObservacoes((String) payload.get("observacoes"));
-            }
-            doacao.save();
+
+            Doacao doacao = Doacao.atualizar(id, idPaciente, observacoes, itens);
             json.send(exchange, 200, doacao);
         } catch (IllegalArgumentException | IllegalStateException e) {
             json.send(exchange, 400, Map.of("error", e.getMessage()));
