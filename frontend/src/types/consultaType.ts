@@ -1,3 +1,16 @@
+export const TIPOS_CONSULTA = ['CONSULTA', 'URGENCIA', 'RETORNO'] as const
+export type TipoConsulta = typeof TIPOS_CONSULTA[number]
+
+export const STATUS_CONSULTA = ['AGENDADA', 'CONCLUIDA', 'CANCELADA'] as const
+export type StatusConsulta = typeof STATUS_CONSULTA[number]
+
+export const STATUS_LABELS: Record<string, string> = {
+  AGENDADA: 'Agendada',
+  CONCLUIDA: 'Concluída',
+  CANCELADA: 'Cancelada',
+  ESPERANDO: 'Esperando',
+}
+
 export type TriagemResumo = {
   id: number
   pressaoArterial?: string
@@ -20,7 +33,7 @@ export type Consulta = {
     horaInicio: string
     horaFim: string
   }
-  tipoConsulta: string
+  tipoConsulta: TipoConsulta
   status: string
   observacoes?: string
   dataAgendamento: string

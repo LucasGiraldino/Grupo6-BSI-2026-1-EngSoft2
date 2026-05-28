@@ -162,7 +162,7 @@ CREATE TABLE consultas (
     id_paciente INTEGER REFERENCES pacientes(id_paciente),
     id_agenda INTEGER REFERENCES agenda(id_agenda),
     id_profissional INTEGER REFERENCES profissionais(id_profissional),
-    tipo_consulta VARCHAR(50) NOT NULL,
+    tipo_consulta VARCHAR(50) NOT NULL CHECK (tipo_consulta IN ('CONSULTA', 'URGENCIA', 'RETORNO', 'Triagem')),
     status VARCHAR(20) NOT NULL,
     observacoes TEXT,
     data_agendamento TIMESTAMP NOT NULL,

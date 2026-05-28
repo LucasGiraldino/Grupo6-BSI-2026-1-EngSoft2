@@ -1,5 +1,6 @@
 import { Clock } from 'lucide-react'
 import { AgendaDisponivel, Consulta } from '../hooks/useConsultasData'
+import { STATUS_LABELS } from '../../../types/consultaType'
 
 const STATUS_CORES: Record<string, string> = {
   AGENDADA: 'bg-blue-100 text-blue-700',
@@ -72,7 +73,7 @@ export default function ConsultasTimeSlots({
                   </div>
                 </div>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ml-2 ${STATUS_CORES[item.consulta!.status] || 'bg-gray-100 text-gray-700'}`}>
-                  {item.consulta!.status}
+                  {STATUS_LABELS[item.consulta!.status] || item.consulta!.status}
                 </span>
               </button>
             )

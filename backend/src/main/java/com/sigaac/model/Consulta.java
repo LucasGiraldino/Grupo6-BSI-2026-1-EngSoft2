@@ -9,10 +9,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class Consulta {
+
+    public static final Set<String> TIPOS_VALIDOS = new HashSet<>(Arrays.asList(
+        "CONSULTA", "URGENCIA", "RETORNO", "Triagem"
+    ));
 
     private Integer id;
     private Paciente paciente;
@@ -97,6 +104,9 @@ public class Consulta {
     }
 
     public Consulta save() {
+        if (this.tipoConsulta == null || !TIPOS_VALIDOS.contains(this.tipoConsulta)) {
+            throw new IllegalArgumentException("Tipo de consulta inválido. Valores aceitos: " + TIPOS_VALIDOS);
+        }
         var db = DatabaseManager.getInstance();
         if (this.id == null) {
             Number id = db.executeInsert(

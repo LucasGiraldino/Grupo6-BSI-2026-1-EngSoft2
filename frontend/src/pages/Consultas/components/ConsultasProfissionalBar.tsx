@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Profissional } from '../hooks/useConsultasData'
+import { STATUS_CONSULTA, STATUS_LABELS } from '../../../types/consultaType'
 
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
@@ -47,10 +48,9 @@ export default function ConsultasProfissionalBar({
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
         >
           <option value="">Todos</option>
-          <option value="AGENDADA">Agendada</option>
-          <option value="CONCLUIDA">Concluída</option>
-          <option value="CANCELADA">Cancelada</option>
-          <option value="ESPERANDO">Esperando</option>
+          {STATUS_CONSULTA.map(s => (
+            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+          ))}
         </select>
       </div>
 

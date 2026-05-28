@@ -1,5 +1,6 @@
 import { X, Clock, Trash2, Loader } from 'lucide-react'
 import { Paciente, AgendaDisponivel, Consulta } from '../hooks/useConsultasData'
+import { TIPOS_CONSULTA } from '../../../types/consultaType'
 
 interface ConsultasFormModalProps {
   aberto: boolean
@@ -92,14 +93,17 @@ export default function ConsultasFormModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Consulta</label>
-            <input
-              type="text"
+            <select
               required
               value={formTipo}
               onChange={e => onFormTipoChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#030213]"
-              placeholder="Ex: Psicologia, Fisioterapia"
-            />
+            >
+              <option value="">Selecione o tipo</option>
+              {TIPOS_CONSULTA.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
           </div>
 
           <div>

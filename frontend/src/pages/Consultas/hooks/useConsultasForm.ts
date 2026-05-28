@@ -23,7 +23,7 @@ export function useConsultasForm(
 
   const resetForm = useCallback(() => {
     setFormPaciente('')
-    setFormTipo('')
+    setFormTipo('CONSULTA')
     setFormObs('')
     setFormStatus('AGENDADA')
     setErroForm('')

@@ -37,22 +37,34 @@ public class ConsultaController {
     }
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
-        consulta.save();
-        json.send(exchange, 201, consulta);
+        try {
+            Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
+            consulta.save();
+            json.send(exchange, 201, consulta);
+        } catch (IllegalArgumentException e) {
+            json.send(exchange, 400, Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            json.send(exchange, 500, Map.of("error", "Erro ao criar consulta."));
+        }
     }
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        var existente = Consulta.findById(id);
-        if (existente.isEmpty()) {
-            json.send(exchange, 404, Map.of("error", "Consulta não encontrada."));
-            return;
+        try {
+            Integer id = Integer.parseInt(params.get("p1"));
+            var existente = Consulta.findById(id);
+            if (existente.isEmpty()) {
+                json.send(exchange, 404, Map.of("error", "Consulta não encontrada."));
+                return;
+            }
+            Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
+            consulta.setId(id);
+            consulta.save();
+            json.send(exchange, 200, consulta);
+        } catch (IllegalArgumentException e) {
+            json.send(exchange, 400, Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            json.send(exchange, 500, Map.of("error", "Erro ao atualizar consulta."));
         }
-        Consulta consulta = json.read(exchange.getRequestBody(), Consulta.class);
-        consulta.setId(id);
-        consulta.save();
-        json.send(exchange, 200, consulta);
     }
 
     private void listarPorAgenda(HttpExchange exchange, Map<String, String> params) throws Exception {

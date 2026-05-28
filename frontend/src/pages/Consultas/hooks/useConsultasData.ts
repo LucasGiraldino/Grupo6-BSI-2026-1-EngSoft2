@@ -125,7 +125,9 @@ export function useConsultasData(mostrarToast: (msg: string, tipo: 'sucesso' | '
       consultas = consultas.filter(c => c.status === filtroStatus)
     }
     const items: { tipo: 'slot' | 'consulta'; slot?: AgendaDisponivel; consulta?: Consulta; ordenador: string }[] = []
-    slots.forEach(s => items.push({ tipo: 'slot', slot: s, ordenador: s.horaInicio }))
+    if (!filtroStatus) {
+      slots.forEach(s => items.push({ tipo: 'slot', slot: s, ordenador: s.horaInicio }))
+    }
     consultas.forEach(c => items.push({ tipo: 'consulta', consulta: c, ordenador: c.agenda!.horaInicio }))
     items.sort((a, b) => a.ordenador.localeCompare(b.ordenador))
     return items
