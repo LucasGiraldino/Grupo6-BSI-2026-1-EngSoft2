@@ -6,6 +6,7 @@ import com.sigaac.model.Prontuario;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,10 @@ public class ExameController {
 
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Exame exame = json.read(exchange.getRequestBody(), Exame.class);
+        if (exame.getDataRealizacao() != null && exame.getDataRealizacao().isBefore(LocalDate.now())) {
+            json.send(exchange, 400, Map.of("error", "A data de realização não pode ser anterior à data atual."));
+            return;
+        }
         exame.save();
         json.send(exchange, 201, exame);
     }
@@ -69,6 +74,10 @@ public class ExameController {
             return;
         }
         Exame request = json.read(exchange.getRequestBody(), Exame.class);
+        if (request.getDataRealizacao() != null && request.getDataRealizacao().isBefore(LocalDate.now())) {
+            json.send(exchange, 400, Map.of("error", "A data de realização não pode ser anterior à data atual."));
+            return;
+        }
         Exame atualizado = opt.get().merge(request);
         atualizado.save();
         json.send(exchange, 200, atualizado);

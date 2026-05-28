@@ -111,6 +111,14 @@ export function useExamesForm(
       return
     }
 
+    if (form.dataRealizacao) {
+      const hoje = new Date().toISOString().split('T')[0]
+      if (form.dataRealizacao < hoje) {
+        setErroForm('A data de realização não pode ser anterior à data atual.')
+        return
+      }
+    }
+
     const body = {
       prontuario: { id: parseInt(form.prontuarioId) },
       medico: { id: parseInt(form.medicoId) },
