@@ -103,9 +103,27 @@ public class Consulta {
             BASE_SELECT + " WHERE c.id_consulta = ?", Consulta::mapRow, id);
     }
 
+    public static boolean existsAgendadaByPaciente(Integer pacienteId, Integer excludeId) {
+        var db = DatabaseManager.getInstance();
+        List<Object> params = new ArrayList<>();
+        params.add(pacienteId);
+        String sql = "SELECT COUNT(*) FROM consultas WHERE id_paciente = ? AND status = 'AGENDADA'";
+        if (excludeId != null) {
+            sql += " AND id_consulta != ?";
+            params.add(excludeId);
+        }
+        return db.querySingle(sql, rs -> (Number) rs.getObject(1), params.toArray())
+            .orElse(0).intValue() > 0;
+    }
+
     public Consulta save() {
         if (this.tipoConsulta == null || !TIPOS_VALIDOS.contains(this.tipoConsulta)) {
             throw new IllegalArgumentException("Tipo de consulta inválido. Valores aceitos: " + TIPOS_VALIDOS);
+        }
+        if (this.paciente != null && this.paciente.getId() != null && "AGENDADA".equals(this.status)) {
+            if (existsAgendadaByPaciente(this.paciente.getId(), this.id)) {
+                throw new IllegalArgumentException("Paciente já possui uma consulta agendada.");
+            }
         }
         var db = DatabaseManager.getInstance();
         if (this.id == null) {

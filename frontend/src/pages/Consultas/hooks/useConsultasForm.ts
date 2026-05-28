@@ -106,8 +106,9 @@ export function useConsultasForm(
       )
       carregarDadosMes()
       carregarPacientesTriagem()
-    } catch {
-      setErroForm('Erro ao salvar. Verifique os dados e tente novamente.')
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+      setErroForm(msg || 'Erro ao salvar. Verifique os dados e tente novamente.')
     } finally {
       setSalvando(false)
     }
