@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useProntuariosData } from './hooks/useProntuariosData'
 import { useProntuariosForm } from './hooks/useProntuariosForm'
 import ProntuariosFilters from './components/ProntuariosFilters'
@@ -7,16 +6,6 @@ import ProntuariosTable from './components/ProntuariosTable'
 import ProntuariosFormModal from './components/ProntuariosFormModal'
 
 export default function ProntuariosPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     prontuarios,
     carregando,
@@ -38,7 +27,7 @@ export default function ProntuariosPage() {
     abrirModal,
     salvar,
     fecharModal,
-  } = useProntuariosForm(carregar, mostrarToast)
+  } = useProntuariosForm(carregar, toast.mostrar)
 
   return (
     <>
@@ -71,7 +60,6 @@ export default function ProntuariosPage() {
         onFechar={fecharModal}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

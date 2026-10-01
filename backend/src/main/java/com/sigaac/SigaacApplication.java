@@ -1,6 +1,9 @@
 package com.sigaac;
 
 import com.sigaac.config.*;
+import com.sigaac.config.cpf.CpfHubStrategy;
+import com.sigaac.config.cpf.CpfSimuladoStrategy;
+import com.sigaac.config.cpf.CpfStrategy;
 import com.sigaac.controller.*;
 import com.sigaac.view.JsonView;
 import com.sigaac.view.StaticFileHandler;
@@ -27,7 +30,11 @@ public class SigaacApplication {
         OtpUtil otpUtil = new OtpUtil();
         TotpUtil totpUtil = new TotpUtil();
         RateLimiter rateLimiter = new RateLimiter();
-        CpfValidator cpfValidator = new CpfValidator(props.getProperty("api.cpf.token", ""));
+        String cpfToken = props.getProperty("api.cpf.token", "");
+        CpfStrategy cpfStrategy = cpfToken.isEmpty()
+                ? new CpfSimuladoStrategy()
+                : new CpfHubStrategy(cpfToken);
+        CpfValidator cpfValidator = new CpfValidator(cpfStrategy);
         CnpjUtil cnpjUtil = new CnpjUtil();
         CepUtil cepUtil = new CepUtil();
 

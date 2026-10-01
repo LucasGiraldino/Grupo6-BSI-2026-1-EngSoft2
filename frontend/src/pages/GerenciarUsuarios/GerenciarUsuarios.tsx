@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useUsuariosData } from './hooks/useUsuariosData'
 import { useUsuariosForm } from './hooks/useUsuariosForm'
 import UsuariosFilters from './components/UsuariosFilters'
@@ -9,16 +8,6 @@ import UsuariosFormModal from './components/UsuariosFormModal'
 import UsuariosDeleteModal from './components/UsuariosDeleteModal'
 
 export default function GerenciarUsuarios() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     usuarios,
     carregando,
@@ -32,7 +21,7 @@ export default function GerenciarUsuarios() {
     handleBuscar,
     handleLimparFiltros,
     confirmarDelete,
-  } = useUsuariosData(mostrarToast)
+  } = useUsuariosData(toast.mostrar)
 
   const {
     modalAberto,
@@ -47,7 +36,7 @@ export default function GerenciarUsuarios() {
     abrirModalEdicao,
     salvar,
     fecharModal,
-  } = useUsuariosForm(carregarUsuarios, mostrarToast)
+  } = useUsuariosForm(carregarUsuarios, toast.mostrar)
 
   return (
     <>
@@ -98,7 +87,6 @@ export default function GerenciarUsuarios() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

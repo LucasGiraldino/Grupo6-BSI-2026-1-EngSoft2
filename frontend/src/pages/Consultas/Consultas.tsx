@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { CalendarDays } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useConsultasData } from './hooks/useConsultasData'
 import { useConsultasForm } from './hooks/useConsultasForm'
 import { AgendaDisponivel } from './hooks/useConsultasData'
@@ -13,16 +13,6 @@ import ConsultasTriagemDetailsModal from './components/ConsultasTriagemDetailsMo
 import ConsultasDeleteModal from './components/ConsultasDeleteModal'
 
 export default function ConsultasPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     profissionais,
     profissionalId,
@@ -54,7 +44,7 @@ export default function ConsultasPage() {
     nextMonth,
     mesAtual,
     selectDia,
-  } = useConsultasData(mostrarToast)
+  } = useConsultasData(toast.mostrar)
 
   const [modalSlot, setModalSlot] = useState<AgendaDisponivel | null>(null)
   const [modalTriagem, setModalTriagem] = useState<import('./hooks/useConsultasData').Consulta | null>(null)
@@ -77,7 +67,7 @@ export default function ConsultasPage() {
     salvar,
     fecharModal,
     setModalAberto,
-  } = useConsultasForm(profissionalId, modalSlot, modalTriagem, setModalSlot, setModalTriagem, carregarDadosMes, carregarPacientesTriagem, mostrarToast)
+  } = useConsultasForm(profissionalId, modalSlot, modalTriagem, setModalSlot, setModalTriagem, carregarDadosMes, carregarPacientesTriagem, toast.mostrar)
 
   const handleProfissionalChange = useCallback((id: string) => {
     setProfissionalId(id)
@@ -201,7 +191,6 @@ export default function ConsultasPage() {
         }}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </div>
   )
 }

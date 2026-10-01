@@ -1,47 +1,21 @@
 package com.sigaac.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigaac.config.cpf.CpfStrategy;
 import com.sigaac.model.CpfResponse;
 
 public class CpfValidator {
 
-    private final String apiToken;
-    private final ObjectMapper mapper;
+    private final CpfStrategy strategy;
 
-    public CpfValidator(String apiToken) {
-        this.apiToken = apiToken != null ? apiToken : "";
-        this.mapper = new ObjectMapper();
+    public CpfValidator(CpfStrategy strategy) {
+        this.strategy = strategy;
     }
 
     public CpfResponse consultar(String cpf) {
-        boolean valido = validarMatematicamente(cpf);
-        if (!valido) {
+        if (!validarMatematicamente(cpf)) {
             return CpfResponse.invalido(cpf, "CPF inválido.");
         }
-
-        if (apiToken.isEmpty()) {
-            return CpfResponse.valido(cpf);
-        }
-
-        try {
-            java.net.URL url = new java.net.URL("https://api.cpfhub.io/cpf/" + cpf);
-            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Authorization", "Bearer " + apiToken);
-            conn.setRequestMethod("GET");
-
-            JsonNode root = mapper.readTree(conn.getInputStream());
-            String nome = root.has("nome") && !root.get("nome").isNull()
-                ? root.get("nome").asText() : null;
-            String dataNascimento = root.has("data_nascimento") && !root.get("data_nascimento").isNull()
-                ? root.get("data_nascimento").asText() : null;
-            String sexo = root.has("sexo") && !root.get("sexo").isNull()
-                ? root.get("sexo").asText() : null;
-
-            return CpfResponse.comDados(cpf, nome, dataNascimento, sexo);
-        } catch (Exception e) {
-            return CpfResponse.invalido(cpf, "Erro ao consultar CPF na API.");
-        }
+        return strategy.consultar(cpf);
     }
 
     public static boolean validarMatematicamente(String cpf) {

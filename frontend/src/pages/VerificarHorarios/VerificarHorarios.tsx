@@ -1,22 +1,11 @@
-import { useState, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useVerificarHorarios } from './hooks/useVerificarHorarios'
 import ProfissionalSelect from './components/ProfissionalSelect'
 import CalendarGrid from './components/CalendarGrid'
 import SlotsList from './components/SlotsList'
 
 export default function VerificarHorariosPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     profissionais,
     profissionalId,
@@ -38,7 +27,7 @@ export default function VerificarHorariosPage() {
     formatarHora,
     DIAS_SEMANA,
     MESES,
-  } = useVerificarHorarios(mostrarToast)
+  } = useVerificarHorarios(toast.mostrar)
 
   return (
     <div className="flex flex-col h-full">
@@ -109,7 +98,6 @@ export default function VerificarHorariosPage() {
         </div>
       )}
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </div>
   )
 }

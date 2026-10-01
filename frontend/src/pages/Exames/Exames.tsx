@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useExamesData } from './hooks/useExamesData'
 import { useExamesForm } from './hooks/useExamesForm'
 import { criarTipoExame, excluirTipoExame } from '../../services/exameService'
@@ -11,16 +11,6 @@ import ExamesTipoModal from './components/ExamesTipoModal'
 import ExamesDeleteModal from './components/ExamesDeleteModal'
 
 export default function ExamesPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     exames,
     tiposExame,
@@ -37,7 +27,7 @@ export default function ExamesPage() {
     handleLimparFiltros,
     confirmarDelete,
     atualizarTiposExame,
-  } = useExamesData(mostrarToast)
+  } = useExamesData(toast.mostrar)
 
   const {
     modalAberto,
@@ -56,29 +46,29 @@ export default function ExamesPage() {
     abrirModalEdicao,
     salvar,
     fecharModal,
-  } = useExamesForm(carregarDados, mostrarToast)
+  } = useExamesForm(carregarDados, toast.mostrar)
 
   const [modalTipoAberto, setModalTipoAberto] = useState(false)
 
   const handleCriarTipo = useCallback(async (nome: string, descricao: string | null) => {
     try {
       await criarTipoExame(nome, descricao)
-      mostrarToast('Tipo de exame criado com sucesso!', 'sucesso')
+      toast.mostrar('Tipo de exame criado com sucesso!', 'sucesso')
       atualizarTiposExame()
     } catch {
-      mostrarToast('Erro ao criar tipo de exame.', 'erro')
+      toast.mostrar('Erro ao criar tipo de exame.', 'erro')
     }
-  }, [mostrarToast, atualizarTiposExame])
+  }, [toast.mostrar, atualizarTiposExame])
 
   const handleExcluirTipo = useCallback(async (id: number) => {
     try {
       await excluirTipoExame(id)
-      mostrarToast('Tipo de exame excluído com sucesso!', 'sucesso')
+      toast.mostrar('Tipo de exame excluído com sucesso!', 'sucesso')
       atualizarTiposExame()
     } catch {
-      mostrarToast('Erro ao excluir tipo de exame.', 'erro')
+      toast.mostrar('Erro ao excluir tipo de exame.', 'erro')
     }
-  }, [mostrarToast, atualizarTiposExame])
+  }, [toast.mostrar, atualizarTiposExame])
 
   return (
     <>
@@ -143,7 +133,6 @@ export default function ExamesPage() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

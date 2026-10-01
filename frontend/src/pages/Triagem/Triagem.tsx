@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react'
 import { Plus, Stethoscope } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useTriagemData } from './hooks/useTriagemData'
 import { useTriagemForm } from './hooks/useTriagemForm'
 import TriagemFilters from './components/TriagemFilters'
@@ -9,16 +8,6 @@ import TriagemFormModal from './components/TriagemFormModal'
 import TriagemDeleteModal from './components/TriagemDeleteModal'
 
 export default function TriagemPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     triagens,
     medicos,
@@ -33,7 +22,7 @@ export default function TriagemPage() {
     handleBuscar,
     handleLimparFiltros,
     confirmarDelete,
-  } = useTriagemData(mostrarToast)
+  } = useTriagemData(toast.mostrar)
 
   const {
     modalAberto,
@@ -53,7 +42,7 @@ export default function TriagemPage() {
     abrirModalEdicao,
     salvar,
     fecharModal,
-  } = useTriagemForm(carregarDados, mostrarToast)
+  } = useTriagemForm(carregarDados, toast.mostrar)
 
   return (
     <>
@@ -115,7 +104,6 @@ export default function TriagemPage() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

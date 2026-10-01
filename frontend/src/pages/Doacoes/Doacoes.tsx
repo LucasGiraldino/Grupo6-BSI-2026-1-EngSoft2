@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useDoacoesData } from './hooks/useDoacoesData'
 import { useDoacoesForm } from './hooks/useDoacoesForm'
 import DoacoesFilters from './components/DoacoesFilters'
@@ -9,16 +8,6 @@ import DoacoesFormModal from './components/DoacoesFormModal'
 import DoacoesDeleteModal from './components/DoacoesDeleteModal'
 
 export default function DoacoesPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     doacoes,
     carregando,
@@ -36,7 +25,7 @@ export default function DoacoesPage() {
     handleBuscar,
     handleLimparFiltros,
     confirmarDelete,
-  } = useDoacoesData(mostrarToast)
+  } = useDoacoesData(toast.mostrar)
 
   const {
     modalAberto,
@@ -51,7 +40,7 @@ export default function DoacoesPage() {
     handleRemoverItem,
     salvar,
     fecharModal,
-  } = useDoacoesForm(carregarDoacoes, carregarPacientes, carregarEstoque, mostrarToast)
+  } = useDoacoesForm(carregarDoacoes, carregarPacientes, carregarEstoque, toast.mostrar)
 
   return (
     <>
@@ -103,7 +92,6 @@ export default function DoacoesPage() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { usePacienteData } from './hooks/usePacienteData'
 import { usePacienteForm } from './hooks/usePacienteForm'
 import PacienteFilters from './components/PacienteFilters'
@@ -9,16 +8,6 @@ import PacienteFormModal from './components/PacienteFormModal'
 import PacienteDeleteModal from './components/PacienteDeleteModal'
 
 export default function GerenciarPacientes() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     pacientes,
     carregando,
@@ -32,7 +21,7 @@ export default function GerenciarPacientes() {
     handleBuscar,
     handleLimparFiltros,
     confirmarDelete,
-  } = usePacienteData(mostrarToast)
+  } = usePacienteData(toast.mostrar)
 
   const {
     modalAberto,
@@ -49,7 +38,7 @@ export default function GerenciarPacientes() {
     abrirModalEdicao,
     salvar,
     fecharModal,
-  } = usePacienteForm(carregarPacientes, mostrarToast)
+  } = usePacienteForm(carregarPacientes, toast.mostrar)
 
   return (
     <>
@@ -101,7 +90,6 @@ export default function GerenciarPacientes() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

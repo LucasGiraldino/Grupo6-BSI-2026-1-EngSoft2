@@ -22,11 +22,13 @@ import VerificarHorarios from './pages/VerificarHorarios'
 import GerenciarAgenda from './pages/GerenciarAgenda'
 import { useAuth } from './hooks/useAuth'
 import AppLayout from './components/AppLayout'
+import ToastObserver from './components/ToastObserver'
 import { SystemConfigProvider } from './contexts/SystemConfigContext'
 
 function App() {
   return (
     <SystemConfigProvider>
+      <ToastObserver />
       <AppRoutes />
     </SystemConfigProvider>
   )

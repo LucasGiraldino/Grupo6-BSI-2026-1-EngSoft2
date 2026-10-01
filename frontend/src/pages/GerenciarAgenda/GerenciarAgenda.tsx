@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { Clock } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useAgendaData } from './hooks/useAgendaData'
 import { useAgendaForm } from './hooks/useAgendaForm'
 import AgendaProfissionalSelect from './components/AgendaProfissionalSelect'
@@ -9,16 +9,6 @@ import AgendaSlotsTable from './components/AgendaSlotsTable'
 import AgendaDeleteModal from './components/AgendaDeleteModal'
 
 export default function GerenciarAgendaPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     profissionais,
     profissionalId,
@@ -29,7 +19,7 @@ export default function GerenciarAgendaPage() {
     setIdParaExcluir,
     carregarSlots,
     confirmarDelete,
-  } = useAgendaData(mostrarToast)
+  } = useAgendaData(toast.mostrar)
 
   const {
     formData,
@@ -42,7 +32,7 @@ export default function GerenciarAgendaPage() {
     erroForm,
     adicionarSlot,
     limparForm,
-  } = useAgendaForm(profissionalId, profissionais, carregarSlots, mostrarToast)
+  } = useAgendaForm(profissionalId, profissionais, carregarSlots, toast.mostrar)
 
   const handleProfissionalChange = useCallback((value: string) => {
     setProfissionalId(value)
@@ -96,7 +86,6 @@ export default function GerenciarAgendaPage() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

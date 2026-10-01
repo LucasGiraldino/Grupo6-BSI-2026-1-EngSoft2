@@ -1,21 +1,11 @@
-import { useState, useCallback } from 'react'
 import { Loader } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useSystemConfig } from '../../contexts/SystemConfigContext'
 import { useConfigForm } from './hooks/useConfigForm'
 import ConfigForm from './components/ConfigForm'
 
 export default function ConfiguracoesPage() {
   const { refresh: refreshConfig } = useSystemConfig()
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
 
   const {
     form,
@@ -28,7 +18,7 @@ export default function ConfiguracoesPage() {
     buscarCep,
     salvar,
     recarregar,
-  } = useConfigForm(mostrarToast, refreshConfig)
+  } = useConfigForm(toast.mostrar, refreshConfig)
 
   if (carregando) {
     return (
@@ -51,7 +41,6 @@ export default function ConfiguracoesPage() {
         onSalvar={salvar}
         onRecarregar={recarregar}
       />
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

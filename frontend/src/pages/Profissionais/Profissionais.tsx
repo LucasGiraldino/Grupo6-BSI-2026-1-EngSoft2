@@ -1,6 +1,5 @@
-import { useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useProfissionaisData } from './hooks/useProfissionaisData'
 import { useProfissionaisForm } from './hooks/useProfissionaisForm'
 import ProfissionaisFilters from './components/ProfissionaisFilters'
@@ -9,16 +8,6 @@ import ProfissionaisFormModal from './components/ProfissionaisFormModal'
 import ProfissionaisDeleteModal from './components/ProfissionaisDeleteModal'
 
 export default function ProfissionaisPage() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const {
     profissionais,
     carregando,
@@ -32,7 +21,7 @@ export default function ProfissionaisPage() {
     handleBuscar,
     handleLimparFiltros,
     confirmarDelete,
-  } = useProfissionaisData(mostrarToast)
+  } = useProfissionaisData(toast.mostrar)
 
   const {
     modalAberto,
@@ -44,7 +33,7 @@ export default function ProfissionaisPage() {
     abrirModalEdicao,
     salvar,
     fecharModal,
-  } = useProfissionaisForm(carregar, mostrarToast)
+  } = useProfissionaisForm(carregar, toast.mostrar)
 
   return (
     <>
@@ -91,7 +80,6 @@ export default function ProfissionaisPage() {
         onCancelar={() => setIdParaExcluir(null)}
       />
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }

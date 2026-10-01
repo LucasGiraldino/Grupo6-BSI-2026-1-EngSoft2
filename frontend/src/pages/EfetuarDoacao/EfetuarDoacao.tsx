@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react'
-import Toast from '../../components/Toast'
+import { toast } from '../../services/toastService'
 import { useEfetuarDoacaoData } from './hooks/useEfetuarDoacaoData'
 import { useEfetuarDoacaoForm } from './hooks/useEfetuarDoacaoForm'
 import PacienteSelect from './components/PacienteSelect'
@@ -7,16 +6,6 @@ import CestaForm from './components/CestaForm'
 import CestaTable from './components/CestaTable'
 
 export default function EfetuarDoacao() {
-  const [toastAberto, setToastAberto] = useState(false)
-  const [toastMensagem, setToastMensagem] = useState('')
-  const [toastTipo, setToastTipo] = useState<'sucesso' | 'erro' | 'aviso' | 'info'>('sucesso')
-
-  const mostrarToast = useCallback((mensagem: string, tipo: 'sucesso' | 'erro' | 'aviso' | 'info' = 'sucesso') => {
-    setToastMensagem(mensagem)
-    setToastTipo(tipo)
-    setToastAberto(true)
-  }, [])
-
   const { pacientes, estoque, carregarEstoque } = useEfetuarDoacaoData()
 
   const {
@@ -35,7 +24,7 @@ export default function EfetuarDoacao() {
     handleAdicionarItem,
     handleRemoverItem,
     handleSalvarDoacao,
-  } = useEfetuarDoacaoForm(estoque, carregarEstoque, mostrarToast)
+  } = useEfetuarDoacaoForm(estoque, carregarEstoque, toast.mostrar)
 
   return (
     <>
@@ -70,7 +59,6 @@ export default function EfetuarDoacao() {
         </div>
       </div>
 
-      <Toast aberto={toastAberto} mensagem={toastMensagem} tipo={toastTipo} onFechar={() => setToastAberto(false)} />
     </>
   )
 }
