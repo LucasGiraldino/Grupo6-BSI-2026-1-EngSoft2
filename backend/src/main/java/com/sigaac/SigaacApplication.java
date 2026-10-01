@@ -8,6 +8,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SigaacApplication {
@@ -19,7 +20,7 @@ public class SigaacApplication {
                 props.load(is);
         }
 
-        DatabaseManager.getInstance();
+        DatabaseManager db = DatabaseManager.getInstance();
         JsonView json = new JsonView();
 
         JwtUtil jwtUtil = new JwtUtil(props);
@@ -106,8 +107,15 @@ public class SigaacApplication {
         pacContext.getFilters().add(corsFilter);
         server.createContext("/", staticHandler);
 
-        server.setExecutor(Executors.newFixedThreadPool(10));
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        server.setExecutor(executor);
         server.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            server.stop(1);
+            executor.shutdown();
+            db.shutdown();
+        }, "sigaac-shutdown"));
 
         System.out.println("SIGAAC server running on port 8080");
         System.out.println("API: http://localhost:8080/api");

@@ -40,6 +40,12 @@ public class DatabaseManager {
         return Holder.INSTANCE;
     }
 
+    public void shutdown() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
+    }
+
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
