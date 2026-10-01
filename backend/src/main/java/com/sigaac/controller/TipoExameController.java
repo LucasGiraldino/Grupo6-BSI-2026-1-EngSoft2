@@ -4,61 +4,59 @@ import com.sigaac.model.TipoExame;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
-public class TipoExameController {
-
-    private final JsonView json;
+public class TipoExameController extends CrudController<TipoExame> {
 
     public TipoExameController(JsonView json) {
-        this.json = json;
+        super(json);
     }
 
-    public void registerRoutes(HttpRouter router) {
-        router.get("/api/tipos-exame", this::listar);
-        router.get("/api/tipos-exame/{id}", this::buscarPorId);
-        router.post("/api/tipos-exame", this::criar);
-        router.put("/api/tipos-exame/{id}", this::atualizar);
-        router.delete("/api/tipos-exame/{id}", this::deletar);
+    @Override
+    protected String basePath() {
+        return "/api/tipos-exame";
     }
 
-    private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, TipoExame.findAll());
+    @Override
+    protected Class<TipoExame> type() {
+        return TipoExame.class;
     }
 
-    private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        var opt = TipoExame.findById(id);
-        if (opt.isPresent()) {
-            json.send(exchange, 200, opt.get());
-        } else {
-            json.send(exchange, 404, Map.of("error", "Tipo de exame não encontrado"));
-        }
+    @Override
+    protected List<TipoExame> listarTodos(HttpExchange exchange) {
+        return TipoExame.findAll();
     }
 
-    private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
+    @Override
+    protected void criarRegistro(HttpExchange exchange) throws Exception {
         TipoExame tipo = json.read(exchange.getRequestBody(), TipoExame.class);
         json.send(exchange, 201, tipo.save());
     }
 
-    private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        if (TipoExame.findById(id).isEmpty()) {
-            json.send(exchange, 404, Map.of("error", "Tipo de exame não encontrado"));
-            return;
-        }
-        TipoExame tipo = json.read(exchange.getRequestBody(), TipoExame.class);
-        tipo.setId(id);
-        json.send(exchange, 200, tipo.save());
+    @Override
+    protected Optional<TipoExame> buscarPorId(Integer id) {
+        return TipoExame.findById(id);
     }
 
-    private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        if (TipoExame.findById(id).isEmpty()) {
-            json.send(exchange, 404, Map.of("error", "Tipo de exame não encontrado"));
-            return;
-        }
-        TipoExame.findById(id).ifPresent(TipoExame::delete);
-        json.send(exchange, 204, null);
+    @Override
+    protected TipoExame persistir(TipoExame tipo) {
+        return tipo.save();
+    }
+
+    @Override
+    protected void remover(TipoExame tipo) {
+        tipo.delete();
+    }
+
+    @Override
+    protected TipoExame aplicarId(TipoExame tipo, Integer id) {
+        tipo.setId(id);
+        return tipo;
+    }
+
+    @Override
+    protected String naoEncontrado() {
+        return "Tipo de exame não encontrado";
     }
 }

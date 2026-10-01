@@ -4,65 +4,59 @@ import com.sigaac.model.ReceitaMedica;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
-public class ReceitaMedicaController {
-
-    private final JsonView json;
+public class ReceitaMedicaController extends CrudController<ReceitaMedica> {
 
     public ReceitaMedicaController(JsonView json) {
-        this.json = json;
+        super(json);
     }
 
-    public void registerRoutes(HttpRouter router) {
-        router.get("/api/receitas", this::listar);
-        router.get("/api/receitas/{id}", this::buscarPorId);
-        router.post("/api/receitas", this::criar);
-        router.put("/api/receitas/{id}", this::atualizar);
-        router.delete("/api/receitas/{id}", this::deletar);
+    @Override
+    protected String basePath() {
+        return "/api/receitas";
     }
 
-    private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, ReceitaMedica.findAll());
+    @Override
+    protected Class<ReceitaMedica> type() {
+        return ReceitaMedica.class;
     }
 
-    private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        var opt = ReceitaMedica.findById(id);
-        if (opt.isPresent()) {
-            json.send(exchange, 200, opt.get());
-        } else {
-            json.send(exchange, 404, Map.of("error", "Receita não encontrada"));
-        }
+    @Override
+    protected List<ReceitaMedica> listarTodos(HttpExchange exchange) {
+        return ReceitaMedica.findAll();
     }
 
-    private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
+    @Override
+    protected void criarRegistro(HttpExchange exchange) throws Exception {
         ReceitaMedica receita = json.read(exchange.getRequestBody(), ReceitaMedica.class);
-        receita.save();
-        json.send(exchange, 201, receita);
+        json.send(exchange, 201, receita.save());
     }
 
-    private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        var opt = ReceitaMedica.findById(id);
-        if (opt.isEmpty()) {
-            json.send(exchange, 404, Map.of("error", "Receita não encontrada"));
-            return;
-        }
-        ReceitaMedica receita = json.read(exchange.getRequestBody(), ReceitaMedica.class);
+    @Override
+    protected Optional<ReceitaMedica> buscarPorId(Integer id) {
+        return ReceitaMedica.findById(id);
+    }
+
+    @Override
+    protected ReceitaMedica persistir(ReceitaMedica receita) {
+        return receita.save();
+    }
+
+    @Override
+    protected void remover(ReceitaMedica receita) {
+        receita.delete();
+    }
+
+    @Override
+    protected ReceitaMedica aplicarId(ReceitaMedica receita, Integer id) {
         receita.setId(id);
-        receita.save();
-        json.send(exchange, 200, receita);
+        return receita;
     }
 
-    private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        var opt = ReceitaMedica.findById(id);
-        if (opt.isEmpty()) {
-            json.send(exchange, 404, Map.of("error", "Receita não encontrada"));
-            return;
-        }
-        opt.get().delete();
-        json.send(exchange, 204, null);
+    @Override
+    protected String naoEncontrado() {
+        return "Receita não encontrada";
     }
 }

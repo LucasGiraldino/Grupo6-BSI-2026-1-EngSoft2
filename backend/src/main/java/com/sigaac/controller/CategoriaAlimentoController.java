@@ -4,61 +4,59 @@ import com.sigaac.model.CategoriaAlimento;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
-public class CategoriaAlimentoController {
-
-    private final JsonView json;
+public class CategoriaAlimentoController extends CrudController<CategoriaAlimento> {
 
     public CategoriaAlimentoController(JsonView json) {
-        this.json = json;
+        super(json);
     }
 
-    public void registerRoutes(HttpRouter router) {
-        router.get("/api/alimentos/categorias", this::listar);
-        router.get("/api/alimentos/categorias/{id}", this::buscarPorId);
-        router.post("/api/alimentos/categorias", this::criar);
-        router.put("/api/alimentos/categorias/{id}", this::atualizar);
-        router.delete("/api/alimentos/categorias/{id}", this::deletar);
+    @Override
+    protected String basePath() {
+        return "/api/alimentos/categorias";
     }
 
-    private void listar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        json.send(exchange, 200, CategoriaAlimento.findAll());
+    @Override
+    protected Class<CategoriaAlimento> type() {
+        return CategoriaAlimento.class;
     }
 
-    private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        var opt = CategoriaAlimento.findById(id);
-        if (opt.isPresent()) {
-            json.send(exchange, 200, opt.get());
-        } else {
-            json.send(exchange, 404, Map.of("error", "Categoria não encontrada"));
-        }
+    @Override
+    protected List<CategoriaAlimento> listarTodos(HttpExchange exchange) {
+        return CategoriaAlimento.findAll();
     }
 
-    private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        CategoriaAlimento body = json.read(exchange.getRequestBody(), CategoriaAlimento.class);
-        json.send(exchange, 201, body.save());
+    @Override
+    protected void criarRegistro(HttpExchange exchange) throws Exception {
+        CategoriaAlimento categoria = json.read(exchange.getRequestBody(), CategoriaAlimento.class);
+        json.send(exchange, 201, categoria.save());
     }
 
-    private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        if (!CategoriaAlimento.existsById(id)) {
-            json.send(exchange, 404, Map.of("error", "Categoria não encontrada"));
-            return;
-        }
-        CategoriaAlimento cat = json.read(exchange.getRequestBody(), CategoriaAlimento.class);
-        cat.setId(id);
-        json.send(exchange, 200, cat.save());
+    @Override
+    protected Optional<CategoriaAlimento> buscarPorId(Integer id) {
+        return CategoriaAlimento.findById(id);
     }
 
-    private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
-        Integer id = Integer.parseInt(params.get("p1"));
-        if (!CategoriaAlimento.existsById(id)) {
-            json.send(exchange, 404, Map.of("error", "Categoria não encontrada"));
-            return;
-        }
-        CategoriaAlimento.findById(id).ifPresent(CategoriaAlimento::delete);
-        json.send(exchange, 204, null);
+    @Override
+    protected CategoriaAlimento persistir(CategoriaAlimento categoria) {
+        return categoria.save();
+    }
+
+    @Override
+    protected void remover(CategoriaAlimento categoria) {
+        categoria.delete();
+    }
+
+    @Override
+    protected CategoriaAlimento aplicarId(CategoriaAlimento categoria, Integer id) {
+        categoria.setId(id);
+        return categoria;
+    }
+
+    @Override
+    protected String naoEncontrado() {
+        return "Categoria não encontrada";
     }
 }
