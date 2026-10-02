@@ -22,7 +22,7 @@ export default function UsuariosTable({ usuarios, carregando, onEditar, onExclui
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-max">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
@@ -39,9 +39,9 @@ export default function UsuariosTable({ usuarios, carregando, onEditar, onExclui
             {usuarios.map(u => (
               <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 text-sm font-medium text-gray-900">{u.nome}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{u.email}</td>
-                <td className="px-4 py-3 text-sm text-gray-600 font-mono">{formatarCpf(u.cpf)}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{u.telefone ? formatarTelefone(u.telefone) : '-'}</td>
+                <td className="px-4 py-3 text-sm  text-gray-600">{u.email}</td>
+                <td className="px-4 py-3 text-sm  text-gray-600 font-mono">{formatarCpf(u.cpf)}</td>
+                <td className="px-4 py-3 text-sm  text-gray-600">{u.telefone ? formatarTelefone(u.telefone) : '-'}</td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     u.perfil === 'ADMINISTRADOR' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
@@ -56,7 +56,7 @@ export default function UsuariosTable({ usuarios, carregando, onEditar, onExclui
                     {u.ativo ? 'Ativo' : 'Inativo'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-500">{u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '-'}</td>
+                <td className="px-4 py-3 text-sm  text-gray-500">{u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '-'}</td>
                 <td className="px-4 py-3 text-right">
                   {u.ativo && (
                     <>

@@ -32,7 +32,7 @@ export default function ConfigForm({
   onRecarregar,
 }: ConfigFormProps) {
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-900">Configurações do Sistema</h3>
       </div>
