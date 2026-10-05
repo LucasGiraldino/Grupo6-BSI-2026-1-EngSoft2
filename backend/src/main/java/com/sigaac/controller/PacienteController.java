@@ -1,20 +1,20 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.Endereco;
+import com.sigaac.model.CadastroPacienteFacade;
 import com.sigaac.model.Paciente;
-import com.sigaac.model.Prontuario;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 public class PacienteController {
 
     private final JsonView json;
+    private final CadastroPacienteFacade facade;
 
-    public PacienteController(JsonView json) {
+    public PacienteController(JsonView json, CadastroPacienteFacade facade) {
         this.json = json;
+        this.facade = facade;
     }
 
     public void registerRoutes(HttpRouter router) {
@@ -56,16 +56,7 @@ public class PacienteController {
     private void criar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Paciente paciente = json.read(exchange.getRequestBody(), Paciente.class);
         try {
-            paciente.validar();
-            if (paciente.getDataCadastro() == null) {
-                paciente.setDataCadastro(LocalDate.now());
-            }
-            if (paciente.getEndereco() != null && paciente.getEndereco().getId() == null) {
-                paciente.setEndereco(paciente.getEndereco().save());
-            }
-            paciente.save();
-            new Prontuario(paciente).save();
-            json.send(exchange, 201, paciente);
+            json.send(exchange, 201, facade.cadastrar(paciente));
         } catch (IllegalArgumentException e) {
             json.send(exchange, 400, Map.of("error", e.getMessage()));
         }

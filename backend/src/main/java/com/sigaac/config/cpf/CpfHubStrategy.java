@@ -20,6 +20,8 @@ public class CpfHubStrategy implements CpfStrategy {
             java.net.URL url = new java.net.URL("https://api.cpfhub.io/cpf/" + cpf);
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Authorization", "Bearer " + apiToken);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
             conn.setRequestMethod("GET");
 
             JsonNode root = mapper.readTree(conn.getInputStream());

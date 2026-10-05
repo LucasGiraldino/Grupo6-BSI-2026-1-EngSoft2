@@ -1,5 +1,6 @@
 package com.sigaac.controller;
 
+import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -11,6 +12,11 @@ import java.util.regex.Pattern;
 public class HttpRouter implements HttpHandler {
 
     private final List<Route> routes = new ArrayList<>();
+    private final JsonView json;
+
+    public HttpRouter(JsonView json) {
+        this.json = json;
+    }
 
     public void get(String path, RouteHandler handler) {
         addRoute("GET", path, handler);
@@ -55,23 +61,14 @@ public class HttpRouter implements HttpHandler {
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
-                    String error = "{\"error\":\"" + e.getMessage() + "\"}";
-                    byte[] bytes = error.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-                    exchange.getResponseHeaders().set("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(500, bytes.length);
-                    exchange.getResponseBody().write(bytes);
-                    exchange.getResponseBody().close();
+                    String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+                    json.error(exchange, 500, msg);
                     return;
                 }
             }
         }
 
-        String notFound = "{\"error\":\"Rota nao encontrada: " + requestMethod + " " + requestPath + "\"}";
-        byte[] bytes = notFound.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(404, bytes.length);
-        exchange.getResponseBody().write(bytes);
-        exchange.getResponseBody().close();
+        json.error(exchange, 404, "Rota nao encontrada: " + requestMethod + " " + requestPath);
     }
 
     static class Route {

@@ -1,6 +1,5 @@
 package com.sigaac.controller;
 
-import com.sigaac.config.DatabaseManager;
 import com.sigaac.model.Agenda;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
@@ -112,8 +111,7 @@ public class AgendaController {
 
     private void deletar(HttpExchange exchange, Map<String, String> pathParams) throws Exception {
         Integer id = Integer.parseInt(pathParams.get("p1"));
-        var db = DatabaseManager.getInstance();
-        db.executeUpdate("DELETE FROM agenda WHERE id_agenda = ?", id);
+        Agenda.deleteById(id);
         json.send(exchange, 204, null);
     }
 }

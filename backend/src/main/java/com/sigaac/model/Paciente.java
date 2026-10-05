@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sigaac.config.CpfValidator;
 import com.sigaac.config.DatabaseManager;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -88,9 +89,13 @@ public class Paciente {
     }
 
     public Paciente save() {
+        return save(null);
+    }
+
+    public Paciente save(Connection conn) {
         var db = DatabaseManager.getInstance();
         if (this.id == null) {
-            Number id = db.executeInsert(
+            Number id = db.executeInsert(conn,
                 "INSERT INTO pacientes (id_endereco, nome, cpf, data_nascimento, sexo, telefone, email, restricoes_alimentares, data_cadastro, ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 this.endereco != null ? this.endereco.getId() : null,
                 this.nome, this.cpf, this.dataNascimento,
@@ -98,7 +103,7 @@ public class Paciente {
                 this.restricoesAlimentares, this.dataCadastro, true);
             if (id != null) this.id = id.intValue();
         } else {
-            db.executeUpdate(
+            db.executeUpdate(conn,
                 "UPDATE pacientes SET id_endereco = ?, nome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, restricoes_alimentares = ?, ativo = ? WHERE id_paciente = ?",
                 this.endereco != null ? this.endereco.getId() : null,
                 this.nome, this.cpf, this.dataNascimento,

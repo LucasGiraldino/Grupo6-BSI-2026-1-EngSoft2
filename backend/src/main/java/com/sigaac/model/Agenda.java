@@ -75,6 +75,11 @@ public class Agenda {
         return this;
     }
 
+    public static void deleteById(Integer id) {
+        DatabaseManager.getInstance().executeUpdate(
+            "DELETE FROM agenda WHERE id_agenda = ?", id);
+    }
+
     private static Agenda mapRow(ResultSet rs) throws SQLException {
         Agenda a = new Agenda();
         a.setId(rs.getInt("id_agenda"));

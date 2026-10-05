@@ -100,6 +100,40 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Variante transacional: conn == null delega para executeInsert(String, Object...)
+     * (abre e fecha a propria conexao do pool). conn != null executa na conexao do
+     * chamador, sem fecha-la, para participar da transacao dele.
+     */
+    public Number executeInsert(Connection conn, String sql, Object... params) {
+        if (conn == null) return executeInsert(sql, params);
+        try (PreparedStatement stmt = prepare(conn, sql, params)) {
+            stmt.executeUpdate();
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return (Number) rs.getObject(1);
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Variante transacional: conn == null delega para executeUpdate(String, Object...)
+     * (abre e fecha a propria conexao do pool). conn != null executa na conexao do
+     * chamador, sem fecha-la, para participar da transacao dele.
+     */
+    public int executeUpdate(Connection conn, String sql, Object... params) {
+        if (conn == null) return executeUpdate(sql, params);
+        try (PreparedStatement stmt = prepare(conn, sql, params)) {
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void executeInTransaction(TransactionCallback callback) {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);

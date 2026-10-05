@@ -5,6 +5,7 @@ import com.sigaac.config.cpf.CpfHubStrategy;
 import com.sigaac.config.cpf.CpfSimuladoStrategy;
 import com.sigaac.config.cpf.CpfStrategy;
 import com.sigaac.controller.*;
+import com.sigaac.model.CadastroPacienteFacade;
 import com.sigaac.view.JsonView;
 import com.sigaac.view.StaticFileHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -39,7 +40,7 @@ public class SigaacApplication {
         CepUtil cepUtil = new CepUtil();
 
         LoginController loginCtrl = new LoginController(jwtUtil, otpUtil, totpUtil, rateLimiter, json);
-        PacienteController pacienteCtrl = new PacienteController(json);
+        PacienteController pacienteCtrl = new PacienteController(json, new CadastroPacienteFacade());
         CpfController cpfCtrl = new CpfController(cpfValidator, json);
         CnpjController cnpjCtrl = new CnpjController(cnpjUtil, json);
         CepController cepCtrl = new CepController(cepUtil, json);
@@ -59,7 +60,7 @@ public class SigaacApplication {
         EstoqueController estoqueCtrl = new EstoqueController(json);
         ReceitaMedicaController receitaCtrl = new ReceitaMedicaController(json);
 
-        HttpRouter router = new HttpRouter();
+        HttpRouter router = new HttpRouter(json);
         loginCtrl.registerRoutes(router);
         pacienteCtrl.registerRoutes(router);
         cpfCtrl.registerRoutes(router);

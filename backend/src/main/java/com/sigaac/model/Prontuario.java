@@ -2,6 +2,7 @@ package com.sigaac.model;
 
 import com.sigaac.config.DatabaseManager;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -68,9 +69,13 @@ public class Prontuario {
     }
 
     public Prontuario save() {
+        return save(null);
+    }
+
+    public Prontuario save(Connection conn) {
         var db = DatabaseManager.getInstance();
         if (this.id == null) {
-            Number id = db.executeInsert(
+            Number id = db.executeInsert(conn,
                 "INSERT INTO prontuarios (id_medico, id_usuario, id_paciente, data_abertura, observacoes_gerais) VALUES (?, ?, ?, ?, ?)",
                 this.medico != null ? this.medico.getId() : null,
                 this.usuario != null ? this.usuario.getId() : null,
@@ -78,7 +83,7 @@ public class Prontuario {
                 this.dataAbertura, this.observacoesGerais);
             if (id != null) this.id = id.intValue();
         } else {
-            db.executeUpdate(
+            db.executeUpdate(conn,
                 "UPDATE prontuarios SET id_medico = ?, id_usuario = ?, id_paciente = ?, data_abertura = ?, data_fechamento = ?, observacoes_gerais = ? WHERE id_prontuario = ?",
                 this.medico != null ? this.medico.getId() : null,
                 this.usuario != null ? this.usuario.getId() : null,

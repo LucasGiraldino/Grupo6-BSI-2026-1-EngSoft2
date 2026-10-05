@@ -2,6 +2,7 @@ package com.sigaac.model;
 
 import com.sigaac.config.DatabaseManager;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -44,16 +45,20 @@ public class Endereco {
     }
 
     public Endereco save() {
+        return save(null);
+    }
+
+    public Endereco save(Connection conn) {
         var db = DatabaseManager.getInstance();
         if (this.id == null) {
-            Number id = db.executeInsert(
+            Number id = db.executeInsert(conn,
                 "INSERT INTO enderecos (cep, logradouro, numero, complemento, bairro, cidade, estado, pais, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 this.cep, this.logradouro, this.numero,
                 this.complemento, this.bairro, this.cidade,
                 this.estado, this.pais, this.descricao);
             if (id != null) this.id = id.intValue();
         } else {
-            db.executeUpdate(
+            db.executeUpdate(conn,
                 "UPDATE enderecos SET cep = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, pais = ?, descricao = ? WHERE id_endereco = ?",
                 this.cep, this.logradouro, this.numero,
                 this.complemento, this.bairro, this.cidade,
