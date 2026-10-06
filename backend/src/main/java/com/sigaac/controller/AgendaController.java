@@ -13,8 +13,16 @@ public class AgendaController {
 
     private final JsonView json;
 
-    public AgendaController(JsonView json) {
-        this.json = json;
+    private AgendaController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final AgendaController INSTANCE = new AgendaController();
+    }
+
+    public static AgendaController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

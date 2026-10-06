@@ -19,8 +19,16 @@ public class ParametrizacaoOngController {
 
     private final JsonView json;
 
-    public ParametrizacaoOngController(JsonView json) {
-        this.json = json;
+    private ParametrizacaoOngController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final ParametrizacaoOngController INSTANCE = new ParametrizacaoOngController();
+    }
+
+    public static ParametrizacaoOngController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

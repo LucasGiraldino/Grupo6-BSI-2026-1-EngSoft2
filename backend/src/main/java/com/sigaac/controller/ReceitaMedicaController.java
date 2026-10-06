@@ -9,8 +9,16 @@ import java.util.Optional;
 
 public class ReceitaMedicaController extends CrudController<ReceitaMedica> {
 
-    public ReceitaMedicaController(JsonView json) {
-        super(json);
+    private ReceitaMedicaController() {
+        super(JsonView.getInstance());
+    }
+
+    private static class Holder {
+        static final ReceitaMedicaController INSTANCE = new ReceitaMedicaController();
+    }
+
+    public static ReceitaMedicaController getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

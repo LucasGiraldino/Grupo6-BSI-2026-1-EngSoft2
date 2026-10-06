@@ -10,8 +10,16 @@ public class ConsultaController {
 
     private final JsonView json;
 
-    public ConsultaController(JsonView json) {
-        this.json = json;
+    private ConsultaController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final ConsultaController INSTANCE = new ConsultaController();
+    }
+
+    public static ConsultaController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

@@ -17,7 +17,14 @@ public class JwtUtil {
     private final Integer expirationHours;
     private final Integer refreshExpirationHours;
 
-    public JwtUtil(Properties props) {
+    private JwtUtil() {
+        Properties props = new Properties();
+        try (var is = JwtUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (is != null) props.load(is);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load application.properties", e);
+        }
+
         this.secret = props.getProperty("api.security.token.secret",
                 "dev-only-insecure-secret-mude-em-producao");
         this.issuer = props.getProperty("api.security.token.issuer", "sigaac");
@@ -25,6 +32,14 @@ public class JwtUtil {
                 props.getProperty("api.security.token.expiration-hours", "2"));
         this.refreshExpirationHours = Integer.parseInt(
                 props.getProperty("api.security.token.refresh-expiration-hours", "24"));
+    }
+
+    private static class Holder {
+        static final JwtUtil INSTANCE = new JwtUtil();
+    }
+
+    public static JwtUtil getInstance() {
+        return Holder.INSTANCE;
     }
 
     public String generateToken(User user) {

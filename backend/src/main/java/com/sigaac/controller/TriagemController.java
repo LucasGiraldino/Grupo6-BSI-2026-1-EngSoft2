@@ -15,8 +15,16 @@ public class TriagemController {
 
     private final JsonView json;
 
-    public TriagemController(JsonView json) {
-        this.json = json;
+    private TriagemController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final TriagemController INSTANCE = new TriagemController();
+    }
+
+    public static TriagemController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

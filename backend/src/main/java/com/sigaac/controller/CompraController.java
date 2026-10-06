@@ -11,8 +11,16 @@ public class CompraController {
 
     private final JsonView json;
 
-    public CompraController(JsonView json) {
-        this.json = json;
+    private CompraController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final CompraController INSTANCE = new CompraController();
+    }
+
+    public static CompraController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

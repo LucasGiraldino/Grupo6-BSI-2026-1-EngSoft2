@@ -5,8 +5,9 @@ import com.sigaac.config.cpf.CpfHubStrategy;
 import com.sigaac.config.cpf.CpfSimuladoStrategy;
 import com.sigaac.config.cpf.CpfStrategy;
 import com.sigaac.controller.*;
-import com.sigaac.model.CadastroPacienteFacade;
-import com.sigaac.view.JsonView;
+import com.sigaac.model.observer.ConsultaSubject;
+import com.sigaac.model.observer.LogObserver;
+import com.sigaac.model.observer.NotificacaoObserver;
 import com.sigaac.view.StaticFileHandler;
 import com.sun.net.httpserver.HttpServer;
 
@@ -25,42 +26,39 @@ public class SigaacApplication {
         }
 
         DatabaseManager db = DatabaseManager.getInstance();
-        JsonView json = new JsonView();
 
-        JwtUtil jwtUtil = new JwtUtil(props);
-        OtpUtil otpUtil = new OtpUtil();
-        TotpUtil totpUtil = new TotpUtil();
-        RateLimiter rateLimiter = new RateLimiter();
         String cpfToken = props.getProperty("api.cpf.token", "");
         CpfStrategy cpfStrategy = cpfToken.isEmpty()
                 ? new CpfSimuladoStrategy()
                 : new CpfHubStrategy(cpfToken);
-        CpfValidator cpfValidator = new CpfValidator(cpfStrategy);
-        CnpjUtil cnpjUtil = new CnpjUtil();
-        CepUtil cepUtil = new CepUtil();
+        CpfValidator.getInstance().setStrategy(cpfStrategy);
 
-        LoginController loginCtrl = new LoginController(jwtUtil, otpUtil, totpUtil, rateLimiter, json);
-        PacienteController pacienteCtrl = new PacienteController(json, new CadastroPacienteFacade());
-        CpfController cpfCtrl = new CpfController(cpfValidator, json);
-        CnpjController cnpjCtrl = new CnpjController(cnpjUtil, json);
-        CepController cepCtrl = new CepController(cepUtil, json);
-        UserController userCtrl = new UserController(json);
-        DoacaoController doacaoCtrl = new DoacaoController(json);
-        CompraController compraCtrl = new CompraController(json);
-        AlimentoController alimentoCtrl = new AlimentoController(json);
-        CategoriaAlimentoController catAlimentoCtrl = new CategoriaAlimentoController(json);
-        ParametrizacaoOngController parametrizacaoCtrl = new ParametrizacaoOngController(json);
-        TipoExameController tipoExameCtrl = new TipoExameController(json);
-        ExameController exameCtrl = new ExameController(json);
-        TriagemController triagemCtrl = new TriagemController(json);
-        ConsultaController consultaCtrl = new ConsultaController(json);
-        ProntuarioController prontuarioCtrl = new ProntuarioController(json);
-        ProfissionalController profissionalCtrl = new ProfissionalController(json);
-        AgendaController agendaCtrl = new AgendaController(json);
-        EstoqueController estoqueCtrl = new EstoqueController(json);
-        ReceitaMedicaController receitaCtrl = new ReceitaMedicaController(json);
+        ConsultaSubject consultaSubject = ConsultaSubject.getInstance();
+        consultaSubject.assinar(new NotificacaoObserver());
+        consultaSubject.assinar(new LogObserver());
 
-        HttpRouter router = new HttpRouter(json);
+        LoginController loginCtrl = LoginController.getInstance();
+        PacienteController pacienteCtrl = PacienteController.getInstance();
+        CpfController cpfCtrl = CpfController.getInstance();
+        CnpjController cnpjCtrl = CnpjController.getInstance();
+        CepController cepCtrl = CepController.getInstance();
+        UserController userCtrl = UserController.getInstance();
+        DoacaoController doacaoCtrl = DoacaoController.getInstance();
+        CompraController compraCtrl = CompraController.getInstance();
+        AlimentoController alimentoCtrl = AlimentoController.getInstance();
+        CategoriaAlimentoController catAlimentoCtrl = CategoriaAlimentoController.getInstance();
+        ParametrizacaoOngController parametrizacaoCtrl = ParametrizacaoOngController.getInstance();
+        TipoExameController tipoExameCtrl = TipoExameController.getInstance();
+        ExameController exameCtrl = ExameController.getInstance();
+        TriagemController triagemCtrl = TriagemController.getInstance();
+        ConsultaController consultaCtrl = ConsultaController.getInstance();
+        ProntuarioController prontuarioCtrl = ProntuarioController.getInstance();
+        ProfissionalController profissionalCtrl = ProfissionalController.getInstance();
+        AgendaController agendaCtrl = AgendaController.getInstance();
+        EstoqueController estoqueCtrl = EstoqueController.getInstance();
+        ReceitaMedicaController receitaCtrl = ReceitaMedicaController.getInstance();
+
+        HttpRouter router = HttpRouter.getInstance();
         loginCtrl.registerRoutes(router);
         pacienteCtrl.registerRoutes(router);
         cpfCtrl.registerRoutes(router);
@@ -89,8 +87,8 @@ public class SigaacApplication {
             System.out.println("Seed data loaded.");
         }
 
-        SecurityFilter securityFilter = new SecurityFilter(jwtUtil, json);
-        CorsFilter corsFilter = new CorsFilter();
+        SecurityFilter securityFilter = SecurityFilter.getInstance();
+        CorsFilter corsFilter = CorsFilter.getInstance();
         StaticFileHandler staticHandler = new StaticFileHandler(
                 "../frontend/dist");
 

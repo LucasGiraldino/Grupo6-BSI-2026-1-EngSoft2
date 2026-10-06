@@ -14,8 +14,16 @@ public class HttpRouter implements HttpHandler {
     private final List<Route> routes = new ArrayList<>();
     private final JsonView json;
 
-    public HttpRouter(JsonView json) {
-        this.json = json;
+    private HttpRouter() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final HttpRouter INSTANCE = new HttpRouter();
+    }
+
+    public static HttpRouter getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void get(String path, RouteHandler handler) {

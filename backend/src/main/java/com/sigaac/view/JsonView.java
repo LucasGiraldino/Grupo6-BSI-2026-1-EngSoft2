@@ -13,10 +13,18 @@ public class JsonView {
 
     private final ObjectMapper mapper;
 
-    public JsonView() {
+    private JsonView() {
         this.mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
+    private static class Holder {
+        static final JsonView INSTANCE = new JsonView();
+    }
+
+    public static JsonView getInstance() {
+        return Holder.INSTANCE;
     }
 
     public <T> void send(HttpExchange exchange, int status, T data) throws IOException {

@@ -10,8 +10,16 @@ public class EstoqueController {
 
     private final JsonView json;
 
-    public EstoqueController(JsonView json) {
-        this.json = json;
+    private EstoqueController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final EstoqueController INSTANCE = new EstoqueController();
+    }
+
+    public static EstoqueController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

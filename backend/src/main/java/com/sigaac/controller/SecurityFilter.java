@@ -16,9 +16,17 @@ public class SecurityFilter extends Filter {
     private final JwtUtil jwtUtil;
     private final JsonView json;
 
-    public SecurityFilter(JwtUtil jwtUtil, JsonView json) {
-        this.jwtUtil = jwtUtil;
-        this.json = json;
+    private SecurityFilter() {
+        this.jwtUtil = JwtUtil.getInstance();
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final SecurityFilter INSTANCE = new SecurityFilter();
+    }
+
+    public static SecurityFilter getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

@@ -12,9 +12,17 @@ public class CepController {
     private final CepUtil cepUtil;
     private final JsonView json;
 
-    public CepController(CepUtil cepUtil, JsonView json) {
-        this.cepUtil = cepUtil;
-        this.json = json;
+    private CepController() {
+        this.cepUtil = new CepUtil();
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final CepController INSTANCE = new CepController();
+    }
+
+    public static CepController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

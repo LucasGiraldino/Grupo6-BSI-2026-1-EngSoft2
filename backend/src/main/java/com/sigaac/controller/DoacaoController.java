@@ -11,8 +11,16 @@ public class DoacaoController {
 
     private final JsonView json;
 
-    public DoacaoController(JsonView json) {
-        this.json = json;
+    private DoacaoController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final DoacaoController INSTANCE = new DoacaoController();
+    }
+
+    public static DoacaoController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

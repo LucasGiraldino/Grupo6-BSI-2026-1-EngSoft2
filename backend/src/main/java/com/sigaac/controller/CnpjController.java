@@ -12,9 +12,17 @@ public class CnpjController {
     private final CnpjUtil cnpjUtil;
     private final JsonView json;
 
-    public CnpjController(CnpjUtil cnpjUtil, JsonView json) {
-        this.cnpjUtil = cnpjUtil;
-        this.json = json;
+    private CnpjController() {
+        this.cnpjUtil = new CnpjUtil();
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final CnpjController INSTANCE = new CnpjController();
+    }
+
+    public static CnpjController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

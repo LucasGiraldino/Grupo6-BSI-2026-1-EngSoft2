@@ -33,12 +33,20 @@ public class LoginController {
     private final ConcurrentHashMap<String, Instant> pendingVerifications = new ConcurrentHashMap<>();
     private static final long PENDING_TTL_MINUTES = 10;
 
-    public LoginController(JwtUtil jwtUtil, OtpUtil otpUtil, TotpUtil totpUtil, RateLimiter rateLimiter, JsonView json) {
-        this.jwtUtil = jwtUtil;
-        this.otpUtil = otpUtil;
-        this.totpUtil = totpUtil;
-        this.rateLimiter = rateLimiter;
-        this.json = json;
+    private LoginController() {
+        this.jwtUtil = JwtUtil.getInstance();
+        this.otpUtil = new OtpUtil();
+        this.totpUtil = new TotpUtil();
+        this.rateLimiter = new RateLimiter();
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final LoginController INSTANCE = new LoginController();
+    }
+
+    public static LoginController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

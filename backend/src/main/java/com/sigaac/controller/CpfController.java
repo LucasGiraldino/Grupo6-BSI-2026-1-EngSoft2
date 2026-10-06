@@ -12,9 +12,17 @@ public class CpfController {
     private final CpfValidator cpfValidator;
     private final JsonView json;
 
-    public CpfController(CpfValidator cpfValidator, JsonView json) {
-        this.cpfValidator = cpfValidator;
-        this.json = json;
+    private CpfController() {
+        this.cpfValidator = CpfValidator.getInstance();
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final CpfController INSTANCE = new CpfController();
+    }
+
+    public static CpfController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

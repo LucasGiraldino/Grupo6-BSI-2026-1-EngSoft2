@@ -10,8 +10,16 @@ public class ProntuarioController {
 
     private final JsonView json;
 
-    public ProntuarioController(JsonView json) {
-        this.json = json;
+    private ProntuarioController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final ProntuarioController INSTANCE = new ProntuarioController();
+    }
+
+    public static ProntuarioController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

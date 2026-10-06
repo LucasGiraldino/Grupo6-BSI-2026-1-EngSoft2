@@ -14,8 +14,16 @@ public class ExameController {
 
     private final JsonView json;
 
-    public ExameController(JsonView json) {
-        this.json = json;
+    private ExameController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final ExameController INSTANCE = new ExameController();
+    }
+
+    public static ExameController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

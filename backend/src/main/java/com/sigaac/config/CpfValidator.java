@@ -5,9 +5,19 @@ import com.sigaac.model.CpfResponse;
 
 public class CpfValidator {
 
-    private final CpfStrategy strategy;
+    private CpfStrategy strategy;
 
-    public CpfValidator(CpfStrategy strategy) {
+    private CpfValidator() {}
+
+    private static class Holder {
+        static final CpfValidator INSTANCE = new CpfValidator();
+    }
+
+    public static CpfValidator getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    public void setStrategy(CpfStrategy strategy) {
         this.strategy = strategy;
     }
 

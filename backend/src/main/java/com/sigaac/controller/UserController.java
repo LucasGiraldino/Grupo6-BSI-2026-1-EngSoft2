@@ -21,8 +21,16 @@ public class UserController {
 
     private final JsonView json;
 
-    public UserController(JsonView json) {
-        this.json = json;
+    private UserController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final UserController INSTANCE = new UserController();
+    }
+
+    public static UserController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

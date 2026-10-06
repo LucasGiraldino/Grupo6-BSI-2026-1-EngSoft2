@@ -9,8 +9,16 @@ import java.util.Optional;
 
 public class CategoriaAlimentoController extends CrudController<CategoriaAlimento> {
 
-    public CategoriaAlimentoController(JsonView json) {
-        super(json);
+    private CategoriaAlimentoController() {
+        super(JsonView.getInstance());
+    }
+
+    private static class Holder {
+        static final CategoriaAlimentoController INSTANCE = new CategoriaAlimentoController();
+    }
+
+    public static CategoriaAlimentoController getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

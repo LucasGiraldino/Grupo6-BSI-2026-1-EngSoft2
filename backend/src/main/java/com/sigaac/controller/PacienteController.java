@@ -1,6 +1,5 @@
 package com.sigaac.controller;
 
-import com.sigaac.model.CadastroPacienteFacade;
 import com.sigaac.model.Paciente;
 import com.sigaac.view.JsonView;
 import com.sun.net.httpserver.HttpExchange;
@@ -12,9 +11,17 @@ public class PacienteController {
     private final JsonView json;
     private final CadastroPacienteFacade facade;
 
-    public PacienteController(JsonView json, CadastroPacienteFacade facade) {
-        this.json = json;
-        this.facade = facade;
+    private PacienteController() {
+        this.json = JsonView.getInstance();
+        this.facade = CadastroPacienteFacade.getInstance();
+    }
+
+    private static class Holder {
+        static final PacienteController INSTANCE = new PacienteController();
+    }
+
+    public static PacienteController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {
@@ -40,12 +47,12 @@ public class PacienteController {
                 }
             }
         }
-        json.send(exchange, 200, Paciente.findAll(nome, cpf));
+        json.send(exchange, 200, facade.listar(nome, cpf));
     }
 
     private void buscarPorId(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = Paciente.findById(id);
+        var opt = facade.buscarPorId(id);
         if (opt.isPresent()) {
             json.send(exchange, 200, opt.get());
         } else {
@@ -64,28 +71,24 @@ public class PacienteController {
 
     private void atualizar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = Paciente.findById(id);
+        var opt = facade.buscarPorId(id);
         if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Paciente não encontrado"));
             return;
         }
         Paciente paciente = json.read(exchange.getRequestBody(), Paciente.class);
         paciente.setId(id);
-        if (paciente.getEndereco() != null && paciente.getEndereco().getId() == null) {
-            paciente.setEndereco(paciente.getEndereco().save());
-        }
-        paciente.save();
-        json.send(exchange, 200, paciente);
+        json.send(exchange, 200, facade.atualizar(paciente));
     }
 
     private void deletar(HttpExchange exchange, Map<String, String> params) throws Exception {
         Integer id = Integer.parseInt(params.get("p1"));
-        var opt = Paciente.findById(id);
+        var opt = facade.buscarPorId(id);
         if (opt.isEmpty()) {
             json.send(exchange, 404, Map.of("error", "Paciente não encontrado"));
             return;
         }
-        opt.get().delete();
+        facade.excluir(opt.get());
         json.send(exchange, 204, null);
     }
 }

@@ -13,6 +13,16 @@ public class CorsFilter extends Filter {
             "http://localhost:3000"
     );
 
+    private CorsFilter() {}
+
+    private static class Holder {
+        static final CorsFilter INSTANCE = new CorsFilter();
+    }
+
+    public static CorsFilter getInstance() {
+        return Holder.INSTANCE;
+    }
+
     @Override
     public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
         String origin = exchange.getRequestHeaders().getFirst("Origin");

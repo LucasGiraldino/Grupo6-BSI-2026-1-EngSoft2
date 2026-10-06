@@ -9,8 +9,16 @@ import java.util.Optional;
 
 public class TipoExameController extends CrudController<TipoExame> {
 
-    public TipoExameController(JsonView json) {
-        super(json);
+    private TipoExameController() {
+        super(JsonView.getInstance());
+    }
+
+    private static class Holder {
+        static final TipoExameController INSTANCE = new TipoExameController();
+    }
+
+    public static TipoExameController getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

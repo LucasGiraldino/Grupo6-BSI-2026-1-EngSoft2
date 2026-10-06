@@ -11,8 +11,16 @@ public class ProfissionalController {
 
     private final JsonView json;
 
-    public ProfissionalController(JsonView json) {
-        this.json = json;
+    private ProfissionalController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final ProfissionalController INSTANCE = new ProfissionalController();
+    }
+
+    public static ProfissionalController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {

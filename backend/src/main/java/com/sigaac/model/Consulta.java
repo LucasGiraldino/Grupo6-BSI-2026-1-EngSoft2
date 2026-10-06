@@ -1,6 +1,8 @@
 package com.sigaac.model;
 
 import com.sigaac.config.DatabaseManager;
+import com.sigaac.model.observer.ConsultaSubject;
+import com.sigaac.model.observer.EventoConsulta;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -126,6 +129,7 @@ public class Consulta {
             }
         }
         var db = DatabaseManager.getInstance();
+        String statusAnterior = null;
         if (this.id == null) {
             Number id = db.executeInsert(
                 "INSERT INTO consultas (id_paciente, id_agenda, id_profissional, tipo_consulta, status, observacoes, data_agendamento, id_triagem) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -140,6 +144,9 @@ public class Consulta {
                 db.executeUpdate("UPDATE agenda SET disponivel = FALSE WHERE id_agenda = ?", this.agenda.getId());
             }
         } else {
+            statusAnterior = db.querySingle(
+                "SELECT status FROM consultas WHERE id_consulta = ?",
+                rs -> rs.getString("status"), this.id).orElse(null);
             db.executeUpdate(
                 "UPDATE consultas SET id_paciente = ?, id_agenda = ?, id_profissional = ?, tipo_consulta = ?, status = ?, observacoes = ?, id_triagem = ? WHERE id_consulta = ?",
                 this.paciente != null ? this.paciente.getId() : null,
@@ -150,6 +157,7 @@ public class Consulta {
                 this.triagem != null ? this.triagem.getId() : null,
                 this.id);
         }
+        notificarMudancaDeStatus(statusAnterior);
         return this;
     }
 
@@ -191,6 +199,18 @@ public class Consulta {
 
         this.status = "CANCELADA";
         this.dataCancelamento = LocalDateTime.now();
+        ConsultaSubject.getInstance().notificar(this, EventoConsulta.CANCELADA);
+    }
+
+    // -- Observer: avisa o ConsultaSubject quando a consulta muda para AGENDADA ou CANCELADA --
+
+    private void notificarMudancaDeStatus(String statusAnterior) {
+        if (Objects.equals(statusAnterior, this.status)) return;
+        if ("AGENDADA".equals(this.status)) {
+            ConsultaSubject.getInstance().notificar(this, EventoConsulta.AGENDADA);
+        } else if ("CANCELADA".equals(this.status)) {
+            ConsultaSubject.getInstance().notificar(this, EventoConsulta.CANCELADA);
+        }
     }
 
     private static Consulta mapRow(ResultSet rs) throws SQLException {

@@ -10,8 +10,16 @@ public class AlimentoController {
 
     private final JsonView json;
 
-    public AlimentoController(JsonView json) {
-        this.json = json;
+    private AlimentoController() {
+        this.json = JsonView.getInstance();
+    }
+
+    private static class Holder {
+        static final AlimentoController INSTANCE = new AlimentoController();
+    }
+
+    public static AlimentoController getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void registerRoutes(HttpRouter router) {
